@@ -11,3 +11,5 @@ add_library(RenderEngineCore STATIC ${SOURCES})
 target_include_directories(RenderEngineCore PUBLIC "${source_dir}")
 
 add_executable(RenderEngineCoreTest "${source_dir}/test.cpp")
+
+target_link_libraries(RenderEngineCoreTest PRIVATE RenderEngineCore)

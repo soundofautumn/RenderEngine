@@ -1,13 +1,15 @@
 //
 // Created by 邱姜铭 on 2024/9/5.
 //
-#include "bitmap.h"
+#include "engine.h"
 
 int main() {
-    Bitmap bitmap(800, 600);
-    bitmap.fill(0x00FF0000);
-    if (!bitmap.save_bmp("test.bmp")){
-        return 1;
-    };
+    RenderEngine engine;
+    engine.init(800, 600);
+    engine.clear();
+    engine.draw_pixel(100, 100, {1, 0, 0, 1});
+    engine.draw_line({1, 1}, {200, 200}, {0, 1, 0, 1});
+    engine.save("output.bmp");
+    return 0;
 
 }
