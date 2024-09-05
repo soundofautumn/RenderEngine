@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <cassert>
+#include <cstdio>
 #include <memory>
 
 class Bitmap {
