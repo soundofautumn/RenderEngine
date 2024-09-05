@@ -7,7 +7,7 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-Listener::Listener(boost::asio::io_context &ioc, tcp::endpoint endpoint)
+Listener::Listener(net::io_context &ioc, tcp::endpoint endpoint)
         : acceptor_(ioc), socket_(ioc) {
 
     boost::system::error_code ec;
@@ -20,7 +20,7 @@ Listener::Listener(boost::asio::io_context &ioc, tcp::endpoint endpoint)
     }
 
     // Allow address reuse
-    acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
+    acceptor_.set_option(net::socket_base::reuse_address(true), ec);
     if (ec) {
         fail(ec, "set_option");
         return;
@@ -35,7 +35,7 @@ Listener::Listener(boost::asio::io_context &ioc, tcp::endpoint endpoint)
 
     // Start listening for connections
     acceptor_.listen(
-            boost::asio::socket_base::max_listen_connections, ec);
+            net::socket_base::max_listen_connections, ec);
     if (ec) {
         fail(ec, "listen");
         return;

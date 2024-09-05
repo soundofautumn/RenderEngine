@@ -11,7 +11,7 @@ WebSocketSession::WebSocketSession(tcp::socket socket)
           ws_(std::move(socket_)) {
 }
 
-void WebSocketSession::do_accept(boost::beast::http::request<boost::beast::http::string_body> req) {
+void WebSocketSession::do_accept(http::request<http::string_body> req) {
     ws_.async_accept(
             req,
             boost::beast::bind_front_handler(

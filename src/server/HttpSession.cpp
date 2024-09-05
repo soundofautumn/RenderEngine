@@ -26,7 +26,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
     }
 
     // See if it is a WebSocket Upgrade
-    if (boost::beast::websocket::is_upgrade(req_)) {
+    if (websocket::is_upgrade(req_)) {
         logger::info("WebSocket upgrade request from {}:{}",
                      socket_.remote_endpoint().address().to_string(),
                      socket_.remote_endpoint().port());
@@ -46,7 +46,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
     res_.body() = "Hello, world!";
 
     auto self = shared_from_this();
-    boost::beast::http::async_write(
+    http::async_write(
             socket_,
             res_,
             [self, this](boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -56,7 +56,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
 
 void HttpSession::on_write(boost::system::error_code ec, bool close) {
     // Happens when the timer closes the socket
-    if (ec == boost::asio::error::operation_aborted)
+    if (ec == net::error::operation_aborted)
         return;
 
     if (ec) {
@@ -79,7 +79,7 @@ void HttpSession::on_write(boost::system::error_code ec, bool close) {
 
 void HttpSession::do_read() {
     // Read a request
-    boost::beast::http::async_read(
+    http::async_read(
             socket_,
             buffer_,
             req_,
