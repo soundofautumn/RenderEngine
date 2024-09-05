@@ -19,6 +19,8 @@ public:
 
     void do_read();
 
+    void on_timer(boost::system::error_code ec);
+
     void on_read(boost::system::error_code ec);
 
     void on_write(boost::system::error_code ec, bool close);

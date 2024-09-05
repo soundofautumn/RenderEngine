@@ -7,13 +7,19 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-HttpSession::HttpSession(tcp::socket socket) : socket_(std::move(socket)) {}
+HttpSession::HttpSession(tcp::socket socket) :
+        socket_(std::move(socket)) {}
+
 
 void HttpSession::run() {
     do_read();
 }
 
 void HttpSession::on_read(boost::system::error_code ec) {
+    // This means they closed the connection
+    if (ec == http::error::end_of_stream)
+        return do_close();
+
     if (ec) {
         fail(ec, "read");
         return;
@@ -21,13 +27,23 @@ void HttpSession::on_read(boost::system::error_code ec) {
 
     // See if it is a WebSocket Upgrade
     if (boost::beast::websocket::is_upgrade(req_)) {
+        logger::info("WebSocket upgrade request from {}:{}",
+                     socket_.remote_endpoint().address().to_string(),
+                     socket_.remote_endpoint().port());
+
         // Create a WebSocket websocket_session by transferring the socket
         std::make_shared<WebSocketSession>(std::move(socket_))->do_accept(std::move(req_));
         return;
     }
 
-    // Send the response
+    logger::info("HTTP request from {}:{}",
+                 socket_.remote_endpoint().address().to_string(),
+                 socket_.remote_endpoint().port());
+
+    // TODO:
 //    handle_request(std::move(req_), res_);
+
+    res_.body() = "Hello, world!";
 
     auto self = shared_from_this();
     boost::beast::http::async_write(
@@ -39,6 +55,10 @@ void HttpSession::on_read(boost::system::error_code ec) {
 }
 
 void HttpSession::on_write(boost::system::error_code ec, bool close) {
+    // Happens when the timer closes the socket
+    if (ec == boost::asio::error::operation_aborted)
+        return;
+
     if (ec) {
         fail(ec, "write");
         return;
@@ -47,7 +67,7 @@ void HttpSession::on_write(boost::system::error_code ec, bool close) {
     if (close) {
         // This means we should close the connection, usually because
         // the response indicated the "Connection: close" semantic.
-        return;
+        return do_close();
     }
 
     // We're done with the response so delete it

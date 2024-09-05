@@ -7,6 +7,10 @@ int main() {
     auto const port = static_cast<unsigned short>(3000);
     auto const threads = 4;
 
+    logger::info("Server started");
+
+    logger::info("Server listening on: {}:{}", address.to_string(), port);
+
     // The io_context is required for all I/O
     boost::asio::io_context ioc{threads};
 

@@ -25,6 +25,10 @@ void WebSocketSession::on_accept(boost::system::error_code ec) {
         return;
     }
 
+    logger::info("WebSocket connection from {}:{}",
+                 ws_.next_layer().remote_endpoint().address().to_string(),
+                 ws_.next_layer().remote_endpoint().port());
+
     ws_.text(true);
     ws_.async_read(
             buffer_,
@@ -39,6 +43,21 @@ void WebSocketSession::on_read(boost::system::error_code ec, std::size_t bytes_t
     if (ec) {
         fail(ec, "read");
         return;
+    }
+
+    // TODO:
+
+    ws_.text(ws_.got_text());
+
+    if (ws_.got_text()) {
+        logger::info("WebSocket message from {}:{}: {}",
+                     ws_.next_layer().remote_endpoint().address().to_string(),
+                     ws_.next_layer().remote_endpoint().port(),
+                     boost::beast::buffers_to_string(buffer_.data()));
+    } else {
+        logger::info("WebSocket binary message from {}:{}",
+                     ws_.next_layer().remote_endpoint().address().to_string(),
+                     ws_.next_layer().remote_endpoint().port());
     }
 
     ws_.async_write(

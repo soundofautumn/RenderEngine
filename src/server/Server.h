@@ -12,10 +12,13 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <spdlog/spdlog.h>
 
+namespace logger = spdlog;
 
 using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;            // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;                     // from <boost/asio.hpp>
 
 #endif //RENDERENGINE_SERVER_H
