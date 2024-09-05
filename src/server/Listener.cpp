@@ -7,7 +7,7 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-Listener::Listener(net::io_context &ioc, tcp::endpoint endpoint)
+Listener::Listener(net::io_context &ioc, const tcp::endpoint& endpoint)
         : acceptor_(ioc), socket_(ioc) {
 
     boost::system::error_code ec;
@@ -51,10 +51,9 @@ void Listener::run() {
 void Listener::do_accept() {
     acceptor_.async_accept(
             socket_,
-            std::bind(
+            boost::beast::bind_front_handler(
                     &Listener::on_accept,
-                    shared_from_this(),
-                    std::placeholders::_1));
+                    shared_from_this()));
 }
 
 void Listener::on_accept(boost::system::error_code ec) {

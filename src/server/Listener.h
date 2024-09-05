@@ -13,7 +13,7 @@ class Listener : public std::enable_shared_from_this<Listener> {
 
 public:
     Listener(boost::asio::io_context &ioc,
-             tcp::endpoint endpoint);
+             const tcp::endpoint& endpoint);
 
     // Start accepting incoming connections
     void run();
