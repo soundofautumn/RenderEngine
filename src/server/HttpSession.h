@@ -1,0 +1,30 @@
+//
+// Created by 邱姜铭 on 2024/9/5.
+//
+
+#ifndef RENDERENGINE_HTTPSESSION_H
+#define RENDERENGINE_HTTPSESSION_H
+
+#include "Server.h"
+
+class HttpSession : public std::enable_shared_from_this<HttpSession> {
+    tcp::socket socket_;
+    boost::beast::flat_buffer buffer_;
+    boost::beast::http::request<boost::beast::http::string_body> req_;
+    boost::beast::http::response<boost::beast::http::string_body> res_;
+public:
+    HttpSession(tcp::socket socket);
+
+    void run();
+
+    void do_read();
+
+    void on_read(boost::system::error_code ec);
+
+    void on_write(boost::system::error_code ec, bool close);
+
+    void do_close();
+};
+
+
+#endif //RENDERENGINE_HTTPSESSION_H
