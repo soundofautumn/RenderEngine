@@ -7,11 +7,27 @@ set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 
 file(GLOB_RECURSE SOURCES "${source_dir}/*.cpp" "${source_dir}/*.h")
 
+set(BUILD_SERVER_MODULE ON)
+
 # Boost.Beast
-find_package(Boost REQUIRED COMPONENTS beast CONFIG)
+find_package(Boost COMPONENTS beast CONFIG)
+
+if (NOT Boost_FOUND)
+    set(BUILD_SERVER_MODULE OFF)
+    message(WARNING "Boost not found")
+endif ()
+
 # spdlog
-find_package(spdlog CONFIG REQUIRED)
+find_package(spdlog CONFIG)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+if (NOT spdlog_FOUND)
+    set(BUILD_SERVER_MODULE OFF)
+    message(WARNING "spdlog not found")
+endif ()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast spdlog::spdlog)
+if (BUILD_SERVER_MODULE)
+    add_library(${PROJECT_NAME} STATIC ${SOURCES})
+    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast spdlog::spdlog)
+else ()
+    message(WARNING "Server module will not be built")
+endif ()
