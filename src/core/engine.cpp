@@ -2,6 +2,7 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
+#include "line.h"
 #include "engine.h"
 
 RenderEngine::RenderEngine() : frame_buffer_(nullptr), width_(0), height_(0) {}
@@ -52,42 +53,38 @@ void RenderEngine::draw_pixel(int x, int y, const Color &color) {
     frame_buffer_->set_pixel(x, y, vector_to_color(color));
 }
 
-void RenderEngine::draw_line(const Point &p1, const Point &p2, const Color &color) {
+void RenderEngine::draw_line(const Point &p1, const Point &p2, const PenOptions &options, LineAlgorithm algorithm) {
     if (!frame_buffer_) {
         return;
     }
-    int x1 = static_cast<int>(p1.x);
-    int y1 = static_cast<int>(p1.y);
-    int x2 = static_cast<int>(p2.x);
-    int y2 = static_cast<int>(p2.y);
-
-    int dx = abs(x2 - x1);
-    int dy = abs(y2 - y1);
-
-    int sx = x1 < x2 ? 1 : -1;
-    int sy = y1 < y2 ? 1 : -1;
-
-    int err = dx - dy;
-
-    while (true) {
-        draw_pixel(x1, y1, color);
-
-        if (x1 == x2 && y1 == y2) {
+    switch (algorithm) {
+        case LineAlgorithm::DDA:
+            draw_line_by_dda(this, p1, p2, options);
             break;
-        }
-
-        int e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x1 += sx;
-        }
-
-        if (e2 < dx) {
-            err += dx;
-            y1 += sy;
-        }
+        case LineAlgorithm::MIDPOINT:
+            draw_line_by_midpoint(this, p1, p2, options);
+            break;
+        case LineAlgorithm::BRESENHAM:
+            draw_line_by_bresenham(this, p1, p2, options);
+            break;
+        default:
+            throw std::runtime_error("Unknown line drawing algorithm");
     }
 }
+
+void RenderEngine::draw_circle(const Point &center, float radius, const PenOptions &options) {
+    if (!frame_buffer_) {
+        return;
+    }
+}
+
+void RenderEngine::draw_arc(const Point &center, float radius, float start_angle, float end_angle,
+                            const PenOptions &options) {
+    if (!frame_buffer_) {
+        return;
+    }
+}
+
 
 bool RenderEngine::render() {
     return frame_buffer_ != nullptr;

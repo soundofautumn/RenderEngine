@@ -7,6 +7,7 @@
 
 #include "bitmap.h"
 #include "vector.h"
+#include "options.h"
 
 class RenderEngine {
     Bitmap *frame_buffer_;
@@ -48,7 +49,14 @@ public:
     void draw_pixel(int x, int y, const Color &color);
 
     // 绘制线段
-    void draw_line(const Point &p1, const Point &p2, const Color &color);
+    void draw_line(const Point &p1, const Point &p2, const PenOptions &options = PenOptions(),
+                   LineAlgorithm algorithm = LineAlgorithm::BRESENHAM);
+
+    // 绘制圆弧
+    void draw_circle(const Point &center, float radius, const PenOptions &options = PenOptions());
+
+    void draw_arc(const Point &center, float radius, float start_angle, float end_angle,
+                  const PenOptions &options = PenOptions());
 
     // 保存到文件
     void save(const std::string &filename);
