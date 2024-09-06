@@ -16,6 +16,8 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include <fstream>
+#include <vector>
 
 class Bitmap {
 protected:
@@ -114,55 +116,55 @@ private:
         uint32_t clr_important;
     };
 public:
-    inline static std::shared_ptr<Bitmap> load_bmp(const char *filename) {
-        FILE *file = fopen(filename, "rb");
-        if (!file) {
+    using Buffer = std::vector<uint8_t>;
+
+    inline static std::shared_ptr<Bitmap> load_from_buffer(const Buffer &buffer) {
+        if (buffer.size() < 14 + sizeof(BitmapInfoHeader)) {
             return nullptr;
         }
-
-        uint8_t header[14];
-        size_t hr = fread(header, sizeof(uint8_t), 14, file);
-        if (hr != 14 || header[0] != 'B' || header[1] != 'M') {
-            fclose(file);
+        const uint8_t *data = buffer.data();
+        const uint8_t *header = data;
+        if (header[0] != 'B' || header[1] != 'M') {
             return nullptr;
         }
-
-        BitmapInfoHeader info_header{};
-        hr = fread(&info_header, sizeof(BitmapInfoHeader), 1, file);
-        if (hr != sizeof(BitmapInfoHeader)) {
-            fclose(file);
+        const auto *info_header = reinterpret_cast<const BitmapInfoHeader *>(data + 14);
+        if (info_header->bit_count != 24 && info_header->bit_count != 32) {
             return nullptr;
         }
-
-        if (info_header.bit_count != 24 && info_header.bit_count != 32) {
-            fclose(file);
-            return nullptr;
-        }
-
-        const auto bitmap = std::make_shared<Bitmap>(info_header.width, info_header.height);
-        fseek(file, 14 + sizeof(BitmapInfoHeader), SEEK_SET);
-
+        const auto bitmap = std::make_shared<Bitmap>(info_header->width, info_header->height);
+        const uint8_t *ptr = data + 14 + sizeof(BitmapInfoHeader);
         // 每个像素的字节数 24位为3字节 32位为4字节
-        uint32_t pixel_size = (info_header.bit_count + 7) / 8;
+        uint32_t pixel_size = (info_header->bit_count + 7) / 8;
         // 每行字节数 4字节对齐
-        uint32_t pitch = (pixel_size * info_header.width + 3) & (~3);
-        for (int i = 0; i < info_header.height; i++) {
-            auto *line = bitmap->line(info_header.height - i - 1);
-            for (int j = 0; j < info_header.width; j += 4) {
+        uint32_t pitch = (pixel_size * info_header->width + 3) & (~3);
+        for (int i = 0; i < info_header->height; i++) {
+            auto *line = bitmap->line(info_header->height - i - 1);
+            for (int j = 0; j < info_header->width; j += 4) {
                 line[3] = 0xFF;
-                fread(line, sizeof(uint8_t), pixel_size, file);
+                std::memcpy(line, ptr, pixel_size);
+                ptr += pixel_size;
             }
-            const auto offset = (long) (pitch - pixel_size * info_header.width);
-            fseek(file, offset, SEEK_CUR);
+            const auto offset = (long) (pitch - pixel_size * info_header->width);
+            ptr += offset;
         }
         return bitmap;
     }
 
-    inline bool save_bmp(const char *filename, bool with_alpha = false) {
-        FILE *file = fopen(filename, "wb");
+    inline static std::shared_ptr<Bitmap> load_bmp(const char *filename) {
+        std::ifstream file(filename, std::ios::binary);
         if (!file) {
-            return false;
+            return nullptr;
         }
+        file.seekg(0, std::ios::end);
+        const auto size = file.tellg();
+        file.seekg(0, std::ios::beg);
+        Buffer buffer(size);
+        file.read(reinterpret_cast<char *>(buffer.data()), size);
+        return load_from_buffer(buffer);
+    }
+
+    [[nodiscard]] inline std::shared_ptr<Buffer> save_to_buffer(bool with_alpha = false) const {
+        Buffer buffer;
         uint32_t pixel_size = with_alpha ? 4 : 3;
         uint32_t pitch = (width_ * pixel_size + 3) & (~3);
         uint32_t file_size = 14 + sizeof(BitmapInfoHeader) + pitch * height_;
@@ -180,23 +182,43 @@ public:
         info_header.y_pels_per_meter = 0x0B13;
         info_header.clr_used = 0;
         info_header.clr_important = 0;
-        fwrite("BM", sizeof(uint8_t), 2, file);
-        fwrite(&file_size, sizeof(uint32_t), 1, file);
-        fwrite(&zero, sizeof(uint32_t), 1, file);
-        fwrite(&offset, sizeof(uint32_t), 1, file);
-        fwrite(&info_header, sizeof(BitmapInfoHeader), 1, file);
+        buffer.resize(file_size);
+        uint8_t *ptr = buffer.data();
+        std::memcpy(ptr, "BM", 2);
+        ptr += 2;
+        std::memcpy(ptr, &file_size, sizeof(uint32_t));
+        ptr += sizeof(uint32_t);
+        std::memcpy(ptr, &zero, sizeof(uint32_t));
+        ptr += sizeof(uint32_t);
+        std::memcpy(ptr, &offset, sizeof(uint32_t));
+        ptr += sizeof(uint32_t);
+        std::memcpy(ptr, &info_header, sizeof(BitmapInfoHeader));
+        ptr += sizeof(BitmapInfoHeader);
         for (int i = 0; i < height_; i++) {
             auto *line = this->line(height_ - i - 1);
             uint32_t padding = pitch - width_ * pixel_size;
             for (int j = 0; j < width_; j++) {
-                fwrite(line, sizeof(uint8_t), pixel_size, file);
+                std::memcpy(ptr, line, pixel_size);
+                ptr += pixel_size;
                 line += 4;
             }
             for (int j = 0; j < padding; j++) {
-                fputc(0, file);
+                *ptr++ = 0;
             }
         }
-        fclose(file);
+        return std::make_shared<Buffer>(buffer);
+    }
+
+    inline bool save_bmp(const char *filename, bool with_alpha = false) const {
+        auto buffer = save_to_buffer(with_alpha);
+        if (!buffer) {
+            return false;
+        }
+        std::ofstream file(filename, std::ios::binary);
+        if (!file) {
+            return false;
+        }
+        file.write(reinterpret_cast<const char *>(buffer->data()), static_cast<std::streamsize>(buffer->size()));
         return true;
     }
 
