@@ -35,6 +35,7 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
                         boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
         return;
     }
+    ws_.binary(false);
     ws_.async_write(boost::asio::buffer("Unknown command"),
                     boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
 }
