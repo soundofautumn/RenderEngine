@@ -18,7 +18,7 @@ class RenderEngine {
     uint32_t color_background_{0xFF000000};
 public:
     using Color = Vector4f;
-    using Point = Vector2f;
+    using Point = Vector2i;
 
 public:
     RenderEngine();
