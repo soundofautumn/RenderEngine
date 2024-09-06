@@ -10,5 +10,5 @@ else ()
     add_compile_options(-Wall -Wextra -pedantic)
 endif ()
 
-add_subdirectory(src/core)
+add_subdirectory(src/engine)
 add_subdirectory(src/server)
