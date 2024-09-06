@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 
-file(GLOB_RECURSE SOURCES "${source_dir}/*.cpp" "${source_dir}/*.h")
+file(GLOB_RECURSE SOURCES "*.cpp" "*.h")
 
 set(BUILD_SERVER_MODULE ON)
 
