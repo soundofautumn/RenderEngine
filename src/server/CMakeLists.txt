@@ -26,7 +26,7 @@ if (NOT spdlog_FOUND)
 endif ()
 
 if (BUILD_SERVER_MODULE)
-    add_library(${PROJECT_NAME} STATIC ${SOURCES})
+    add_executable(${PROJECT_NAME} ${SOURCES})
     target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast spdlog::spdlog)
 else ()
     message(WARNING "Server module will not be built")
