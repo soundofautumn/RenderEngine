@@ -2,8 +2,8 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
-#ifndef RENDERENGINE_VECTOR_H
-#define RENDERENGINE_VECTOR_H
+#ifndef RENDERENGINE_VECTOR_HPP
+#define RENDERENGINE_VECTOR_HPP
 
 #include <cassert>
 
@@ -524,7 +524,7 @@ using Vector2i = Vector<2, int>;
 using Vector3i = Vector<3, int>;
 using Vector4i = Vector<4, int>;
 
-#include "utils.h"
+#include "utils.hpp"
 
 // 矢量转整数颜色
 inline static uint32_t vector_to_color(const Vector4f &v) {
@@ -548,4 +548,4 @@ inline static Vector4f color_to_vector(uint32_t color) {
     return {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
 }
 
-#endif //RENDERENGINE_VECTOR_H
+#endif //RENDERENGINE_VECTOR_HPP

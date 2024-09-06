@@ -2,10 +2,10 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 
-#ifndef RENDERENGINE_COLORS_H
-#define RENDERENGINE_COLORS_H
+#ifndef RENDERENGINE_COLORS_HPP
+#define RENDERENGINE_COLORS_HPP
 
-#include "vector.h"
+#include "vector.hpp"
 
 using Color = Vector4f;
 
@@ -22,4 +22,4 @@ namespace Colors {
     const Color LightGray{0.75, 0.75, 0.75, 1};
     const Color DarkGray{0.25, 0.25, 0.25, 1};
 }
-#endif //RENDERENGINE_COLORS_H
+#endif //RENDERENGINE_COLORS_HPP

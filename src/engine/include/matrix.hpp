@@ -11,7 +11,7 @@
 #include <initializer_list>
 #include <iostream>
 
-#include "vector.h"
+#include "vector.hpp"
 
 //---------------------------------------------------------------------
 // 数学库：矩阵

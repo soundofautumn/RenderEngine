@@ -2,8 +2,8 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
-#ifndef RENDERENGINE_BITMAP_H
-#define RENDERENGINE_BITMAP_H
+#ifndef RENDERENGINE_BITMAP_HPP
+#define RENDERENGINE_BITMAP_HPP
 
 #include <cstdint>
 #include <cassert>
@@ -197,4 +197,4 @@ public:
 
 };
 
-#endif //RENDERENGINE_BITMAP_H
+#endif //RENDERENGINE_BITMAP_HPP

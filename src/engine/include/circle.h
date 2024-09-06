@@ -6,7 +6,7 @@
 #define RENDERENGINE_CIRCLE_H
 
 #include "engine.h"
-#include "options.h"
+#include "options.hpp"
 
 using Point = RenderEngine::Point;
 

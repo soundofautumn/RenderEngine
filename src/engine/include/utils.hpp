@@ -2,8 +2,8 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
-#ifndef RENDERENGINE_UTILS_H
-#define RENDERENGINE_UTILS_H
+#ifndef RENDERENGINE_UTILS_HPP
+#define RENDERENGINE_UTILS_HPP
 
 // 绝对值
 template<typename T>
@@ -41,4 +41,4 @@ inline T saturate(T x) {
     return clamp(x, T(0), T(1));
 }
 
-#endif //RENDERENGINE_UTILS_H
+#endif //RENDERENGINE_UTILS_HPP

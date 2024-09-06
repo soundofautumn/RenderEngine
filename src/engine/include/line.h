@@ -5,10 +5,9 @@
 #ifndef RENDERENGINE_LINE_H
 #define RENDERENGINE_LINE_H
 
-#include "bitmap.h"
-#include "options.h"
+#include "bitmap.hpp"
+#include "options.hpp"
 #include "engine.h"
-
 
 using Point = RenderEngine::Point;
 

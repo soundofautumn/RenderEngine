@@ -2,10 +2,10 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 
-#ifndef RENDERENGINE_OPTIONS_H
-#define RENDERENGINE_OPTIONS_H
+#ifndef RENDERENGINE_OPTIONS_HPP
+#define RENDERENGINE_OPTIONS_HPP
 
-#include "vector.h"
+#include "vector.hpp"
 
 using Color = Vector4f;
 
@@ -41,4 +41,4 @@ enum class LineAlgorithm {
     BRESENHAM
 };
 
-#endif //RENDERENGINE_OPTIONS_H
+#endif //RENDERENGINE_OPTIONS_HPP
