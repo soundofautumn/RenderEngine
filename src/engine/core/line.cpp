@@ -1,9 +1,10 @@
 //
 // Created by Autumn Sound on 2024/9/6.
 //
+
+#include <cmath>
 #include "line.h"
 #include "utils.hpp"
-
 
 // 画特殊斜率的线段
 bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
