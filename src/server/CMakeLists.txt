@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(RenderEngineServer)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -27,7 +27,7 @@ endif ()
 
 if (BUILD_SERVER_MODULE)
     add_executable(${PROJECT_NAME} ${SOURCES})
-    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast spdlog::spdlog)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast spdlog::spdlog RenderEngineCore)
 else ()
     message(WARNING "Server module will not be built")
 endif ()

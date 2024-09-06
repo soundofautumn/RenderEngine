@@ -32,7 +32,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
                      socket_.remote_endpoint().port());
 
         // Create a WebSocket websocket_session by transferring the socket
-        std::make_shared<WebSocketSession>(std::move(socket_))->do_accept(std::move(req_));
+        std::make_shared<WebSocketSession>(std::move(socket_))->do_accept(req_);
         return;
     }
 

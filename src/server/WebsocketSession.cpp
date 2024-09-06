@@ -3,12 +3,12 @@
 //
 
 #include "WebSocketSession.h"
+#include "EngineWebSocketSession.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
 WebSocketSession::WebSocketSession(tcp::socket socket)
-        : socket_(std::move(socket)),
-          ws_(std::move(socket_)) {
+        : ws_(std::move(socket)) {
 }
 
 void WebSocketSession::do_accept(const http::request<http::string_body>& req) {
@@ -45,9 +45,12 @@ void WebSocketSession::on_read(boost::system::error_code ec, std::size_t bytes_t
         return;
     }
 
-    // TODO:
-
-    ws_.text(ws_.got_text());
+    const std::string message = boost::beast::buffers_to_string(buffer_.data());
+    if (message == "engine") {
+        logger::info("Start rendering engine");
+        std::make_shared<EngineWebSocketSession>(std::move(ws_))->run();
+        return;
+    }
 
     if (ws_.got_text()) {
         logger::info("WebSocket message from {}:{}: {}",
