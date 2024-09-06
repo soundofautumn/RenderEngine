@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <memory>
 
 class Bitmap {
@@ -33,7 +34,7 @@ public:
             height_(bitmap.height_),
             pitch_(bitmap.pitch_),
             data_(new uint8_t[bitmap.width_ * bitmap.height_ * 4]) {
-        memcpy(data_, bitmap.data_, width_ * height_ * 4);
+        std::memcpy(data_, bitmap.data_, width_ * height_ * 4);
     }
 
     inline ~Bitmap() {
