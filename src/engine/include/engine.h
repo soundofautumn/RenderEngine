@@ -20,6 +20,8 @@ public:
     using Color = Vector4f;
     using Point = Vector2i;
 
+    using Buffer = Bitmap::Buffer;
+
 public:
     RenderEngine();
 
@@ -61,6 +63,8 @@ public:
     // 保存到文件
     void save(const std::string &filename);
 
+    // 获取文件
+    [[nodiscard]] Buffer get_frame_buffer() const;
 };
 
 

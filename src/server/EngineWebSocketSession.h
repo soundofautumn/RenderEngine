@@ -12,6 +12,8 @@ class EngineWebSocketSession :
         public std::enable_shared_from_this<EngineWebSocketSession> {
     websocket::stream<tcp::socket> ws_;
     boost::beast::flat_buffer buffer_;
+    // frame buffer
+    RenderEngine::Buffer frame_buffer_;
     RenderEngine engine_{};
 
 public:

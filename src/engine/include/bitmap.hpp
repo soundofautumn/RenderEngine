@@ -163,7 +163,7 @@ public:
         return load_from_buffer(buffer);
     }
 
-    [[nodiscard]] inline std::shared_ptr<Buffer> save_to_buffer(bool with_alpha = false) const {
+    [[nodiscard]] inline Buffer save_to_buffer(bool with_alpha = false) const {
         Buffer buffer;
         uint32_t pixel_size = with_alpha ? 4 : 3;
         uint32_t pitch = (width_ * pixel_size + 3) & (~3);
@@ -206,19 +206,19 @@ public:
                 *ptr++ = 0;
             }
         }
-        return std::make_shared<Buffer>(buffer);
+        return buffer;
     }
 
     inline bool save_bmp(const char *filename, bool with_alpha = false) const {
         auto buffer = save_to_buffer(with_alpha);
-        if (!buffer) {
+        if (buffer.empty()) {
             return false;
         }
         std::ofstream file(filename, std::ios::binary);
         if (!file) {
             return false;
         }
-        file.write(reinterpret_cast<const char *>(buffer->data()), static_cast<std::streamsize>(buffer->size()));
+        file.write(reinterpret_cast<const char *>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
         return true;
     }
 

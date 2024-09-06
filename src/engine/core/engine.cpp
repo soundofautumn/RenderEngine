@@ -95,3 +95,10 @@ void RenderEngine::save(const std::string &filename) {
         frame_buffer_->save_bmp(filename.c_str());
     }
 }
+
+RenderEngine::Buffer RenderEngine::get_frame_buffer() const {
+    if (frame_buffer_) {
+        return frame_buffer_->save_to_buffer();
+    }
+    return {};
+}
