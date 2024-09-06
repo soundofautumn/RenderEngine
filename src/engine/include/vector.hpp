@@ -2,6 +2,12 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
+//=====================================================================
+// 数学库：矢量
+// 说明：矢量是一个一维数组，用于表示一维空间的点和向量
+// 来自：https://github.com/skywind3000/RenderHelp/blob/master/RenderHelp.h
+//=====================================================================
+
 #ifndef RENDERENGINE_VECTOR_HPP
 #define RENDERENGINE_VECTOR_HPP
 

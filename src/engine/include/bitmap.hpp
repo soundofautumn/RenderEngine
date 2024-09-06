@@ -2,6 +2,12 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
+//=====================================================================
+// 位图库：Bitmap
+// 说明：提供一个简单的位图类，支持加载和保存BMP文件
+// 修改自：https://github.com/skywind3000/RenderHelp/blob/master/RenderHelp.h
+//=====================================================================
+
 #ifndef RENDERENGINE_BITMAP_HPP
 #define RENDERENGINE_BITMAP_HPP
 

@@ -2,6 +2,12 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
+//=====================================================================
+// 工具库：通用函数
+// 说明：提供一些通用的数学函数
+// 来自：https://github.com/skywind3000/RenderHelp/blob/master/RenderHelp.h
+//=====================================================================
+
 #ifndef RENDERENGINE_UTILS_HPP
 #define RENDERENGINE_UTILS_HPP
 

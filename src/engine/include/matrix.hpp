@@ -2,10 +2,17 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
+//=====================================================================
+// 数学库：矩阵
+// 说明：矩阵是一个二维数组，用于表示二维空间的变换和计算
+// 来自：https://github.com/skywind3000/RenderHelp/blob/master/RenderHelp.h
+//=====================================================================
+
 #ifndef RENDERENGINE_MATRIX_H
 #define RENDERENGINE_MATRIX_H
 
 #include <cassert>
+#include <cstring>
 
 #include <memory>
 #include <initializer_list>
@@ -80,6 +87,7 @@ struct Matrix {
         }
     }
 
+    // 转置矩阵
     inline Matrix<ROW, COL, T> transpose() const {
         Matrix<COL, ROW, T> res;
         for (size_t i = 0; i < ROW; i++) {
@@ -90,6 +98,7 @@ struct Matrix {
         return res;
     };
 
+    // 单位矩阵
     inline static Matrix<ROW, COL, T> identity() {
         Matrix<ROW, COL, T> res;
         for (size_t i = 0; i < ROW; i++) {
@@ -100,6 +109,7 @@ struct Matrix {
         return res;
     }
 
+    // 零矩阵
     inline static Matrix<ROW, COL, T> zero() {
         Matrix<ROW, COL, T> res;
         for (size_t i = 0; i < ROW; i++) {
