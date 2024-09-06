@@ -275,7 +275,7 @@ inline T matrix_cofactor(const Matrix<1, 1, T> &m, size_t row, size_t col) {
 // 多阶余子式：即删除特定行列的子式的行列式值
 template<size_t N, typename T>
 inline T matrix_cofactor(const Matrix<N, N, T> &m, size_t row, size_t col) {
-    return matrix_det(m.GetMinor(row, col)) * (((row + col) % 2)? -1 : 1);
+    return matrix_det(m.GetMinor(row, col)) * (((row + col) % 2) ? -1 : 1);
 }
 
 // 伴随矩阵：即余子式矩阵的转置
@@ -298,7 +298,7 @@ inline Matrix<N, N, T> matrix_invert(const Matrix<N, N, T> &m) {
 
 // 输出到文本流
 template<size_t ROW, size_t COL, typename T>
-inline std::ostream& operator << (std::ostream& os, const Matrix<ROW, COL, T>& m) {
+inline std::ostream &operator<<(std::ostream &os, const Matrix<ROW, COL, T> &m) {
     for (size_t r = 0; r < ROW; r++) {
         Vector<COL, T> row = m.Row(r);
         os << row << std::endl;

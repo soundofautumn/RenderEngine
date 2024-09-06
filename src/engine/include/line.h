@@ -11,11 +11,11 @@
 
 using Point = RenderEngine::Point;
 
-void draw_line_by_dda(RenderEngine *engine,  const Point &p1, const Point &p2, const PenOptions &options);
+void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options);
 
-void draw_line_by_midpoint(RenderEngine *engine,  const Point &p1, const Point &p2, const PenOptions &options);
+void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options);
 
-void draw_line_by_bresenham(RenderEngine *engine,  const Point &p1, const Point &p2, const PenOptions &options);
+void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options);
 
 
 #endif //RENDERENGINE_LINE_H

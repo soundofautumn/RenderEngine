@@ -115,7 +115,7 @@ private:
     };
 public:
     inline static std::shared_ptr<Bitmap> load_bmp(const char *filename) {
-        FILE * file = fopen(filename, "rb");
+        FILE *file = fopen(filename, "rb");
         if (!file) {
             return nullptr;
         }
@@ -159,7 +159,7 @@ public:
     }
 
     inline bool save_bmp(const char *filename, bool with_alpha = false) {
-        FILE * file = fopen(filename, "wb");
+        FILE *file = fopen(filename, "wb");
         if (!file) {
             return false;
         }
