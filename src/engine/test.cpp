@@ -9,7 +9,7 @@ int main() {
     engine.init(800, 600);
     engine.clear();
     engine.draw_pixel(100, 100, {1, 0, 0, 1});
-    engine.draw_line({1, 1}, {200, 200}, {.color = Colors::Red});
+    engine.draw_line({1, 1}, {200, 200}, {.color = Colors::Red}, LineAlgorithm::DDA);
     engine.save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");

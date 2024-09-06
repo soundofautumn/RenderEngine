@@ -6,21 +6,23 @@
 #define RENDERENGINE_OPTIONS_HPP
 
 #include "vector.hpp"
+#include "colors.hpp"
 
 using Color = Vector4f;
 
+// 画笔选项
 struct PenOptions {
     // 画笔颜色
-    Color color{1.0f, 1.0f, 1.0f, 1.0f};
+    Color color{Colors::White};
     // 画笔宽度
     float width{1.0f};
     // 画笔类型
     enum class LineType {
-        SOLID,
-        DASH,
-        DOT,
-        DASH_DOT,
-        DASH_DOT_DOT
+        SOLID, // 实线
+        DASH, // 虚线
+        DOT, // 点线
+        DASH_DOT, // 点划线
+        DASH_DOT_DOT // 点点划线
     } type{LineType::SOLID};
     // 虚线间隔
     float dash_gap{5.0f};
@@ -36,9 +38,9 @@ struct PenOptions {
 };
 
 enum class LineAlgorithm {
-    DDA,
-    MIDPOINT,
-    BRESENHAM
+    DDA, // DDA算法
+    MIDPOINT, // 中点算法
+    BRESENHAM // Bresenham算法
 };
 
 #endif //RENDERENGINE_OPTIONS_HPP
