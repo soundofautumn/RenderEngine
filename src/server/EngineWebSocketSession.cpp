@@ -63,6 +63,7 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
+    logger::info("Sending frame");
     // 发送帧
     frame_buffer_ = engine_.get_frame_buffer();
     ws_.binary(true);
@@ -70,6 +71,7 @@ void EngineWebSocketSession::send_frame() {
                     [self = shared_from_this()](boost::system::error_code ec, std::size_t) {
                         if (ec) {
                             fail(ec, "write");
+                            self->timer_.cancel();
                         }
                     });
 }
