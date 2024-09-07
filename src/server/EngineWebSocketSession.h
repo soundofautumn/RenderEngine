@@ -25,8 +25,6 @@ public:
 
     void on_read(boost::system::error_code ec, std::size_t bytes_transferred);
 
-    void on_write(boost::system::error_code ec, std::size_t bytes_transferred);
-
     void on_timer(boost::system::error_code ec);
 
     void send_frame();

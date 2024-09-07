@@ -25,7 +25,6 @@ int main() {
                 [&ioc] {
                     ioc.run();
                 });
-    ioc.run();
 
     for (auto &t: v)
         t.join();
