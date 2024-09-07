@@ -14,6 +14,7 @@ void EngineWebSocketSession::run() {
     engine_.init(800, 600);
     engine_.clear();
     engine_.draw_line({0, 0}, {799, 599}, {.color = Colors::Red}, LineAlgorithm::DDA);
+    ws_.binary(true);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
 }
@@ -52,6 +53,9 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
 
 void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
     if (ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
         fail(ec, "timer");
         return;
     }
@@ -63,15 +67,28 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
-    logger::info("Sending frame");
+    std::lock_guard lock(frame_buffer_mutex_);
     // 发送帧
+    if (write_in_progress_) {
+        logger::warn("Write in progress, frame dropped");
+        return;
+    }
     frame_buffer_ = engine_.get_frame_buffer();
-    ws_.binary(true);
-    ws_.async_write(boost::asio::buffer(frame_buffer_),
-                    [self = shared_from_this()](boost::system::error_code ec, std::size_t) {
-                        if (ec) {
-                            fail(ec, "write");
-                            self->timer_.cancel();
-                        }
-                    });
+    write_in_progress_ = true;
+    ws_.async_write(
+            boost::asio::buffer(frame_buffer_),
+            boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
 }
+
+void EngineWebSocketSession::on_write(boost::system::error_code ec, std::size_t bytes_transferred) {
+    boost::ignore_unused(bytes_transferred);
+    if (ec) {
+        fail(ec, "write");
+        write_in_progress_ = false;
+        timer_.cancel();
+        return;
+    }
+    write_in_progress_ = false;
+}
+
+

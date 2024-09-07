@@ -6,5 +6,5 @@
 
 void fail(boost::system::error_code ec, char const* what)
 {
-    std::cerr << what << ": " << ec.message() << "\n";
+    logger::error("{}: {}", what, ec.message());
 }

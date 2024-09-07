@@ -14,9 +14,11 @@ class EngineWebSocketSession :
     boost::beast::flat_buffer buffer_;
     boost::asio::steady_timer timer_;
     int fps_{0};
+    RenderEngine engine_{};
     // frame buffer
     RenderEngine::Buffer frame_buffer_;
-    RenderEngine engine_{};
+    std::mutex frame_buffer_mutex_;
+    bool write_in_progress_{false};
 
 public:
     explicit EngineWebSocketSession(websocket::stream<tcp::socket> ws);
@@ -28,6 +30,8 @@ public:
     void on_timer(boost::system::error_code ec);
 
     void send_frame();
+
+    void on_write(boost::system::error_code ec, std::size_t bytes_transferred);
 };
 
 
