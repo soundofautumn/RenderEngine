@@ -50,6 +50,10 @@ void RenderEngine::draw_pixel(int x, int y, const Color &color) {
     if (!frame_buffer_) {
         return;
     }
+    // 忽略超出范围的点
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+        return;
+    }
     frame_buffer_->set_pixel(x, y, vector_to_color(color));
 }
 

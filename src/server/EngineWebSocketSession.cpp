@@ -47,6 +47,22 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
             }
         }
     }
+    if (message.starts_with("draw_line")) {
+        auto pos = message.find(' ');
+        if (pos != std::string::npos) {
+            auto pos2 = message.find(' ', pos + 1);
+            if (pos2 != std::string::npos) {
+                auto pos3 = message.find(' ', pos2 + 1);
+                if (pos3 != std::string::npos) {
+                    auto x1 = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
+                    auto y1 = std::stoi(message.substr(pos2 + 1, pos3 - pos2 - 1));
+                    auto x2 = std::stoi(message.substr(pos3 + 1));
+                    auto y2 = std::stoi(message.substr(pos3 + 1));
+                    engine_.draw_line({x1, y1}, {x2, y2}, {.color = Colors::White}, LineAlgorithm::DDA);
+                }
+            }
+        }
+    }
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
 }
