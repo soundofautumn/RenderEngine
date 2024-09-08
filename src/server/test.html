@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BMP Viewer</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+      /* 设置背景颜色 */
+      body {
+        background-color: #000000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="bmpCanvas"></canvas>
+
+    <script>
+      // 创建 WebSocket 连接
+      const ws = new WebSocket("ws://localhost:3000");
+      // 发送消息
+
+      ws.onopen = function () {
+        ws.send("engine");
+        ws.send("set_canvas 800 600");
+        ws.send("draw_line 0 0 100 100");
+        ws.send("fps=10");
+      };
+
+      ws.binaryType = "arraybuffer";
+
+      ws.onmessage = function (event) {
+        const canvas = document.getElementById("bmpCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 800;
+        canvas.height = 600;
+        const data = new Uint8ClampedArray(event.data);
+
+        const imageData = new ImageData(data, 800, 600);
+        ctx.putImageData(imageData, 0, 0);
+      };
+
+      // 画线功能
+      const canvas = document.getElementById("bmpCanvas");
+      const ctx = canvas.getContext("2d");
+      let drawing = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      canvas.addEventListener("mousedown", (e) => {
+        drawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      });
+
+      canvas.addEventListener("mousemove", (e) => {});
+
+      canvas.addEventListener("mouseup", (e) => {
+        if (!drawing) return;
+
+        // 发送绘制数据到服务器
+        ws.send(`draw_line ${lastX} ${lastY} ${e.offsetX} ${e.offsetY}`);
+      });
+      canvas.addEventListener("mouseout", () => (drawing = false));
+    </script>
+  </body>
+</html>

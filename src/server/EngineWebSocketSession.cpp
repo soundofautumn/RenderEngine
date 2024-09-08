@@ -11,9 +11,6 @@ EngineWebSocketSession::EngineWebSocketSession(websocket::stream<tcp::socket> ws
 }
 
 void EngineWebSocketSession::run() {
-    engine_.init(800, 600);
-    engine_.clear();
-    engine_.draw_line({0, 0}, {799, 599}, {.color = Colors::Red}, LineAlgorithm::DDA);
     ws_.binary(true);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
@@ -34,6 +31,18 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
     }
     if (message == "clear") {
         engine_.clear();
+    }
+    if (message.starts_with("set_canvas")) {
+        auto pos = message.find(' ');
+        if (pos != std::string::npos) {
+            auto pos2 = message.find(' ', pos + 1);
+            if (pos2 != std::string::npos) {
+                auto width = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
+                auto height = std::stoi(message.substr(pos2 + 1));
+                engine_.init(width, height);
+                engine_.clear();
+            }
+        }
     }
     if (message.starts_with("fps")) {
         auto pos = message.find('=');

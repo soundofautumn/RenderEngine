@@ -27,6 +27,7 @@ void RenderEngine::init(int32_t width, int32_t height) {
     width_ = width;
     height_ = height;
     frame_buffer_ = new Bitmap(width, height);
+    clear();
 }
 
 void RenderEngine::clear() {
