@@ -32,8 +32,7 @@
     ws.onopen = function () {
         ws.send("engine");
         ws.send("set_canvas 800 600");
-        ws.send("draw_line 0 0 100 100");
-        ws.send("fps=10");
+        ws.send("fps=30");
     };
 
     ws.binaryType = "arraybuffer";
@@ -58,19 +57,19 @@
 
     canvas.addEventListener("mousedown", (e) => {
         drawing = true;
-        [lastX, lastY] = [e.x, e.y];
+        [lastX, lastY] = [e.offsetX, e.offsetY];
     });
 
     canvas.addEventListener("mousemove", (e) => {
         const mousePosition = document.getElementById("mousePosition");
-        mousePosition.textContent = `X: ${e.x}, Y: ${e.y}`;
+        mousePosition.textContent = `X: ${e.offsetX}, Y: ${e.offsetY}`;
     });
 
     canvas.addEventListener("mouseup", (e) => {
         if (!drawing) return;
 
         // 发送绘制数据到服务器
-        ws.send(`draw_line ${lastX} ${lastY} ${e.x} ${e.y}`);
+        ws.send(`draw_line ${lastX} ${lastY} ${e.offsetX} ${e.offsetY}`);
     });
     canvas.addEventListener("mouseout", () => (drawing = false));
 </script>
