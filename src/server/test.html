@@ -1,37 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BMP Viewer</title>
     <style>
-      canvas {
-        border: 1px solid black;
-      }
-      /* 设置背景颜色 */
-      body {
-        background-color: #000000;
-      }
+        canvas {
+            border: 1px solid black;
+            background: black;
+        }
+        #mousePosition {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+        }
     </style>
-  </head>
-  <body>
-    <canvas id="bmpCanvas"></canvas>
+</head>
+<body>
+<canvas id="bmpCanvas"></canvas>
+<div id="mousePosition">X: 0, Y: 0</div>
 
-    <script>
-      // 创建 WebSocket 连接
-      const ws = new WebSocket("ws://localhost:3000");
-      // 发送消息
+<script>
+    // 创建 WebSocket 连接
+    const ws = new WebSocket("ws://localhost:3000");
+    // 发送消息
 
-      ws.onopen = function () {
+    ws.onopen = function () {
         ws.send("engine");
         ws.send("set_canvas 800 600");
         ws.send("draw_line 0 0 100 100");
         ws.send("fps=10");
-      };
+    };
 
-      ws.binaryType = "arraybuffer";
+    ws.binaryType = "arraybuffer";
 
-      ws.onmessage = function (event) {
+    ws.onmessage = function (event) {
         const canvas = document.getElementById("bmpCanvas");
         const ctx = canvas.getContext("2d");
         canvas.width = 800;
@@ -40,29 +47,32 @@
 
         const imageData = new ImageData(data, 800, 600);
         ctx.putImageData(imageData, 0, 0);
-      };
+    };
 
-      // 画线功能
-      const canvas = document.getElementById("bmpCanvas");
-      const ctx = canvas.getContext("2d");
-      let drawing = false;
-      let lastX = 0;
-      let lastY = 0;
+    // 画线功能
+    const canvas = document.getElementById("bmpCanvas");
+    const ctx = canvas.getContext("2d");
+    let drawing = false;
+    let lastX = 0;
+    let lastY = 0;
 
-      canvas.addEventListener("mousedown", (e) => {
+    canvas.addEventListener("mousedown", (e) => {
         drawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-      });
+        [lastX, lastY] = [e.x, e.y];
+    });
 
-      canvas.addEventListener("mousemove", (e) => {});
+    canvas.addEventListener("mousemove", (e) => {
+        const mousePosition = document.getElementById("mousePosition");
+        mousePosition.textContent = `X: ${e.x}, Y: ${e.y}`;
+    });
 
-      canvas.addEventListener("mouseup", (e) => {
+    canvas.addEventListener("mouseup", (e) => {
         if (!drawing) return;
 
         // 发送绘制数据到服务器
-        ws.send(`draw_line ${lastX} ${lastY} ${e.offsetX} ${e.offsetY}`);
-      });
-      canvas.addEventListener("mouseout", () => (drawing = false));
-    </script>
-  </body>
+        ws.send(`draw_line ${lastX} ${lastY} ${e.x} ${e.y}`);
+    });
+    canvas.addEventListener("mouseout", () => (drawing = false));
+</script>
+</body>
 </html>

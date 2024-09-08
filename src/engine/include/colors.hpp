@@ -10,7 +10,7 @@
 using Color = Vector4f;
 
 namespace Colors {
-    const Color Black{0, 0, 0, 1};
+    const Color Black{0, 0, 0, 0};
     const Color White{1, 1, 1, 1};
     const Color Red{1, 0, 0, 1};
     const Color Green{0, 1, 0, 1};
