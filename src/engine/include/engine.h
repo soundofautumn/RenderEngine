@@ -15,7 +15,7 @@ class RenderEngine {
     int32_t width_;
     int32_t height_;
 
-    uint32_t color_background_{0xFF000000};
+    uint32_t color_background_{vector_to_color(Colors::Black)};
 public:
     using Color = Vector4f;
     using Point = Vector2i;

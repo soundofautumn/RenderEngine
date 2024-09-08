@@ -534,11 +534,12 @@ using Vector4i = Vector<4, int>;
 
 // 矢量转整数颜色
 inline static uint32_t vector_to_color(const Vector4f &v) {
-    const auto r = (uint8_t) clamp(v[0], 0.0f, 1.0f) * 255;
-    const auto g = (uint8_t) clamp(v[1], 0.0f, 1.0f) * 255;
-    const auto b = (uint8_t) clamp(v[2], 0.0f, 1.0f) * 255;
-    const auto a = (uint8_t) clamp(v[3], 0.0f, 1.0f) * 255;
-    return (r << 16) | (g << 8) | b | (a << 24);
+    const auto r = (uint32_t) clamp(v[0], 0.0f, 1.0f) * 255;
+    const auto g = (uint32_t) clamp(v[1], 0.0f, 1.0f) * 255;
+    const auto b = (uint32_t) clamp(v[2], 0.0f, 1.0f) * 255;
+    const auto a = (uint32_t) clamp(v[3], 0.0f, 1.0f) * 255;
+    const uint32_t color = (r << 24) | (g << 16) | (b << 8) | a;
+    return color;
 }
 
 inline static uint32_t vector_to_color(const Vector3f &v) {
@@ -547,10 +548,10 @@ inline static uint32_t vector_to_color(const Vector3f &v) {
 
 // 整数颜色转矢量
 inline static Vector4f color_to_vector(uint32_t color) {
-    const auto r = (float) ((color >> 16) & 0xFF);
-    const auto g = (float) ((color >> 8) & 0xFF);
-    const auto b = (float) (color & 0xFF);
-    const auto a = (float) ((color >> 24) & 0xFF);
+    const auto r = (float) ((color >> 24) & 0xFF);
+    const auto g = (float) ((color >> 16) & 0xFF);
+    const auto b = (float) ((color >> 8) & 0xFF);
+    const auto a = (float) (color & 0xFF);
     return {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
 }
 
