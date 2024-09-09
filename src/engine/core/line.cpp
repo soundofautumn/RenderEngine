@@ -9,14 +9,14 @@
 // 画特殊斜率的线段
 bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
     if (p1 == p2) {
-        engine->draw_point(p1, options);
+        engine->draw_point(p1.x, p1.y, options);
         return true;
     } else if (p1.x == p2.x) {
         int y1 = min(p1.y, p2.y);
         int y2 = max(p1.y, p2.y);
         int x = p1.x;
         for (int y = y1; y <= y2; ++y) {
-            engine->draw_point({x, y}, options);
+            engine->draw_point(x, y, options);
         }
         return true;
     } else if (p1.y == p2.y) {
@@ -24,7 +24,7 @@ bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point 
         int x2 = max(p1.x, p2.x);
         int y = p1.y;
         for (int x = x1; x <= x2; ++x) {
-            engine->draw_point({x, y}, options);
+            engine->draw_point(x, y, options);
         }
         return true;
     } else {
@@ -47,7 +47,7 @@ void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, co
         }
         auto y = (float) y1;
         for (int x = x1; x <= x2; ++x) {
-            engine->draw_point({x, (int) round(y)}, options);
+            engine->draw_point(x, (int) round(y), options);
             y += k;
         }
     } else {
@@ -58,7 +58,7 @@ void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, co
         k = 1 / k;
         auto x = (float) x1;
         for (int y = y1; y <= y2; ++y) {
-            engine->draw_point({(int) round(x), y}, options);
+            engine->draw_point((int) round(x), y, options);
             x += k;
         }
     }
@@ -85,7 +85,7 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
         // 主要沿 x 方向
         int d = 2 * dy - dx; // 初始决策参数
         for (int x = x1, y = y1; x != x2; x += sx) {
-            engine->draw_point({x, y}, options); // 绘制当前像素
+            engine->draw_point(x, y, options); // 绘制当前像素
             if (d > 0) {
                 y += sy; // 更新 y 坐标
                 d -= 2 * dx; // 更新决策参数
@@ -96,7 +96,7 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
         // 主要沿 y 方向
         int d = 2 * dx - dy; // 初始决策参数
         for (int y = y1, x = x1; y != y2; y += sy) {
-            engine->draw_point({x, y}, options); // 绘制当前像素
+            engine->draw_point(x, y, options); // 绘制当前像素
             if (d > 0) {
                 x += sx; // 更新 x 坐标
                 d -= 2 * dy; // 更新决策参数
@@ -106,7 +106,7 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
     }
 
     // 绘制终点
-    engine->draw_point({x1, y1}, options);
+    engine->draw_point(x1, y1, options);
 
 }
 
@@ -121,7 +121,7 @@ void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &
     int err = dx - dy;
 
     while (true) {
-        engine->draw_point({x1, y1}, options);
+        engine->draw_point(x1, y1, options);
 
         if (x1 == x2 && y1 == y2) break;
 

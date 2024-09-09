@@ -58,8 +58,8 @@ void RenderEngine::draw_pixel(int x, int y, const Color &color) {
     frame_buffer_->set_pixel(x, y, vector_to_color(color));
 }
 
-void RenderEngine::draw_point(const Point &p, const PenOptions &options) {
-    draw_pixel(p.x, p.y, options.color);
+void RenderEngine::draw_point(int x, int y, const PenOptions &options) {
+    draw_pixel(x, y, options.color);
 }
 
 void RenderEngine::draw_line(const Point &p1, const Point &p2, const PenOptions &options, LineAlgorithm algorithm) {
