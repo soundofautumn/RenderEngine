@@ -12,6 +12,7 @@ EngineWebSocketSession::EngineWebSocketSession(websocket::stream<tcp::socket> ws
 }
 
 void EngineWebSocketSession::run() {
+    ws_.set_option(websocket::permessage_deflate());
     ws_.binary(true);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
