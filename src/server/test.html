@@ -33,7 +33,7 @@
     // 发送消息
 
     ws.onopen = function () {
-        ws.send("engine");
+        ws.send("start_engine");
         ws.send(`set_canvas_size ${width} ${height}`);
         ws.send(`set_fps ${fps}`);
     };
