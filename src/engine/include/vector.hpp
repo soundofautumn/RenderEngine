@@ -538,8 +538,7 @@ inline static uint32_t vector_to_color(const Vector4f &v) {
     const auto g = (uint32_t) clamp(v[1], 0.0f, 1.0f) * 255;
     const auto b = (uint32_t) clamp(v[2], 0.0f, 1.0f) * 255;
     const auto a = (uint32_t) clamp(v[3], 0.0f, 1.0f) * 255;
-    const uint32_t color = (r << 24) | (g << 16) | (b << 8) | a;
-    return color;
+    return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
 inline static uint32_t vector_to_color(const Vector3f &v) {
