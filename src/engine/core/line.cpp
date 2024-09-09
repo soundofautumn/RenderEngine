@@ -65,7 +65,49 @@ void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, co
 }
 
 void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
-    throw std::runtime_error("Not implemented yet");
+    if (draw_line_special_slope(engine, p1, p2, options)) {
+        return;
+    }
+    int x1 = p1.x, y1 = p1.y;
+    int x2 = p2.x, y2 = p2.y;
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+
+    int x_inc = dx > 0 ? 1 : -1;
+    int y_inc = dy > 0 ? 1 : -1;
+
+    dx = abs(dx);
+    dy = abs(dy);
+
+    // 选择主要的增量方向
+    if (dx > dy) {
+        // 主要沿 x 方向
+        int d = 2 * dy - dx; // 初始决策参数
+        for (int x = x1, y = y1; x != x2; x += x_inc) {
+            engine->draw_point({x, y}, options); // 绘制当前像素
+            if (d > 0) {
+                y += y_inc; // 更新 y 坐标
+                d -= 2 * dx; // 更新决策参数
+            }
+            d += 2 * dy; // 更新决策参数
+        }
+    } else {
+        // 主要沿 y 方向
+        int d = 2 * dx - dy; // 初始决策参数
+        for (int y = y1, x = x1; y != y2; y += y_inc) {
+            engine->draw_point({x, y}, options); // 绘制当前像素
+            if (d > 0) {
+                x += x_inc; // 更新 x 坐标
+                d -= 2 * dy; // 更新决策参数
+            }
+            d += 2 * dx; // 更新决策参数
+        }
+    }
+
+    // 绘制终点
+    engine->draw_point({x1, y1}, options);
+
 }
 
 void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
