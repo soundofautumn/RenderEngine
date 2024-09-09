@@ -114,8 +114,8 @@ void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &
     int x1 = p1.x, y1 = p1.y;
     int x2 = p2.x, y2 = p2.y;
 
-    int dx = std::abs(x2 - x1);
-    int dy = std::abs(y2 - y1);
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
     int sx = (x1 < x2) ? 1 : -1;
     int sy = (y1 < y2) ? 1 : -1;
     int err = dx - dy;
