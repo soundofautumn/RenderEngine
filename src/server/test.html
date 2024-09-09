@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>BMP Viewer</title>
+    <title>Render Engine Viewer</title>
     <style>
         canvas {
             border: 1px solid black;
@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-<canvas id="bmpCanvas"></canvas>
+<canvas id="frame"></canvas>
 <div id="mousePosition">X: 0, Y: 0</div>
 
 <script>
@@ -41,7 +41,7 @@
     ws.binaryType = "arraybuffer";
 
     ws.onmessage = function (event) {
-        const canvas = document.getElementById("bmpCanvas");
+        const canvas = document.getElementById("frame");
         const ctx = canvas.getContext("2d");
         canvas.width = width;
         canvas.height = height;
@@ -52,7 +52,7 @@
     };
 
     // 画线功能
-    const canvas = document.getElementById("bmpCanvas");
+    const canvas = document.getElementById("frame");
     const ctx = canvas.getContext("2d");
     let drawing = false;
     let lastX = 0;
