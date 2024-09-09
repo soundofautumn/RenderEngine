@@ -74,8 +74,8 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
     int dx = x2 - x1;
     int dy = y2 - y1;
 
-    int x_inc = dx > 0 ? 1 : -1;
-    int y_inc = dy > 0 ? 1 : -1;
+    int sx = dx > 0 ? 1 : -1;
+    int sy = dy > 0 ? 1 : -1;
 
     dx = abs(dx);
     dy = abs(dy);
@@ -84,10 +84,10 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
     if (dx > dy) {
         // 主要沿 x 方向
         int d = 2 * dy - dx; // 初始决策参数
-        for (int x = x1, y = y1; x != x2; x += x_inc) {
+        for (int x = x1, y = y1; x != x2; x += sx) {
             engine->draw_point({x, y}, options); // 绘制当前像素
             if (d > 0) {
-                y += y_inc; // 更新 y 坐标
+                y += sy; // 更新 y 坐标
                 d -= 2 * dx; // 更新决策参数
             }
             d += 2 * dy; // 更新决策参数
@@ -95,10 +95,10 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
     } else {
         // 主要沿 y 方向
         int d = 2 * dx - dy; // 初始决策参数
-        for (int y = y1, x = x1; y != y2; y += y_inc) {
+        for (int y = y1, x = x1; y != y2; y += sy) {
             engine->draw_point({x, y}, options); // 绘制当前像素
             if (d > 0) {
-                x += x_inc; // 更新 x 坐标
+                x += sx; // 更新 x 坐标
                 d -= 2 * dy; // 更新决策参数
             }
             d += 2 * dx; // 更新决策参数
@@ -111,5 +111,28 @@ void draw_line_by_midpoint(RenderEngine *engine, const Point &p1, const Point &p
 }
 
 void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
-    throw std::runtime_error("Not implemented yet");
+    int x1 = p1.x, y1 = p1.y;
+    int x2 = p2.x, y2 = p2.y;
+
+    int dx = std::abs(x2 - x1);
+    int dy = std::abs(y2 - y1);
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
+    int err = dx - dy;
+
+    while (true) {
+        engine->draw_point({x1, y1}, options);
+
+        if (x1 == x2 && y1 == y2) break;
+
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
 }
