@@ -3,6 +3,7 @@
 //
 
 #include "EngineWebSocketSession.h"
+#include "handle_request.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
@@ -14,6 +15,15 @@ void EngineWebSocketSession::run() {
     ws_.binary(true);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
+}
+
+void EngineWebSocketSession::set_fps(int fps) {
+    fps_ = fps;
+    timer_.cancel();
+    if (fps_ != 0) {
+        timer_.expires_after(std::chrono::milliseconds(1000 / fps_));
+        timer_.async_wait(boost::beast::bind_front_handler(&EngineWebSocketSession::on_timer, shared_from_this()));
+    }
 }
 
 void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -29,49 +39,13 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
     if (message == "get") {
         send_frame();
     }
-    if (message == "clear") {
-        engine_.clear();
-    }
-    if (message.starts_with("set_canvas")) {
-        auto pos = message.find(' ');
-        if (pos != std::string::npos) {
-            auto pos2 = message.find(' ', pos + 1);
-            if (pos2 != std::string::npos) {
-                auto width = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
-                auto height = std::stoi(message.substr(pos2 + 1));
-                engine_.init(width, height);
-                engine_.clear();
-            }
-        }
-    }
     if (message.starts_with("fps")) {
         auto pos = message.find('=');
         if (pos != std::string::npos) {
-            fps_ = std::stoi(message.substr(pos + 1));
-            timer_.cancel();
-            if (fps_ != 0) {
-                timer_.expires_after(std::chrono::milliseconds(1000 / fps_));
-                timer_.async_wait(
-                        boost::beast::bind_front_handler(&EngineWebSocketSession::on_timer, shared_from_this()));
-            }
+            set_fps(std::stoi(message.substr(pos + 1)));
         }
     }
-    if (message.starts_with("draw_line")) {
-        const auto pos = message.find(' ');
-        const auto pos2 = message.find(' ', pos + 1);
-        const auto pos3 = message.find(' ', pos2 + 1);
-        const auto pos4 = message.find(' ', pos3 + 1);
-        if (pos != std::string::npos &&
-            pos2 != std::string::npos &&
-            pos3 != std::string::npos &&
-            pos4 != std::string::npos) {
-            const auto x1 = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
-            const auto y1 = std::stoi(message.substr(pos2 + 1, pos3 - pos2 - 1));
-            const auto x2 = std::stoi(message.substr(pos3 + 1, pos4 - pos3 - 1));
-            const auto y2 = std::stoi(message.substr(pos4 + 1));
-            engine_.draw_line({x1, y1}, {x2, y2}, {.color = Colors::White}, LineAlgorithm::DDA);
-        }
-    }
+    handle_engine_request(message, engine_);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
 }

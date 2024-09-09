@@ -31,6 +31,8 @@ public:
 
     void send_frame();
 
+    void set_fps(int fps);
+
     void on_write(boost::system::error_code ec, std::size_t bytes_transferred);
 };
 
