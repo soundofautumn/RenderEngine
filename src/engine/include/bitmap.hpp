@@ -194,7 +194,7 @@ public:
                 file.write(reinterpret_cast<const char *>(&pixel), pixel_size);
                 line += 4;
             }
-            for (int j = 0; j < padding; j++) {
+            for (uint32_t j = 0; j < padding; j++) {
                 file.put(0);
             }
         }

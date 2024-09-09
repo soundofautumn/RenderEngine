@@ -9,14 +9,14 @@
 // 画特殊斜率的线段
 bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
     if (p1 == p2) {
-        engine->draw_pixel(p1.x, p1.y, options.color);
+        engine->draw_point(p1, options);
         return true;
     } else if (p1.x == p2.x) {
         int y1 = min(p1.y, p2.y);
         int y2 = max(p1.y, p2.y);
         int x = p1.x;
         for (int y = y1; y <= y2; ++y) {
-            engine->draw_pixel(x, y, options.color);
+            engine->draw_point({x, y}, options);
         }
         return true;
     } else if (p1.y == p2.y) {
@@ -24,7 +24,7 @@ bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point 
         int x2 = max(p1.x, p2.x);
         int y = p1.y;
         for (int x = x1; x <= x2; ++x) {
-            engine->draw_pixel(x, y, options.color);
+            engine->draw_point({x, y}, options);
         }
         return true;
     } else {
@@ -47,7 +47,7 @@ void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, co
         }
         auto y = (float) y1;
         for (int x = x1; x <= x2; ++x) {
-            engine->draw_pixel(x, round(y), options.color);
+            engine->draw_point({x, (int) round(y)}, options);
             y += k;
         }
     } else {
@@ -58,7 +58,7 @@ void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, co
         k = 1 / k;
         auto x = (float) x1;
         for (int y = y1; y <= y2; ++y) {
-            engine->draw_pixel(round(x), y, options.color);
+            engine->draw_point({(int) round(x), y}, options);
             x += k;
         }
     }

@@ -50,6 +50,9 @@ public:
     // 绘制像素
     void draw_pixel(int x, int y, const Color &color);
 
+    // 绘制点
+    void draw_point(const Point &p, const PenOptions &options = PenOptions());
+
     // 绘制线段
     void draw_line(const Point &p1, const Point &p2, const PenOptions &options = PenOptions(),
                    LineAlgorithm algorithm = LineAlgorithm::BRESENHAM);
