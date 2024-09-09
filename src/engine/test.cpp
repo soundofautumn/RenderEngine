@@ -12,6 +12,7 @@ int main() {
     engine.draw_line({0, 599}, {799, 0}, {.color = Colors::Green});
     engine.draw_line({400, 0}, {400, 599}, {.color = Colors::Blue});
     engine.draw_line({0, 300}, {799, 300}, {.color = Colors::Yellow});
+    engine.draw_circle({400, 300}, 200, {.color = Colors::White});
     engine.save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");

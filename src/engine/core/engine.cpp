@@ -3,6 +3,7 @@
 //
 
 #include "line.h"
+#include "circle.h"
 #include "engine.h"
 
 RenderEngine::RenderEngine() : frame_buffer_(nullptr), width_(0), height_(0) {}
@@ -85,6 +86,7 @@ void RenderEngine::draw_circle(const Point &center, float radius, const PenOptio
     if (!frame_buffer_) {
         return;
     }
+    draw_circle_by_midpoint(this, center, radius, options);
 }
 
 void RenderEngine::draw_arc(const Point &center, float radius, float start_angle, float end_angle,
