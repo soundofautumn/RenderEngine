@@ -39,8 +39,8 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
     if (message == "get") {
         send_frame();
     }
-    if (message.starts_with("fps")) {
-        auto pos = message.find('=');
+    if (message.starts_with("set_fps")) {
+        auto pos = message.find(' ');
         if (pos != std::string::npos) {
             set_fps(std::stoi(message.substr(pos + 1)));
         }

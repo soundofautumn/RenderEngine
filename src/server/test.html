@@ -27,12 +27,15 @@
 <script>
     // 创建 WebSocket 连接
     const ws = new WebSocket("ws://localhost:3000");
+    const fps = 30;
+    const width = 800;
+    const height = 600;
     // 发送消息
 
     ws.onopen = function () {
         ws.send("engine");
-        ws.send("set_canvas 800 600");
-        ws.send("fps=30");
+        ws.send(`set_canvas_size ${width} ${height}`);
+        ws.send(`set_fps ${fps}`);
     };
 
     ws.binaryType = "arraybuffer";
@@ -40,11 +43,11 @@
     ws.onmessage = function (event) {
         const canvas = document.getElementById("bmpCanvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = width;
+        canvas.height = height;
         const data = new Uint8ClampedArray(event.data);
 
-        const imageData = new ImageData(data, 800, 600);
+        const imageData = new ImageData(data, width, height);
         ctx.putImageData(imageData, 0, 0);
     };
 

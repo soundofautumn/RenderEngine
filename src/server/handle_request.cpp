@@ -10,7 +10,7 @@ void clear_canvas(const std::string &message, RenderEngine &engine) {
 }
 
 void set_canvas(const std::string &message, RenderEngine &engine) {
-    if (message.starts_with("set_canvas")) {
+    if (message.starts_with("set_canvas_size")) {
         auto pos = message.find(' ');
         if (pos == std::string::npos) {
             return;
