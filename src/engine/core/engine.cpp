@@ -60,7 +60,7 @@ void RenderEngine::draw_pixel(int x, int y, const Color &color) {
 }
 
 void RenderEngine::draw_point(int x, int y, const PenOptions &options) {
-    if (near_equal(options.size, 1.0f)) {
+    if (near_equal(options.width, 1.0f)) {
         draw_pixel(x, y, options.color);
         return;
     }
