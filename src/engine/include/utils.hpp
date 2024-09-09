@@ -31,7 +31,7 @@ inline T min(T a, T b) {
 
 // 判断两个浮点数是否相等
 template<typename T>
-inline bool near_equal(T a, T b, T epsilon) {
+inline bool near_equal(T a, T b, T epsilon = 1e-6) {
     return abs(a - b) < epsilon;
 }
 

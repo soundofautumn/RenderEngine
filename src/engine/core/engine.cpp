@@ -60,7 +60,10 @@ void RenderEngine::draw_pixel(int x, int y, const Color &color) {
 }
 
 void RenderEngine::draw_point(int x, int y, const PenOptions &options) {
-    draw_pixel(x, y, options.color);
+    if (near_equal(options.size, 1.0f)) {
+        draw_pixel(x, y, options.color);
+        return;
+    }
 }
 
 void RenderEngine::draw_line(const Point &p1, const Point &p2, const PenOptions &options, LineAlgorithm algorithm) {
