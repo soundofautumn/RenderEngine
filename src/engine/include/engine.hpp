@@ -107,7 +107,7 @@ public:
     bool render();
 
     // 绘制点
-    void draw_point(int x, int y, const PenOptions &options = PenOptions());
+    void draw_point(int x, int y, const PenOptions &options = PenOptions(), int index = -1);
 
     // 绘制线段
     void draw_line(const Line &line);
