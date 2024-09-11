@@ -37,28 +37,33 @@ void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radi
     }
 }
 
-void draw_arc_by_midpoint(RenderEngine *engine, const Point &center, int radius, float start_angle, float end_angle,
+void draw_arc_by_midpoint(RenderEngine *engine,
+                          const Point &center, int radius,
+                          float start_angle, float end_angle,
                           const PenOptions &options) {
     throw std::runtime_error("Not implemented yet");
 }
 
 void RenderEngine::draw_circle(const Circle &circle) {
-    switch (circle.type) {
-        case Circle::Type::CenterRadius:
-            draw_circle_by_midpoint(this, circle.center_radius.center, circle.center_radius.radius, circle.options);
-            break;
-        case Circle::Type::ThreePoints:
-            throw std::runtime_error("Not implemented yet");
+    if (std::holds_alternative<CircleUseCenterRadius>(circle)) {
+        auto &center_radius = std::get<CircleUseCenterRadius>(circle);
+        draw_circle_by_midpoint(this, center_radius.center, center_radius.radius, center_radius.options);
+        return;
+    } else if (std::holds_alternative<CircleUseThreePoints>(circle)) {
+        auto &three_points = std::get<CircleUseThreePoints>(circle);
+        throw std::runtime_error("Not implemented yet");
     }
 }
 
 void RenderEngine::draw_arc(const Arc &arc) {
-    switch (arc.type) {
-        case Arc::Type::CenterRadiusAngle:
-            draw_arc_by_midpoint(this, arc.center_radius_angle.center, arc.center_radius_angle.radius,
-                                 arc.center_radius_angle.start_angle, arc.center_radius_angle.end_angle, arc.options);
-            break;
-        case Arc::Type::ThreePoints:
-            throw std::runtime_error("Not implemented yet");
+    if (std::holds_alternative<ArcUseCenterRadiusAngle>(arc)) {
+        auto &center_radius_angle = std::get<ArcUseCenterRadiusAngle>(arc);
+        draw_arc_by_midpoint(this, center_radius_angle.center, center_radius_angle.radius,
+                             center_radius_angle.start_angle, center_radius_angle.end_angle,
+                             center_radius_angle.options);
+        return;
+    } else if (std::holds_alternative<ArcUseThreePoints>(arc)) {
+        auto &three_points = std::get<ArcUseThreePoints>(arc);
+        throw std::runtime_error("Not implemented yet");
     }
 }

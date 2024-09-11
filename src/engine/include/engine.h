@@ -49,9 +49,6 @@ public:
     // 绘制像素
     void draw_pixel(int x, int y, const Color &color);
 
-    // 绘制点
-    void draw_point(int x, int y, const PenOptions &options = PenOptions());
-
     // 绘制图元
     void draw_primitive(const Primitive &primitive);
 
@@ -61,11 +58,16 @@ public:
     // 获取文件
     [[nodiscard]] Buffer get_frame_buffer() const;
 
-private:
+    // 绘制点
+    void draw_point(int x, int y, const PenOptions &options = PenOptions());
+
+    // 绘制线段
     void draw_line(const Line &line);
 
+    // 绘制圆
     void draw_circle(const Circle &circle);
 
+    // 绘制圆弧
     void draw_arc(const Arc &arc);
 };
 
