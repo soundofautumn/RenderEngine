@@ -534,10 +534,10 @@ using Vector4i = Vector<4, int>;
 
 // 矢量转整数颜色
 inline static uint32_t vector_to_color(const Vector4f &v) {
-    const auto r = (uint32_t) clamp(v[0], 0.0f, 1.0f) * 255;
-    const auto g = (uint32_t) clamp(v[1], 0.0f, 1.0f) * 255;
-    const auto b = (uint32_t) clamp(v[2], 0.0f, 1.0f) * 255;
-    const auto a = (uint32_t) clamp(v[3], 0.0f, 1.0f) * 255;
+    const auto r = (uint32_t) clamp(v.r, 0.0f, 1.0f) * 255;
+    const auto g = (uint32_t) clamp(v.g, 0.0f, 1.0f) * 255;
+    const auto b = (uint32_t) clamp(v.b, 0.0f, 1.0f) * 255;
+    const auto a = (uint32_t) clamp(v.a, 0.0f, 1.0f) * 255;
     return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
