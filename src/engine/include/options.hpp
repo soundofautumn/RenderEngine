@@ -26,15 +26,6 @@ struct PenOptions {
     } type{LineType::SOLID};
     // 虚线间隔
     float dash_gap{5.0f};
-    // 端点类型
-    enum class CapType {
-        // 平头
-        BUTT,
-        // 圆头
-        ROUND,
-        // 方头
-        SQUARE
-    } cap{CapType::BUTT};
 };
 
 enum class LineAlgorithm {
