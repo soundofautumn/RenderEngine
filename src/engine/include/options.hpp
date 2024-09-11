@@ -5,9 +5,8 @@
 #ifndef RENDERENGINE_OPTIONS_HPP
 #define RENDERENGINE_OPTIONS_HPP
 
-#include "vector.hpp"
-#include "colors.hpp"
-#include "common.h"
+#include "color.hpp"
+#include "point.hpp"
 
 // 画笔选项
 struct PenOptions {

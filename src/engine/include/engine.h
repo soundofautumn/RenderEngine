@@ -6,9 +6,8 @@
 #define RENDERENGINE_ENGINE_H
 
 #include "bitmap.hpp"
-#include "vector.hpp"
 #include "options.hpp"
-#include "common.h"
+#include "point.hpp"
 
 class RenderEngine {
     Bitmap *frame_buffer_;

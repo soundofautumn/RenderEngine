@@ -530,28 +530,4 @@ using Vector2i = Vector<2, int>;
 using Vector3i = Vector<3, int>;
 using Vector4i = Vector<4, int>;
 
-#include "utils.hpp"
-
-// 矢量转整数颜色
-inline static uint32_t vector_to_color(const Vector4f &v) {
-    const auto r = (uint32_t) clamp(v.r, 0.0f, 1.0f) * 255;
-    const auto g = (uint32_t) clamp(v.g, 0.0f, 1.0f) * 255;
-    const auto b = (uint32_t) clamp(v.b, 0.0f, 1.0f) * 255;
-    const auto a = (uint32_t) clamp(v.a, 0.0f, 1.0f) * 255;
-    return (r << 24) | (g << 16) | (b << 8) | a;
-}
-
-inline static uint32_t vector_to_color(const Vector3f &v) {
-    return vector_to_color(v.xyz1());
-}
-
-// 整数颜色转矢量
-inline static Vector4f color_to_vector(uint32_t color) {
-    const auto r = (float) ((color >> 24) & 0xFF);
-    const auto g = (float) ((color >> 16) & 0xFF);
-    const auto b = (float) ((color >> 8) & 0xFF);
-    const auto a = (float) (color & 0xFF);
-    return {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
-}
-
 #endif //RENDERENGINE_VECTOR_HPP

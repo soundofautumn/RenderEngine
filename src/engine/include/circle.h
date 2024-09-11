@@ -7,7 +7,7 @@
 
 #include "engine.h"
 #include "options.hpp"
-#include "common.h"
+#include "point.hpp"
 
 void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radius, const PenOptions &options);
 

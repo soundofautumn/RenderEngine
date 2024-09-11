@@ -5,10 +5,9 @@
 #ifndef RENDERENGINE_LINE_H
 #define RENDERENGINE_LINE_H
 
-#include "bitmap.hpp"
 #include "options.hpp"
 #include "engine.h"
-#include "common.h"
+#include "point.hpp"
 
 void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options);
 
