@@ -8,8 +8,7 @@
 #include "bitmap.hpp"
 #include "options.hpp"
 #include "engine.h"
-
-using Point = RenderEngine::Point;
+#include "common.h"
 
 void draw_line_by_dda(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options);
 

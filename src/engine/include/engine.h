@@ -8,6 +8,7 @@
 #include "bitmap.hpp"
 #include "vector.hpp"
 #include "options.hpp"
+#include "common.h"
 
 class RenderEngine {
     Bitmap *frame_buffer_;
@@ -17,8 +18,6 @@ class RenderEngine {
 
     uint32_t color_background_{vector_to_color(Colors::Black)};
 public:
-    using Color = Vector4f;
-    using Point = Vector2i;
 
     using Buffer = Bitmap::Buffer;
 

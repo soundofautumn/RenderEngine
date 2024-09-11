@@ -7,8 +7,7 @@
 
 #include "vector.hpp"
 #include "colors.hpp"
-
-using Color = Vector4f;
+#include "common.h"
 
 // 画笔选项
 struct PenOptions {
