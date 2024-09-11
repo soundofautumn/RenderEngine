@@ -6,7 +6,7 @@
 #define RENDERENGINE_HANDLE_REQUEST_H
 
 #include <string>
-#include "engine.h"
+#include "engine.hpp"
 
 void handle_engine_request(const std::string &message, RenderEngine &engine);
 

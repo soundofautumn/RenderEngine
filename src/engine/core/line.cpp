@@ -5,8 +5,7 @@
 #include <cmath>
 #include "line.hpp"
 #include "utils.hpp"
-#include "engine.h"
-
+#include "engine.hpp"
 
 // 画特殊斜率的线段
 bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {

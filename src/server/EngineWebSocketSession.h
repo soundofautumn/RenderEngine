@@ -6,7 +6,7 @@
 #define RENDERENGINE_ENGINEWEBSOCKETSESSION_H
 
 #include "Server.h"
-#include "engine.h"
+#include "engine.hpp"
 
 class EngineWebSocketSession :
         public std::enable_shared_from_this<EngineWebSocketSession> {
