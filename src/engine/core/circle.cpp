@@ -2,7 +2,9 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 
-#include "circle.h"
+#include "circle.hpp"
+#include "engine.h"
+
 
 void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radius, const PenOptions &options) {
     int x = 0;
@@ -38,4 +40,25 @@ void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radi
 void draw_arc_by_midpoint(RenderEngine *engine, const Point &center, int radius, float start_angle, float end_angle,
                           const PenOptions &options) {
     throw std::runtime_error("Not implemented yet");
+}
+
+void RenderEngine::draw_circle(const Circle &circle) {
+    switch (circle.type) {
+        case Circle::Type::CenterRadius:
+            draw_circle_by_midpoint(this, circle.center_radius.center, circle.center_radius.radius, circle.options);
+            break;
+        case Circle::Type::ThreePoints:
+            throw std::runtime_error("Not implemented yet");
+    }
+}
+
+void RenderEngine::draw_arc(const Arc &arc) {
+    switch (arc.type) {
+        case Arc::Type::CenterRadiusAngle:
+            draw_arc_by_midpoint(this, arc.center_radius_angle.center, arc.center_radius_angle.radius,
+                                 arc.center_radius_angle.start_angle, arc.center_radius_angle.end_angle, arc.options);
+            break;
+        case Arc::Type::ThreePoints:
+            throw std::runtime_error("Not implemented yet");
+    }
 }

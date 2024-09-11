@@ -8,6 +8,7 @@
 #include "bitmap.hpp"
 #include "options.hpp"
 #include "point.hpp"
+#include "primitive.h"
 
 class RenderEngine {
     Bitmap *frame_buffer_;
@@ -51,21 +52,21 @@ public:
     // 绘制点
     void draw_point(int x, int y, const PenOptions &options = PenOptions());
 
-    // 绘制线段
-    void draw_line(const Point &p1, const Point &p2, const PenOptions &options = PenOptions(),
-                   LineAlgorithm algorithm = LineAlgorithm::BRESENHAM);
-
-    // 绘制圆弧
-    void draw_circle(const Point &center, float radius, const PenOptions &options = PenOptions());
-
-    void draw_arc(const Point &center, float radius, float start_angle, float end_angle,
-                  const PenOptions &options = PenOptions());
+    // 绘制图元
+    void draw_primitive(const Primitive &primitive);
 
     // 保存到文件
     void save(const std::string &filename);
 
     // 获取文件
     [[nodiscard]] Buffer get_frame_buffer() const;
+
+private:
+    void draw_line(const Line &line);
+
+    void draw_circle(const Circle &circle);
+
+    void draw_arc(const Arc &arc);
 };
 
 

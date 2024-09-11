@@ -3,8 +3,10 @@
 //
 
 #include <cmath>
-#include "line.h"
+#include "line.hpp"
 #include "utils.hpp"
+#include "engine.h"
+
 
 // 画特殊斜率的线段
 bool draw_line_special_slope(RenderEngine *engine, const Point &p1, const Point &p2, const PenOptions &options) {
@@ -134,5 +136,19 @@ void draw_line_by_bresenham(RenderEngine *engine, const Point &p1, const Point &
             err += dx;
             y1 += sy;
         }
+    }
+}
+
+void RenderEngine::draw_line(const Line &line) {
+    switch (line.algorithm) {
+        case Line::LineAlgorithm::DDA:
+            draw_line_by_dda(this, line.p1, line.p2, line.options);
+            break;
+        case Line::LineAlgorithm::MIDPOINT:
+            draw_line_by_midpoint(this, line.p1, line.p2, line.options);
+            break;
+        case Line::LineAlgorithm::BRESENHAM:
+            draw_line_by_bresenham(this, line.p1, line.p2, line.options);
+            break;
     }
 }

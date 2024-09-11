@@ -26,10 +26,6 @@ struct PenOptions {
     float dash_gap{5.0f};
 };
 
-enum class LineAlgorithm {
-    DDA, // DDA算法
-    MIDPOINT, // 中点算法
-    BRESENHAM // Bresenham算法
-};
+
 
 #endif //RENDERENGINE_OPTIONS_HPP

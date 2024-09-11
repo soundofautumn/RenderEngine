@@ -2,9 +2,10 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
-#include "line.h"
-#include "circle.h"
+#include "line.hpp"
+#include "circle.hpp"
 #include "engine.h"
+#include "primitive.h"
 
 RenderEngine::RenderEngine() : frame_buffer_(nullptr), width_(0), height_(0) {}
 
@@ -66,36 +67,16 @@ void RenderEngine::draw_point(int x, int y, const PenOptions &options) {
     }
 }
 
-void RenderEngine::draw_line(const Point &p1, const Point &p2, const PenOptions &options, LineAlgorithm algorithm) {
+void RenderEngine::draw_primitive(const Primitive &primitive) {
     if (!frame_buffer_) {
         return;
     }
-    switch (algorithm) {
-        case LineAlgorithm::DDA:
-            draw_line_by_dda(this, p1, p2, options);
-            break;
-        case LineAlgorithm::MIDPOINT:
-            draw_line_by_midpoint(this, p1, p2, options);
-            break;
-        case LineAlgorithm::BRESENHAM:
-            draw_line_by_bresenham(this, p1, p2, options);
-            break;
-        default:
-            throw std::runtime_error("Unknown line drawing algorithm");
-    }
-}
-
-void RenderEngine::draw_circle(const Point &center, float radius, const PenOptions &options) {
-    if (!frame_buffer_) {
-        return;
-    }
-    draw_circle_by_midpoint(this, center, radius, options);
-}
-
-void RenderEngine::draw_arc(const Point &center, float radius, float start_angle, float end_angle,
-                            const PenOptions &options) {
-    if (!frame_buffer_) {
-        return;
+    if (std::holds_alternative<Line>(primitive)) {
+        const auto& line = std::get<Line>(primitive);
+        draw_line(line);
+    } else if (std::holds_alternative<Circle>(primitive)) {
+        const auto& circle = std::get<Circle>(primitive);
+        draw_circle(circle);
     }
 }
 
