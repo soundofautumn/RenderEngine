@@ -5,9 +5,9 @@
 #ifndef RENDERENGINE_CIRCLE_HPP
 #define RENDERENGINE_CIRCLE_HPP
 
+#include <variant>
 #include "options.hpp"
 #include "point.hpp"
-#include <variant>
 
 struct CircleUseCenterRadius {
     Point center;
