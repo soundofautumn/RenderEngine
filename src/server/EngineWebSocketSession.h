@@ -8,6 +8,8 @@
 #include "Server.h"
 #include "engine.hpp"
 
+using RenderCore::RenderEngine;
+
 class EngineWebSocketSession :
         public std::enable_shared_from_this<EngineWebSocketSession> {
     websocket::stream<tcp::socket> ws_;

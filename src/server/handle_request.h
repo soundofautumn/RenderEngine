@@ -8,6 +8,8 @@
 #include <string>
 #include "engine.hpp"
 
+using RenderCore::RenderEngine;
+
 void handle_engine_request(const std::string &message, RenderEngine &engine);
 
 #endif //RENDERENGINE_HANDLE_REQUEST_H

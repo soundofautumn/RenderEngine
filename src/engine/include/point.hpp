@@ -7,6 +7,10 @@
 
 #include "vector.hpp"
 
-using Point = Vector2i;
+namespace RenderCore {
+
+    using Point = Vector2i;
+
+}// namespace RenderCore
 
 #endif //RENDERENGINE_POINT_H

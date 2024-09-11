@@ -3,6 +3,8 @@
 //
 #include "handle_request.h"
 
+using RenderCore::Line;
+
 void clear_canvas(const std::string &message, RenderEngine &engine) {
     if (message == "clear") {
         engine.clear();
@@ -48,7 +50,7 @@ void draw_line(const std::string &message, RenderEngine &engine) {
         const auto y1 = std::stoi(message.substr(pos2 + 1, pos3 - pos2 - 1));
         const auto x2 = std::stoi(message.substr(pos3 + 1, pos4 - pos3 - 1));
         const auto y2 = std::stoi(message.substr(pos4 + 1));
-        engine.draw_line({x1, y1}, {x2, y2}, {.color = Colors::White}, LineAlgorithm::DDA);
+        engine.draw_line({{x1, y1}, {x2, y2}, {.color = RenderCore::Colors::White}, Line::LineAlgorithm::DDA});
     }
 }
 
@@ -68,7 +70,7 @@ void draw_point(const std::string &message, RenderEngine &engine) {
         }
         const auto x = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
         const auto y = std::stoi(message.substr(pos2 + 1, pos3 - pos2 - 1));
-        engine.draw_point(x, y, {.color = Colors::White});
+        engine.draw_point(x, y, {.color = RenderCore::Colors::White});
     }
 }
 

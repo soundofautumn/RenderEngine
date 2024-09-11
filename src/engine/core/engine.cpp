@@ -6,6 +6,8 @@
 #include "circle.hpp"
 #include "engine.hpp"
 
+using namespace RenderCore;
+
 void RenderEngine::draw_point(int x, int y, const PenOptions &options) {
     if (near_equal(options.width, 1.0f)) {
         draw_pixel(x, y, options.color);

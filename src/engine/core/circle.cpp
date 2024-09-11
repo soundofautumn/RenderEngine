@@ -5,6 +5,8 @@
 #include "circle.hpp"
 #include "engine.hpp"
 
+using namespace RenderCore;
+
 void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radius, const PenOptions &options) {
     int x = 0;
     int y = radius;

@@ -10,7 +10,11 @@
 #include "point.hpp"
 #include "primitive.hpp"
 
-class RenderEngine {
+namespace RenderCore {
+    class RenderEngine;
+}
+
+class RenderCore::RenderEngine {
     Bitmap *frame_buffer_;
 
     int32_t width_;

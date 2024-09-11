@@ -4,6 +4,8 @@
 #include "engine.hpp"
 #include "color.hpp"
 
+using namespace RenderCore;
+
 int main() {
     RenderEngine engine;
     engine.init(800, 600);

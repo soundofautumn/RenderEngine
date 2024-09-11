@@ -9,6 +9,10 @@
 #include "line.hpp"
 #include "circle.hpp"
 
-using Primitive = std::variant<Line, Circle, Arc>;
+namespace RenderCore {
+
+    using Primitive = std::variant<Line, Circle, Arc>;
+
+}
 
 #endif //RENDERENGINE_PRIMITIVE_HPP
