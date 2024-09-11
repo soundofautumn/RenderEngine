@@ -52,9 +52,29 @@ void draw_line(const std::string &message, RenderEngine &engine) {
     }
 }
 
-void handle_engine_request(const std::string &message,
-                           RenderEngine &engine) {
+void draw_point(const std::string &message, RenderEngine &engine) {
+    if (message.starts_with("draw_point")) {
+        const auto pos = message.find(' ');
+        if (pos == std::string::npos) {
+            return;
+        }
+        const auto pos2 = message.find(' ', pos + 1);
+        if (pos2 == std::string::npos) {
+            return;
+        }
+        const auto pos3 = message.find(' ', pos2 + 1);
+        if (pos3 == std::string::npos) {
+            return;
+        }
+        const auto x = std::stoi(message.substr(pos + 1, pos2 - pos - 1));
+        const auto y = std::stoi(message.substr(pos2 + 1, pos3 - pos2 - 1));
+        engine.draw_point(x, y, {.color = Colors::White});
+    }
+}
+
+void handle_engine_request(const std::string &message, RenderEngine &engine) {
     clear_canvas(message, engine);
     set_canvas(message, engine);
     draw_line(message, engine);
+    draw_point(message, engine);
 }
