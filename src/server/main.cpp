@@ -1,8 +1,16 @@
 #include <thread>
+#include <spdlog/spdlog.h>
 
 #include "Listener.h"
 
 int main() {
+
+#ifdef NDEBUG
+    spdlog::set_level(spdlog::level::info);
+#else
+    spdlog::set_level(spdlog::level::debug);
+#endif
+
     auto const address = boost::asio::ip::make_address("0.0.0.0");
     auto const port = static_cast<unsigned short>(3000);
     auto const threads = 4;

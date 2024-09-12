@@ -28,7 +28,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
 
     // See if it is a WebSocket Upgrade
     if (websocket::is_upgrade(req_)) {
-        logger::info("WebSocket upgrade request from {}:{}",
+        logger::debug("WebSocket upgrade request from {}:{}",
                      socket_.remote_endpoint().address().to_string(),
                      socket_.remote_endpoint().port());
 
@@ -37,7 +37,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
                 logger::info("Engine {} found", req_["EngineName"]);
                 std::make_shared<EngineWebSocketSession>(std::move(socket_), req_["EngineName"])->run();
             } else {
-                logger::info("Engine {} not found", req_["EngineName"]);
+                logger::warning("Engine {} not found", req_["EngineName"]);
                 res_.result(http::status::not_found);
                 res_.set(http::field::content_type, "text/plain");
                 res_.body() = "Engine not found";

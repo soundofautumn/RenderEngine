@@ -40,7 +40,7 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
     }
     const std::string message = boost::beast::buffers_to_string(buffer_.data());
     buffer_.consume(buffer_.size());
-    logger::info("Received message: {}", message);
+    logger::debug("Received message: {}", message);
 
     if (message == "get") {
         send_frame();

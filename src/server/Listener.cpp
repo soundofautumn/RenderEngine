@@ -60,7 +60,7 @@ void Listener::on_accept(boost::system::error_code ec) {
     if (ec) {
         fail(ec, "accept");
     } else {
-        logger::info("New connection from {}:{}",
+        logger::debug("New connection from {}:{}",
                      socket_.remote_endpoint().address().to_string(),
                      socket_.remote_endpoint().port());
         // Create the session and run it
