@@ -30,6 +30,9 @@ void EngineWebSocketSession::set_fps(int fps) {
 void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
     if (ec) {
+        if (ec == boost::beast::websocket::error::closed) {
+            return;
+        }
         fail(ec, "read");
         return;
     }
