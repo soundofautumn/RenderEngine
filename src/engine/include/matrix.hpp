@@ -244,23 +244,23 @@ namespace RenderCore {
     }
 
 
-//---------------------------------------------------------------------
-// 数学库：行列式和逆矩阵等，光照计算有用
-//---------------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // 数学库：行列式和逆矩阵等，光照计算有用
+    //---------------------------------------------------------------------
 
-// 行列式求值：一阶
+    // 行列式求值：一阶
     template<typename T>
     inline T matrix_det(const Matrix<1, 1, T> &m) {
         return m[0][0];
     }
 
-// 行列式求值：二阶
+    // 行列式求值：二阶
     template<typename T>
     inline T matrix_det(const Matrix<2, 2, T> &m) {
         return m[0][0] * m[1][1] - m[0][1] * m[1][0];
     }
 
-// 行列式求值：多阶行列式，即第一行同他们的余子式相乘求和
+    // 行列式求值：多阶行列式，即第一行同他们的余子式相乘求和
     template<size_t N, typename T>
     inline T matrix_det(const Matrix<N, N, T> &m) {
         T sum = 0;
@@ -268,19 +268,19 @@ namespace RenderCore {
         return sum;
     }
 
-// 余子式：一阶
+    // 余子式：一阶
     template<typename T>
     inline T matrix_cofactor(const Matrix<1, 1, T> &m, size_t row, size_t col) {
         return 0;
     }
 
-// 多阶余子式：即删除特定行列的子式的行列式值
+    // 多阶余子式：即删除特定行列的子式的行列式值
     template<size_t N, typename T>
     inline T matrix_cofactor(const Matrix<N, N, T> &m, size_t row, size_t col) {
         return matrix_det(m.GetMinor(row, col)) * (((row + col) % 2) ? -1 : 1);
     }
 
-// 伴随矩阵：即余子式矩阵的转置
+    // 伴随矩阵：即余子式矩阵的转置
     template<size_t N, typename T>
     inline Matrix<N, N, T> matrix_adjoint(const Matrix<N, N, T> &m) {
         Matrix<N, N, T> ret;
@@ -290,7 +290,7 @@ namespace RenderCore {
         return ret;
     }
 
-// 求逆矩阵：使用伴随矩阵除以行列式的值得到
+    // 求逆矩阵：使用伴随矩阵除以行列式的值得到
     template<size_t N, typename T>
     inline Matrix<N, N, T> matrix_invert(const Matrix<N, N, T> &m) {
         Matrix<N, N, T> ret = matrix_adjoint(m);
