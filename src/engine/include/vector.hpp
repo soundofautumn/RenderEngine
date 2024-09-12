@@ -36,6 +36,7 @@ namespace RenderCore {
         }
 
         inline Vector(const std::initializer_list<T> &list) {
+            assert(list.size() == N);
             size_t i = 0;
             for (const T &v: list) {
                 m[i++] = v;
