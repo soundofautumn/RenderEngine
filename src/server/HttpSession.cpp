@@ -4,6 +4,7 @@
 
 #include "HttpSession.h"
 #include "WebSocketSession.h"
+#include "EngineWebSocketSession.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
@@ -30,6 +31,26 @@ void HttpSession::on_read(boost::system::error_code ec) {
         logger::info("WebSocket upgrade request from {}:{}",
                      socket_.remote_endpoint().address().to_string(),
                      socket_.remote_endpoint().port());
+
+        if (req_.find("EngineName") != req_.end()) {
+            if (EngineManager::get_instance().check_engine(req_["EngineName"])) {
+                logger::info("Engine {} found", req_["EngineName"]);
+                std::make_shared<EngineWebSocketSession>(std::move(socket_), req_["EngineName"])->run();
+            } else {
+                logger::info("Engine {} not found", req_["EngineName"]);
+                res_.result(http::status::not_found);
+                res_.set(http::field::content_type, "text/plain");
+                res_.body() = "Engine not found";
+                auto self = shared_from_this();
+                http::async_write(
+                        socket_,
+                        res_,
+                        [self, this](boost::system::error_code ec, std::size_t bytes_transferred) {
+                            self->on_write(ec, res_.need_eof());
+                        });
+            };
+            return;
+        }
 
         // Create a WebSocket websocket_session by transferring the socket
         std::make_shared<WebSocketSession>(std::move(socket_))->do_accept(req_);

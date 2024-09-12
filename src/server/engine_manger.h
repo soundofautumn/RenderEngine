@@ -36,6 +36,10 @@ public:
         return engines_[name];
     }
 
+    bool check_engine(const std::string &name) {
+        return engines_.find(name) != engines_.end();
+    }
+
     std::mutex &get_engine_mutex(const std::string &name) {
         return engine_mutex_[name];
     }

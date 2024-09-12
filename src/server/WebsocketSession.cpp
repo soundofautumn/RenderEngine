@@ -46,11 +46,6 @@ void WebSocketSession::on_read(boost::system::error_code ec, std::size_t bytes_t
     }
 
     const std::string message = boost::beast::buffers_to_string(buffer_.data());
-    if (message == "start_engine") {
-        logger::info("Start rendering engine");
-        std::make_shared<EngineWebSocketSession>(std::move(ws_), "")->run();
-        return;
-    }
 
     if (ws_.got_text()) {
         logger::info("WebSocket message from {}:{}: {}",

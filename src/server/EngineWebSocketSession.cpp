@@ -7,10 +7,10 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-EngineWebSocketSession::EngineWebSocketSession(websocket::stream<tcp::socket> ws, const std::string& engine_name)
+EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket, const std::string& engine_name)
         : engine_name_(engine_name), engine_(EngineManager::get_instance().get_engine(engine_name)),
           engine_mutex_(EngineManager::get_instance().get_engine_mutex(engine_name)),
-          ws_(std::move(ws)), timer_(ws_.get_executor()) {
+          ws_(std::move(socket)), timer_(ws_.get_executor()) {
 }
 
 void EngineWebSocketSession::run() {

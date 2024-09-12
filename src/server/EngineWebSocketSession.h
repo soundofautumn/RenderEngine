@@ -26,7 +26,7 @@ class EngineWebSocketSession :
     bool write_in_progress_{false};
 
 public:
-    explicit EngineWebSocketSession(websocket::stream<tcp::socket> ws, const std::string& engine_name);
+    EngineWebSocketSession(tcp::socket socket, const std::string& engine_name);
 
     void run();
 
