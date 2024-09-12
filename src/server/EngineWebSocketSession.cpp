@@ -7,8 +7,10 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-EngineWebSocketSession::EngineWebSocketSession(websocket::stream<tcp::socket> ws)
-        : ws_(std::move(ws)), timer_(ws_.get_executor()) {
+EngineWebSocketSession::EngineWebSocketSession(websocket::stream<tcp::socket> ws, const std::string& engine_name)
+        : engine_name_(engine_name), engine_(EngineManager::get_instance().get_engine(engine_name)),
+          engine_mutex_(EngineManager::get_instance().get_engine_mutex(engine_name)),
+          ws_(std::move(ws)), timer_(ws_.get_executor()) {
 }
 
 void EngineWebSocketSession::run() {
@@ -49,7 +51,6 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
             set_fps(std::stoi(message.substr(pos + 1)));
         }
     }
-    handle_engine_request(message, engine_);
     ws_.async_read(buffer_,
                    boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
 }
@@ -70,13 +71,13 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
-    std::lock_guard lock(frame_buffer_mutex_);
+    std::lock_guard lock(engine_mutex_);
     // 发送帧
     if (write_in_progress_) {
         logger::warn("Write in progress, frame dropped");
         return;
     }
-    frame_buffer_ = engine_.get_frame_buffer();
+    frame_buffer_ = engine_->get_frame_buffer();
     write_in_progress_ = true;
     ws_.async_write(
             boost::asio::buffer(frame_buffer_),

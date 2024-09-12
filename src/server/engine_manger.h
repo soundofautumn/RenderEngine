@@ -15,12 +15,20 @@ using RenderCore::RenderEngine;
 
 class EngineManager {
     std::unordered_map<std::string, std::shared_ptr<RenderEngine>> engines_;
-    std::mutex mutex_;
+    std::unordered_map<std::string, std::mutex> engine_mutex_;
+    std::mutex map_mutex_;
 
 public:
 
+    EngineManager() = default;
+
+    static EngineManager &get_instance() {
+        static EngineManager instance;
+        return instance;
+    }
+
     void create_engine(const std::string &name, int width, int height) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(map_mutex_);
         engines_[name] = std::make_shared<RenderEngine>(width, height);
     }
 
@@ -28,8 +36,12 @@ public:
         return engines_[name];
     }
 
+    std::mutex &get_engine_mutex(const std::string &name) {
+        return engine_mutex_[name];
+    }
+
     void remove_engine(const std::string &name) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(map_mutex_);
         engines_.erase(name);
     }
 };
