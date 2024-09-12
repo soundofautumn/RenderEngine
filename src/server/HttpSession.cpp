@@ -36,9 +36,10 @@ void HttpSession::on_read(boost::system::error_code ec) {
         return;
     }
 
-    logger::info("HTTP request from {}:{}",
+    logger::info("HTTP request from {}:{} {}",
                  socket_.remote_endpoint().address().to_string(),
-                 socket_.remote_endpoint().port());
+                 socket_.remote_endpoint().port(),
+                 req_.target());
 
     // TODO:
 //    handle_request(std::move(req_), res_);
