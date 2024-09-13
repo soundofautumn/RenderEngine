@@ -15,7 +15,6 @@ void not_found_response(request req, response &res) {
     res.result(http::status::not_found);
     res.set(http::field::server, "RenderEngine");
     res.set(http::field::content_type, "text/plain");
-    res.keep_alive(req.keep_alive());
     res.body() = "The resource '" + std::string(req.target()) + "' was not found.";
     res.prepare_payload();
 }
@@ -25,7 +24,6 @@ void handle_engine_create(request req, response &res) {
     if (req.method() != http::verb::post) {
         res.result(http::status::bad_request);
         res.set(http::field::content_type, "text/plain");
-        res.keep_alive(req.keep_alive());
         res.body() = "The request method must be POST.";
         res.prepare_payload();
         return;
@@ -36,7 +34,6 @@ void handle_engine_create(request req, response &res) {
     if (!j.is_object()) {
         res.result(http::status::bad_request);
         res.set(http::field::content_type, "text/plain");
-        res.keep_alive(req.keep_alive());
         res.body() = "The request body must be a JSON object.";
         res.prepare_payload();
         return;
@@ -45,7 +42,6 @@ void handle_engine_create(request req, response &res) {
     if (EngineManager::get_instance().check_engine(engine_name)) {
         res.result(http::status::bad_request);
         res.set(http::field::content_type, "text/plain");
-        res.keep_alive(req.keep_alive());
         res.body() = "Engine already exists.";
         res.prepare_payload();
         return;
@@ -55,7 +51,6 @@ void handle_engine_create(request req, response &res) {
     EngineManager::get_instance().create_engine(engine_name, width, height);
     res.result(http::status::ok);
     res.set(http::field::content_type, "text/plain");
-    res.keep_alive(req.keep_alive());
     res.body() = "Engine created.";
     res.prepare_payload();
 }
@@ -63,6 +58,7 @@ void handle_engine_create(request req, response &res) {
 void handle_request(const request &req, response &res) {
     res.version(req.version());
     res.set(http::field::server, "RenderEngine");
+    res.keep_alive(req.keep_alive());
     try {
         if (req.target().starts_with("/engine")) {
             if (req.target().starts_with("/engine/create")) {
@@ -76,7 +72,6 @@ void handle_request(const request &req, response &res) {
     } catch (const std::exception &e) {
         res.result(http::status::internal_server_error);
         res.set(http::field::content_type, "text/plain");
-        res.keep_alive(req.keep_alive());
 #ifdef NDEBUG
         res.body() = "Internal server error.";
 #else
