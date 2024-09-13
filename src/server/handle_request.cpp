@@ -11,7 +11,7 @@ using RenderCore::Line;
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;
 
-void not_found_response(request req, response &res) {
+void not_found_response(const request& req, response &res) {
     res.result(http::status::not_found);
     res.set(http::field::server, "RenderEngine");
     res.set(http::field::content_type, "text/plain");
