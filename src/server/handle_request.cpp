@@ -11,11 +11,19 @@ using RenderCore::Line;
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;
 
+void not_found_response(request req, response &res) {
+    res.result(http::status::not_found);
+    res.set(http::field::server, "RenderEngine");
+    res.set(http::field::content_type, "text/plain");
+    res.keep_alive(req.keep_alive());
+    res.body() = "The resource '" + std::string(req.target()) + "' was not found.";
+    res.prepare_payload();
+}
+
 
 void handle_engine_create(request req, response &res) {
     if (req.method() != http::verb::post) {
         res.result(http::status::bad_request);
-        res.set(http::field::server, "RenderEngine");
         res.set(http::field::content_type, "text/plain");
         res.keep_alive(req.keep_alive());
         res.body() = "The request method must be POST.";
@@ -27,7 +35,6 @@ void handle_engine_create(request req, response &res) {
     auto j = boost::json::parse(body);
     if (!j.is_object()) {
         res.result(http::status::bad_request);
-        res.set(http::field::server, "RenderEngine");
         res.set(http::field::content_type, "text/plain");
         res.keep_alive(req.keep_alive());
         res.body() = "The request body must be a JSON object.";
@@ -39,7 +46,6 @@ void handle_engine_create(request req, response &res) {
     auto height = j.at("height").as_int64();
     EngineManager::get_instance().create_engine(engine_name, width, height);
     res.result(http::status::ok);
-    res.set(http::field::server, "RenderEngine");
     res.set(http::field::content_type, "text/plain");
     res.keep_alive(req.keep_alive());
     res.body() = "Engine created.";
@@ -47,23 +53,15 @@ void handle_engine_create(request req, response &res) {
 }
 
 void handle_request(request req, response &res) {
+    res.version(req.version());
+    res.set(http::field::server, "RenderEngine");
     if (req.target().starts_with("/engine")) {
         if (req.target().starts_with("/engine/create")) {
             handle_engine_create(req, res);
         } else {
-            res.result(http::status::not_found);
-            res.set(http::field::server, "RenderEngine");
-            res.set(http::field::content_type, "text/plain");
-            res.keep_alive(req.keep_alive());
-            res.body() = "The resource '" + std::string(req.target()) + "' was not found.";
-            res.prepare_payload();
+            return not_found_response(req, res);
         }
     } else {
-        res.result(http::status::not_found);
-        res.set(http::field::server, "RenderEngine");
-        res.set(http::field::content_type, "text/plain");
-        res.keep_alive(req.keep_alive());
-        res.body() = "The resource '" + std::string(req.target()) + "' was not found.";
-        res.prepare_payload();
+        return not_found_response(req, res);
     }
 }
