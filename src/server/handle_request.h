@@ -14,6 +14,4 @@ using RenderCore::RenderEngine;
 void handle_request(http::request<boost::beast::http::string_body> req,
                     http::response<boost::beast::http::string_body>& res);
 
-void handle_engine_request(const std::string &message, RenderEngine &engine);
-
 #endif //RENDERENGINE_HANDLE_REQUEST_H
