@@ -35,9 +35,9 @@ void HttpSession::on_read(boost::system::error_code ec) {
         if (req_.find("EngineName") != req_.end()) {
             if (EngineManager::get_instance().check_engine(req_["EngineName"])) {
                 logger::info("Engine {} found", req_["EngineName"]);
-                std::make_shared<EngineWebSocketSession>(std::move(socket_), req_["EngineName"])->run();
+                std::make_shared<EngineWebSocketSession>(std::move(socket_), req_["EngineName"])->run(req_);
             } else {
-                logger::warning("Engine {} not found", req_["EngineName"]);
+                logger::warn("Engine {} not found", req_["EngineName"]);
                 res_.result(http::status::not_found);
                 res_.set(http::field::content_type, "text/plain");
                 res_.body() = "Engine not found";

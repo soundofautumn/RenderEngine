@@ -7,17 +7,20 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket, const std::string& engine_name)
+EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket, const std::string &engine_name)
         : engine_name_(engine_name), engine_(EngineManager::get_instance().get_engine(engine_name)),
           engine_mutex_(EngineManager::get_instance().get_engine_mutex(engine_name)),
           ws_(std::move(socket)), timer_(ws_.get_executor()) {
 }
 
-void EngineWebSocketSession::run() {
+void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
     ws_.set_option(websocket::permessage_deflate());
-    ws_.binary(true);
-    ws_.async_read(buffer_,
-                   boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
+    ws_.async_accept(req,
+                     [self = shared_from_this()](boost::system::error_code ec) {
+                         self->ws_.binary(true);
+                         self->ws_.async_read(self->buffer_,
+                                              boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, self));
+                     });
 }
 
 void EngineWebSocketSession::set_fps(int fps) {

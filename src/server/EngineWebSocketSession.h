@@ -28,7 +28,7 @@ class EngineWebSocketSession :
 public:
     EngineWebSocketSession(tcp::socket socket, const std::string& engine_name);
 
-    void run();
+    void run(const http::request<http::string_body>& req);
 
     void on_read(boost::system::error_code ec, std::size_t bytes_transferred);
 
