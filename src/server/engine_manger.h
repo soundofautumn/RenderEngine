@@ -29,6 +29,7 @@ public:
 
     void create_engine(const std::string &name, int width, int height) {
         std::lock_guard<std::mutex> lock(map_mutex_);
+        logger::info("Create engine: {}", name);
         engines_[name] = std::make_shared<RenderEngine>(width, height);
     }
 
@@ -46,6 +47,7 @@ public:
 
     void remove_engine(const std::string &name) {
         std::lock_guard<std::mutex> lock(map_mutex_);
+        logger::info("Remove engine: {}", name);
         engines_.erase(name);
     }
 };

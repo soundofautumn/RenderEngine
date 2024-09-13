@@ -41,7 +41,15 @@ void handle_engine_create(request req, response &res) {
         res.prepare_payload();
         return;
     }
-    const std::string engine_name = "default";
+    auto engine_name = j.at("name").as_string().c_str();
+    if (EngineManager::get_instance().check_engine(engine_name)) {
+        res.result(http::status::bad_request);
+        res.set(http::field::content_type, "text/plain");
+        res.keep_alive(req.keep_alive());
+        res.body() = "Engine already exists.";
+        res.prepare_payload();
+        return;
+    }
     auto width = j.at("width").as_int64();
     auto height = j.at("height").as_int64();
     EngineManager::get_instance().create_engine(engine_name, width, height);
@@ -52,16 +60,28 @@ void handle_engine_create(request req, response &res) {
     res.prepare_payload();
 }
 
-void handle_request(request req, response &res) {
+void handle_request(const request &req, response &res) {
     res.version(req.version());
     res.set(http::field::server, "RenderEngine");
-    if (req.target().starts_with("/engine")) {
-        if (req.target().starts_with("/engine/create")) {
-            handle_engine_create(req, res);
+    try {
+        if (req.target().starts_with("/engine")) {
+            if (req.target().starts_with("/engine/create")) {
+                handle_engine_create(req, res);
+            } else {
+                return not_found_response(req, res);
+            }
         } else {
             return not_found_response(req, res);
         }
-    } else {
-        return not_found_response(req, res);
+    } catch (const std::exception &e) {
+        res.result(http::status::internal_server_error);
+        res.set(http::field::content_type, "text/plain");
+        res.keep_alive(req.keep_alive());
+#ifdef NDEBUG
+        res.body() = "Internal server error.";
+#else
+        res.body() = "Internal server error: " + std::string(e.what());
+#endif
+        res.prepare_payload();
     }
 }

@@ -58,12 +58,14 @@ void HttpSession::on_read(boost::system::error_code ec) {
         return;
     }
 
-    logger::info("HTTP request from {}:{} {}",
+    logger::debug("HTTP request from {}:{} {}",
                  socket_.remote_endpoint().address().to_string(),
                  socket_.remote_endpoint().port(),
                  req_.target());
 
-    handle_request(std::move(req_), res_);
+    handle_request(req_, res_);
+
+    req_ = {};
 
     auto self = shared_from_this();
     http::async_write(
