@@ -30,26 +30,12 @@ void HttpSession::on_read(boost::system::error_code ec) {
     // See if it is a WebSocket Upgrade
     if (websocket::is_upgrade(req_)) {
         logger::debug("WebSocket upgrade request from {}:{}",
-                     socket_.remote_endpoint().address().to_string(),
-                     socket_.remote_endpoint().port());
+                      socket_.remote_endpoint().address().to_string(),
+                      socket_.remote_endpoint().port());
 
-        if (req_.find("EngineName") != req_.end()) {
-            if (EngineManager::get_instance().check_engine(req_["EngineName"])) {
-                logger::info("Engine {} found", req_["EngineName"]);
-                std::make_shared<EngineWebSocketSession>(std::move(socket_), req_["EngineName"])->run(req_);
-            } else {
-                logger::warn("Engine {} not found", req_["EngineName"]);
-                res_.result(http::status::not_found);
-                res_.set(http::field::content_type, "text/plain");
-                res_.body() = "Engine not found";
-                auto self = shared_from_this();
-                http::async_write(
-                        socket_,
-                        res_,
-                        [self, this](boost::system::error_code ec, std::size_t bytes_transferred) {
-                            self->on_write(ec, res_.need_eof());
-                        });
-            };
+        if (req_.target().starts_with("/engine/")) {
+            // Create a WebSocket engine_session by transferring the socket
+            std::make_shared<EngineWebSocketSession>(std::move(socket_))->run(req_);
             return;
         }
 
@@ -59,9 +45,9 @@ void HttpSession::on_read(boost::system::error_code ec) {
     }
 
     logger::debug("HTTP request from {}:{} {}",
-                 socket_.remote_endpoint().address().to_string(),
-                 socket_.remote_endpoint().port(),
-                 req_.target());
+                  socket_.remote_endpoint().address().to_string(),
+                  socket_.remote_endpoint().port(),
+                  req_.target());
 
     handle_request(req_, res_);
 

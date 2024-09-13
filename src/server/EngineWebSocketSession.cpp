@@ -7,13 +7,25 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket, const std::string &engine_name)
-        : engine_name_(engine_name), engine_(EngineManager::get_instance().get_engine(engine_name)),
-          engine_mutex_(EngineManager::get_instance().get_engine_mutex(engine_name)),
-          ws_(std::move(socket)), timer_(ws_.get_executor()) {
+EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket)
+        : ws_(std::move(socket)), timer_(ws_.get_executor()) {
 }
 
 void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
+    // find the engine name
+    auto pos = req.target().find_last_of('/');
+    if (pos == std::string::npos) {
+        logger::error("Invalid request target: {}", req.target());
+        return;
+    }
+    engine_name_ = req.target().substr(pos + 1);
+    logger::debug("Engine name: {}", engine_name_);
+    if (!EngineManager::get_instance().check_engine(engine_name_)) {
+        logger::error("Engine not found: {}", engine_name_);
+        return;
+    }
+    engine_ = EngineManager::get_instance().get_engine(engine_name_);
+    engine_mutex_ = EngineManager::get_instance().get_engine_mutex(engine_name_);
     ws_.set_option(websocket::permessage_deflate());
     ws_.async_accept(req,
                      [self = shared_from_this()](boost::system::error_code ec) {
@@ -74,7 +86,7 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
-    std::lock_guard lock(engine_mutex_);
+    std::lock_guard lock(*engine_mutex_);
     // 发送帧
     if (write_in_progress_) {
         logger::warn("Write in progress, frame dropped");

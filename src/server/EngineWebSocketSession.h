@@ -15,7 +15,7 @@ class EngineWebSocketSession :
         public std::enable_shared_from_this<EngineWebSocketSession> {
     std::string engine_name_;
     std::shared_ptr<RenderEngine> engine_;
-    std::mutex& engine_mutex_;
+    std::shared_ptr<std::mutex> engine_mutex_;
 
     websocket::stream<tcp::socket> ws_;
     boost::beast::flat_buffer buffer_;
@@ -26,7 +26,7 @@ class EngineWebSocketSession :
     bool write_in_progress_{false};
 
 public:
-    EngineWebSocketSession(tcp::socket socket, const std::string& engine_name);
+    explicit EngineWebSocketSession(tcp::socket socket);
 
     void run(const http::request<http::string_body>& req);
 

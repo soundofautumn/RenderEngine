@@ -15,7 +15,7 @@ using RenderCore::RenderEngine;
 
 class EngineManager {
     std::unordered_map<std::string, std::shared_ptr<RenderEngine>> engines_;
-    std::unordered_map<std::string, std::mutex> engine_mutex_;
+    std::unordered_map<std::string, std::shared_ptr<std::mutex>> engine_mutex_;
     std::mutex map_mutex_;
 
 public:
@@ -31,6 +31,7 @@ public:
         std::lock_guard<std::mutex> lock(map_mutex_);
         logger::info("Create engine: {}", name);
         engines_[name] = std::make_shared<RenderEngine>(width, height);
+        engine_mutex_[name] = std::make_shared<std::mutex>();
     }
 
     std::shared_ptr<RenderEngine> get_engine(const std::string &name) {
@@ -41,7 +42,7 @@ public:
         return engines_.find(name) != engines_.end();
     }
 
-    std::mutex &get_engine_mutex(const std::string &name) {
+    std::shared_ptr<std::mutex> get_engine_mutex(const std::string &name) {
         return engine_mutex_[name];
     }
 
