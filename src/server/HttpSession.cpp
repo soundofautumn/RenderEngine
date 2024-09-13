@@ -5,6 +5,7 @@
 #include "HttpSession.h"
 #include "WebSocketSession.h"
 #include "EngineWebSocketSession.h"
+#include "handle_request.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
@@ -62,10 +63,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
                  socket_.remote_endpoint().port(),
                  req_.target());
 
-    // TODO:
-//    handle_request(std::move(req_), res_);
-
-    res_.body() = "Hello, world!";
+    handle_request(std::move(req_), res_);
 
     auto self = shared_from_this();
     http::async_write(

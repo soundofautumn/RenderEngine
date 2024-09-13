@@ -2,8 +2,22 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 #include "handle_request.h"
+#include "engine_manger.h"
 
 using RenderCore::Line;
+
+void handle_request(http::request<boost::beast::http::string_body> req,
+                    http::response<boost::beast::http::string_body> &res) {
+    auto message = req.body();
+    if (message.empty()) {
+        return;
+    }
+    auto engine = EngineManager::get_instance().get_engine("default");
+    handle_engine_request(message, *engine);
+    res.set(http::field::content_type, "text/plain");
+    res.result(http::status::ok);
+    res.body() = "OK";
+}
 
 void clear_canvas(const std::string &message, RenderEngine &engine) {
     if (message == "clear") {
