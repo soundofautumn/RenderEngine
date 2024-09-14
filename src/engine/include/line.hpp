@@ -22,7 +22,7 @@ struct Line {
 
 inline Line make_line(const Point &p1, const Point &p2, const PenOptions &options = {},
     Line::LineAlgorithm algorithm = Line::LineAlgorithm::BRESENHAM) {
-    return RenderCore::Line{p1, p2, options};
+    return RenderCore::Line{p1, p2, options, algorithm};
 }
 
 }  // namespace RenderCore
