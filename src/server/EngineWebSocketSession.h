@@ -13,7 +13,6 @@ using RenderCore::RenderEngine;
 
 class EngineWebSocketSession : public std::enable_shared_from_this<EngineWebSocketSession> {
     std::string engine_name_;
-    std::shared_ptr<EngineManager::EngineMutex> engine_with_mutex;
 
     websocket::stream<tcp::socket> ws_;
     boost::beast::flat_buffer buffer_;

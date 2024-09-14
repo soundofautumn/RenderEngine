@@ -24,7 +24,6 @@ void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
         logger::error("Engine not found: {}", engine_name_);
         return;
     }
-    engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
     ws_.set_option(websocket::permessage_deflate());
     ws_.async_accept(req, [self = shared_from_this()](boost::system::error_code) {
         self->ws_.binary(true);
@@ -86,6 +85,7 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
+    auto engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
     std::lock_guard lock(engine_with_mutex->mutex);
     // 发送帧
     if (write_in_progress_) {
