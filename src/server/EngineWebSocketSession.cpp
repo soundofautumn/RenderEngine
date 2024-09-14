@@ -24,8 +24,7 @@ void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
         logger::error("Engine not found: {}", engine_name_);
         return;
     }
-    engine_ = EngineManager::get_instance().get_engine(engine_name_);
-    engine_mutex_ = EngineManager::get_instance().get_engine_mutex(engine_name_);
+    engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
     ws_.set_option(websocket::permessage_deflate());
     ws_.async_accept(req,
                      [self = shared_from_this()](boost::system::error_code ec) {
@@ -86,13 +85,13 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 }
 
 void EngineWebSocketSession::send_frame() {
-    std::lock_guard lock(*engine_mutex_);
+    std::lock_guard lock(engine_with_mutex->mutex);
     // 发送帧
     if (write_in_progress_) {
         logger::warn("Write in progress, frame dropped");
         return;
     }
-    frame_buffer_ = engine_->get_frame_buffer();
+    frame_buffer_ = engine_with_mutex->engine.get_frame_buffer();
     write_in_progress_ = true;
     ws_.async_write(
             boost::asio::buffer(frame_buffer_),

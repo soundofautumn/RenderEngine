@@ -8,7 +8,7 @@
 #include "serialize.h"
 
 using RenderCore::RenderEngine;
-using RenderCore::Line;
+using RenderCore::Primitive;
 
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;
@@ -79,19 +79,23 @@ void handle_engine_remove(const request &req, response &res) {
     res.body() = "Engine removed.";
 }
 
-std::shared_ptr<RenderEngine> get_engine(const request &req, response &res) {
+std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(const request &req, response &res) {
     auto engine_name = get_engine_name(req, res);
     if (engine_name.empty()) {
         return nullptr;
     }
-    auto engine = EngineManager::get_instance().get_engine(engine_name);
-    if (!engine) {
+    if (!EngineManager::get_instance().check_engine(engine_name)) {
         res.result(http::status::not_found);
         res.set(http::field::content_type, "text/plain");
         res.body() = "Engine not found.";
         return nullptr;
     }
-    return engine;
+    return EngineManager::get_instance().get_engine_with_mutex(engine_name);
+}
+
+void draw_primitive( EngineManager::EngineMutex &engine_mutex, const Primitive &primitive) {
+    std::lock_guard<std::mutex> lock(engine_mutex.mutex);
+    engine_mutex.engine.draw_primitive(primitive);
 }
 
 void handle_engine_draw(const request &req, response &res) {
@@ -99,13 +103,13 @@ void handle_engine_draw(const request &req, response &res) {
     if (j.is_null()) {
         return;
     }
-    auto engine = get_engine(req, res);
+    auto engine = get_engine_with_mutex(req, res);
     if (!engine) {
         return;
     }
     try {
         auto primitive = deserialize_primitive(j.as_object());
-        engine->draw_primitive(primitive);
+        draw_primitive(*engine, primitive);
     } catch (const std::exception &e) {
         res.result(http::status::bad_request);
         res.set(http::field::content_type, "text/plain");
