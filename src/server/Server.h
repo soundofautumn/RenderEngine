@@ -21,4 +21,8 @@ namespace http = boost::beast::http;            // from <boost/beast/http.hpp>
 namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;                     // from <boost/asio.hpp>
 
+constexpr const char SERVER_NAME[] = "RenderEngine";
+constexpr const char ENGINE_NAME_HEADER[] = "Engine-Name";
+constexpr const char ENGINE_ALLOW_HEADERS[] = "Content-Type, Engine-Name";
+
 #endif //RENDERENGINE_SERVER_H

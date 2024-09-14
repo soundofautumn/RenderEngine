@@ -9,6 +9,7 @@
             border: 1px solid black;
             background: black;
         }
+
         #mousePosition {
             position: absolute;
             top: 10px;
@@ -24,17 +25,31 @@
 <canvas id="frame"></canvas>
 <div id="mousePosition">X: 0, Y: 0</div>
 
-<script>
-    // 创建 WebSocket 连接
-    const ws = new WebSocket("ws://localhost:3000");
-    const fps = 30;
+<script type="module">
+    const backend_endpoint = "localhost:3000";
+
     const width = 800;
     const height = 600;
+    const engine_name = "test";
+    await fetch(`http://${backend_endpoint}/engine/create`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            name: engine_name,
+            width: width,
+            height: height,
+        }),
+    });
+
+    // 创建 WebSocket 连接 设置请求头
+    const ws = new WebSocket(`ws://${backend_endpoint}/engine/${engine_name}`);
+
+    const fps = 30;
     // 发送消息
 
     ws.onopen = function () {
-        ws.send("start_engine");
-        ws.send(`set_canvas_size ${width} ${height}`);
         ws.send(`set_fps ${fps}`);
     };
 
@@ -53,7 +68,6 @@
 
     // 画线功能
     const canvas = document.getElementById("frame");
-    const ctx = canvas.getContext("2d");
     let drawing = false;
     let lastX = 0;
     let lastY = 0;
@@ -72,7 +86,21 @@
         if (!drawing) return;
 
         // 发送绘制数据到服务器
-        ws.send(`draw_line ${lastX} ${lastY} ${e.offsetX} ${e.offsetY}`);
+        fetch(`http://${backend_endpoint}/engine/draw`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Engine-Name": engine_name,
+            },
+            body: JSON.stringify({
+                Line: {
+                    p1: { x: lastX, y: lastY },
+                    p2: { x: e.offsetX, y: e.offsetY },
+                    color: { r: 255, g: 255, b: 255, a: 255},
+                    algorithm: 0,
+                },
+            }),
+        });
     });
     canvas.addEventListener("mouseout", () => (drawing = false));
 </script>

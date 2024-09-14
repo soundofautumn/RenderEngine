@@ -2,7 +2,10 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 
-#include "circle.h"
+#include "circle.hpp"
+#include "engine.hpp"
+
+using namespace RenderCore;
 
 void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radius, const PenOptions &options) {
     int x = 0;
@@ -35,7 +38,33 @@ void draw_circle_by_midpoint(RenderEngine *engine, const Point &center, int radi
     }
 }
 
-void draw_arc_by_midpoint(RenderEngine *engine, const Point &center, int radius, float start_angle, float end_angle,
+void draw_arc_by_midpoint(RenderEngine *engine,
+                          const Point &center, int radius,
+                          float start_angle, float end_angle,
                           const PenOptions &options) {
     throw std::runtime_error("Not implemented yet");
+}
+
+void RenderEngine::draw_circle(const Circle &circle) {
+    if (std::holds_alternative<CircleUseCenterRadius>(circle)) {
+        auto &center_radius = std::get<CircleUseCenterRadius>(circle);
+        draw_circle_by_midpoint(this, center_radius.center, center_radius.radius, center_radius.options);
+        return;
+    } else if (std::holds_alternative<CircleUseThreePoints>(circle)) {
+        auto &three_points = std::get<CircleUseThreePoints>(circle);
+        throw std::runtime_error("Not implemented yet");
+    }
+}
+
+void RenderEngine::draw_arc(const Arc &arc) {
+    if (std::holds_alternative<ArcUseCenterRadiusAngle>(arc)) {
+        auto &center_radius_angle = std::get<ArcUseCenterRadiusAngle>(arc);
+        draw_arc_by_midpoint(this, center_radius_angle.center, center_radius_angle.radius,
+                             center_radius_angle.start_angle, center_radius_angle.end_angle,
+                             center_radius_angle.options);
+        return;
+    } else if (std::holds_alternative<ArcUseThreePoints>(arc)) {
+        auto &three_points = std::get<ArcUseThreePoints>(arc);
+        throw std::runtime_error("Not implemented yet");
+    }
 }

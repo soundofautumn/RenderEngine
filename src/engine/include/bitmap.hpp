@@ -19,7 +19,11 @@
 #include <fstream>
 #include <vector>
 
-class Bitmap {
+namespace RenderCore {
+    class Bitmap;
+}
+
+class RenderCore::Bitmap {
 protected:
     // 宽度
     int32_t width_;

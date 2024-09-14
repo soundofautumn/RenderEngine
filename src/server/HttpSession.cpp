@@ -4,6 +4,8 @@
 
 #include "HttpSession.h"
 #include "WebSocketSession.h"
+#include "EngineWebSocketSession.h"
+#include "handle_request.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
@@ -27,23 +29,29 @@ void HttpSession::on_read(boost::system::error_code ec) {
 
     // See if it is a WebSocket Upgrade
     if (websocket::is_upgrade(req_)) {
-        logger::info("WebSocket upgrade request from {}:{}",
-                     socket_.remote_endpoint().address().to_string(),
-                     socket_.remote_endpoint().port());
+        logger::debug("WebSocket upgrade request from {}:{}",
+                      socket_.remote_endpoint().address().to_string(),
+                      socket_.remote_endpoint().port());
+
+        if (req_.target().starts_with("/engine/")) {
+            // Create a WebSocket engine_session by transferring the socket
+            std::make_shared<EngineWebSocketSession>(std::move(socket_))->run(req_);
+            return;
+        }
 
         // Create a WebSocket websocket_session by transferring the socket
         std::make_shared<WebSocketSession>(std::move(socket_))->do_accept(req_);
         return;
     }
 
-    logger::info("HTTP request from {}:{}",
-                 socket_.remote_endpoint().address().to_string(),
-                 socket_.remote_endpoint().port());
+    logger::debug("HTTP request from {}:{} {}",
+                  socket_.remote_endpoint().address().to_string(),
+                  socket_.remote_endpoint().port(),
+                  req_.target());
 
-    // TODO:
-//    handle_request(std::move(req_), res_);
+    handle_request(req_, res_);
 
-    res_.body() = "Hello, world!";
+    req_ = {};
 
     auto self = shared_from_this();
     http::async_write(
