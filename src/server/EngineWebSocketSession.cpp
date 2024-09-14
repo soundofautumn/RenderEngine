@@ -26,7 +26,7 @@ void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
     }
     engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
     ws_.set_option(websocket::permessage_deflate());
-    ws_.async_accept(req, [self = shared_from_this()](boost::system::error_code ec) {
+    ws_.async_accept(req, [self = shared_from_this()](boost::system::error_code) {
         self->ws_.binary(true);
         self->ws_.async_read(self->buffer_,
             boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, self));
