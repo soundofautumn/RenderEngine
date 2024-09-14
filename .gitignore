@@ -126,3 +126,6 @@ fabric.properties
 
 .idea/
 
+output.bmp
+RenderEngine*
+build/
