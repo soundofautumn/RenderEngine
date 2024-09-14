@@ -1,0 +1,41 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+# Match CLion/IntelliJ default style for C/C++ files
+[*.{c,h,cpp,hpp,cc}]
+# Set C/C++ specific indentation
+indent_style = space
+indent_size = 4
+# Keep braces aligned
+curly_brace_on_new_line = false
+# Spaces around operators
+space_around_operators = true
+# Place space after keywords like 'if', 'while', etc.
+space_after_keywords = true
+# Add final newlines in files
+insert_final_newline = true
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# YAML files
+[*.yml]
+indent_style = space
+indent_size = 2
