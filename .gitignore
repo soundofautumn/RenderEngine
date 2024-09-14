@@ -90,6 +90,8 @@ _deps
 
 # CMake
 cmake-build-*/
+build/
+CMakePresets.json
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
@@ -126,6 +128,5 @@ fabric.properties
 
 .idea/
 
-output.bmp
-RenderEngine*
-build/
+# VS Code
+.vscode/
