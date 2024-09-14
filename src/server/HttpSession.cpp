@@ -53,12 +53,11 @@ void HttpSession::on_read(boost::system::error_code ec) {
 
     req_ = {};
 
-    auto self = shared_from_this();
     http::async_write(
             socket_,
             res_,
-            [self, this](boost::system::error_code ec, std::size_t bytes_transferred) {
-                self->on_write(ec, res_.need_eof());
+            [self = shared_from_this()](boost::system::error_code ec, std::size_t) {
+                self->on_write(ec, self->res_.need_eof());
             });
 }
 
@@ -91,7 +90,7 @@ void HttpSession::do_read() {
             socket_,
             buffer_,
             req_,
-            [self = shared_from_this()](boost::system::error_code ec, std::size_t bytes_transferred) {
+            [self = shared_from_this()](boost::system::error_code ec, std::size_t) {
                 self->on_read(ec);
             });
 }

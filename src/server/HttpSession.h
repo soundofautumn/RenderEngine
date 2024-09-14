@@ -10,8 +10,8 @@
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
     tcp::socket socket_;
     boost::beast::flat_buffer buffer_;
-    http::request<boost::beast::http::string_body> req_;
-    http::response<boost::beast::http::string_body> res_;
+    http::request<http::string_body> req_;
+    http::response<http::string_body> res_;
 public:
     explicit HttpSession(tcp::socket socket);
 
