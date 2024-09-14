@@ -18,3 +18,7 @@ ln -s build/src/server/RenderEngineServer ./RenderEngineServer
 # Start
 ./RenderEngineServer
 ```
+
+# API文档
+
+[ApiFox链接](https://apifox.com/apidoc/shared-8cf19dc6-dfdb-48da-8ac1-0f19a5b58529)
