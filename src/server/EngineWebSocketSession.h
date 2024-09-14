@@ -11,8 +11,7 @@
 
 using RenderCore::RenderEngine;
 
-class EngineWebSocketSession :
-        public std::enable_shared_from_this<EngineWebSocketSession> {
+class EngineWebSocketSession : public std::enable_shared_from_this<EngineWebSocketSession> {
     std::string engine_name_;
     std::shared_ptr<EngineManager::EngineMutex> engine_with_mutex;
 
@@ -24,7 +23,7 @@ class EngineWebSocketSession :
     RenderEngine::Buffer frame_buffer_;
     bool write_in_progress_{false};
 
-public:
+   public:
     explicit EngineWebSocketSession(tcp::socket socket);
 
     void run(const http::request<http::string_body>& req);
@@ -40,5 +39,4 @@ public:
     void on_write(boost::system::error_code ec, std::size_t bytes_transferred);
 };
 
-
-#endif //RENDERENGINE_ENGINEWEBSOCKETSESSION_H
+#endif  //RENDERENGINE_ENGINEWEBSOCKETSESSION_H

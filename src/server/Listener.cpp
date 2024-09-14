@@ -3,13 +3,13 @@
 //
 
 #include "Listener.h"
+
 #include "HttpSession.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
-Listener::Listener(net::io_context &ioc, const tcp::endpoint& endpoint)
-        : acceptor_(ioc), socket_(ioc) {
-
+Listener::Listener(net::io_context &ioc, const tcp::endpoint &endpoint)
+    : acceptor_(ioc), socket_(ioc) {
     boost::system::error_code ec;
 
     // Open the acceptor
@@ -34,8 +34,7 @@ Listener::Listener(net::io_context &ioc, const tcp::endpoint& endpoint)
     }
 
     // Start listening for connections
-    acceptor_.listen(
-            net::socket_base::max_listen_connections, ec);
+    acceptor_.listen(net::socket_base::max_listen_connections, ec);
     if (ec) {
         fail(ec, "listen");
         return;
@@ -43,26 +42,21 @@ Listener::Listener(net::io_context &ioc, const tcp::endpoint& endpoint)
 }
 
 void Listener::run() {
-    if (!acceptor_.is_open())
-        return;
+    if (!acceptor_.is_open()) return;
     do_accept();
 }
 
 void Listener::do_accept() {
     acceptor_.async_accept(
-            socket_,
-            boost::beast::bind_front_handler(
-                    &Listener::on_accept,
-                    shared_from_this()));
+        socket_, boost::beast::bind_front_handler(&Listener::on_accept, shared_from_this()));
 }
 
 void Listener::on_accept(boost::system::error_code ec) {
     if (ec) {
         fail(ec, "accept");
     } else {
-        logger::debug("New connection from {}:{}",
-                     socket_.remote_endpoint().address().to_string(),
-                     socket_.remote_endpoint().port());
+        logger::debug("New connection from {}:{}", socket_.remote_endpoint().address().to_string(),
+            socket_.remote_endpoint().port());
         // Create the session and run it
         std::make_shared<HttpSession>(std::move(socket_))->run();
     }

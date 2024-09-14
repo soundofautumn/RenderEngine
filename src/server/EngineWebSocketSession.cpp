@@ -3,13 +3,13 @@
 //
 
 #include "EngineWebSocketSession.h"
+
 #include "handle_request.h"
 
 extern void fail(boost::system::error_code ec, char const *what);
 
 EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket)
-        : ws_(std::move(socket)), timer_(ws_.get_executor()) {
-}
+    : ws_(std::move(socket)), timer_(ws_.get_executor()) {}
 
 void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
     // find the engine name
@@ -26,12 +26,11 @@ void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
     }
     engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
     ws_.set_option(websocket::permessage_deflate());
-    ws_.async_accept(req,
-                     [self = shared_from_this()](boost::system::error_code ec) {
-                         self->ws_.binary(true);
-                         self->ws_.async_read(self->buffer_,
-                                              boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, self));
-                     });
+    ws_.async_accept(req, [self = shared_from_this()](boost::system::error_code ec) {
+        self->ws_.binary(true);
+        self->ws_.async_read(self->buffer_,
+            boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, self));
+    });
 }
 
 void EngineWebSocketSession::set_fps(int fps) {
@@ -39,7 +38,8 @@ void EngineWebSocketSession::set_fps(int fps) {
     timer_.cancel();
     if (fps_ != 0) {
         timer_.expires_after(std::chrono::milliseconds(1000 / fps_));
-        timer_.async_wait(boost::beast::bind_front_handler(&EngineWebSocketSession::on_timer, shared_from_this()));
+        timer_.async_wait(boost::beast::bind_front_handler(
+            &EngineWebSocketSession::on_timer, shared_from_this()));
     }
 }
 
@@ -66,7 +66,7 @@ void EngineWebSocketSession::on_read(boost::system::error_code ec, std::size_t b
         }
     }
     ws_.async_read(buffer_,
-                   boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
+        boost::beast::bind_front_handler(&EngineWebSocketSession::on_read, shared_from_this()));
 }
 
 void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
@@ -80,7 +80,8 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
     send_frame();
     if (fps_ != 0) {
         timer_.expires_after(std::chrono::milliseconds(1000 / fps_));
-        timer_.async_wait(boost::beast::bind_front_handler(&EngineWebSocketSession::on_timer, shared_from_this()));
+        timer_.async_wait(boost::beast::bind_front_handler(
+            &EngineWebSocketSession::on_timer, shared_from_this()));
     }
 }
 
@@ -93,9 +94,8 @@ void EngineWebSocketSession::send_frame() {
     }
     frame_buffer_ = engine_with_mutex->engine.get_frame_buffer();
     write_in_progress_ = true;
-    ws_.async_write(
-            boost::asio::buffer(frame_buffer_),
-            boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
+    ws_.async_write(boost::asio::buffer(frame_buffer_),
+        boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
 }
 
 void EngineWebSocketSession::on_write(boost::system::error_code ec, std::size_t bytes_transferred) {
@@ -108,5 +108,3 @@ void EngineWebSocketSession::on_write(boost::system::error_code ec, std::size_t 
     }
     write_in_progress_ = false;
 }
-
-

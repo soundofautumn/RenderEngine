@@ -11,7 +11,7 @@ class WebSocketSession : public std::enable_shared_from_this<WebSocketSession> {
     boost::beast::flat_buffer buffer_;
     websocket::stream<tcp::socket> ws_;
 
-public:
+   public:
     explicit WebSocketSession(tcp::socket socket);
 
     void do_accept(const http::request<boost::beast::http::string_body> &req);
@@ -21,8 +21,6 @@ public:
     void on_read(boost::system::error_code ec, std::size_t bytes_transferred);
 
     void on_write(boost::system::error_code ec, std::size_t bytes_transferred);
-
 };
 
-
-#endif //RENDERENGINE_WEBSOCKETSESSION_H
+#endif  //RENDERENGINE_WEBSOCKETSESSION_H

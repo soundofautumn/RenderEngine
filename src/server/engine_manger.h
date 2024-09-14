@@ -6,15 +6,15 @@
 #define RENDERENGINE_ENGINEMANGER_H
 
 #include <memory>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #include "engine.hpp"
 
 using RenderCore::RenderEngine;
 
 class EngineManager {
-public:
+   public:
     struct EngineMutex {
         RenderEngine engine;
         std::mutex mutex;
@@ -24,13 +24,11 @@ public:
         EngineMutex(int width, int height) : engine(width, height) {}
     };
 
-private:
-
+   private:
     std::unordered_map<std::string, std::shared_ptr<EngineMutex>> engines_;
     std::mutex map_mutex_;
 
-public:
-
+   public:
     EngineManager() = default;
 
     static EngineManager &get_instance() {
@@ -44,14 +42,11 @@ public:
         engines_[name] = std::make_shared<EngineMutex>(width, height);
     }
 
-    bool check_engine(const std::string &name) {
-        return engines_.find(name) != engines_.end();
-    }
+    bool check_engine(const std::string &name) { return engines_.find(name) != engines_.end(); }
 
     std::shared_ptr<EngineMutex> get_engine_with_mutex(const std::string &name) {
         return engines_[name];
     }
-
 
     void remove_engine(const std::string &name) {
         std::lock_guard<std::mutex> lock(map_mutex_);
@@ -60,4 +55,4 @@ public:
     }
 };
 
-#endif //RENDERENGINE_ENGINEMANGER_H
+#endif  //RENDERENGINE_ENGINEMANGER_H

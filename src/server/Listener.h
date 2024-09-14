@@ -11,9 +11,8 @@ class Listener : public std::enable_shared_from_this<Listener> {
     tcp::acceptor acceptor_;
     tcp::socket socket_;
 
-public:
-    Listener(boost::asio::io_context &ioc,
-             const tcp::endpoint& endpoint);
+   public:
+    Listener(boost::asio::io_context& ioc, const tcp::endpoint& endpoint);
 
     // Start accepting incoming connections
     void run();
@@ -23,5 +22,4 @@ public:
     void on_accept(boost::system::error_code ec);
 };
 
-
-#endif //RENDERENGINE_LISTENER_H
+#endif  //RENDERENGINE_LISTENER_H

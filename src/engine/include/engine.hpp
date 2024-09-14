@@ -11,7 +11,7 @@
 #include "primitive.hpp"
 
 namespace RenderCore {
-    class RenderEngine;
+class RenderEngine;
 }
 
 class RenderCore::RenderEngine {
@@ -21,28 +21,22 @@ class RenderCore::RenderEngine {
     int32_t height_;
 
     uint32_t color_background_{vector_to_color(Colors::Black)};
-public:
 
+   public:
     using Buffer = Bitmap::Buffer;
 
-public:
+   public:
     RenderEngine() : frame_buffer_(nullptr), width_(0), height_(0) {}
 
-    RenderEngine(int32_t width, int32_t height) :
-            frame_buffer_(nullptr),
-            width_(width),
-            height_(height) {
+    RenderEngine(int32_t width, int32_t height)
+        : frame_buffer_(nullptr), width_(width), height_(height) {
         init(width, height);
     }
 
-    virtual ~RenderEngine() {
-        reset();
-    }
+    virtual ~RenderEngine() { reset(); }
 
     // 初始化
-    void init() {
-        init(width_, height_);
-    }
+    void init() { init(width_, height_); }
 
     // 以指定宽高初始化
     void init(int32_t width, int32_t height) {
@@ -69,9 +63,7 @@ public:
     }
 
     // 设置背景色
-    void set_background_color(const Color &color) {
-        color_background_ = vector_to_color(color);
-    }
+    void set_background_color(const Color &color) { color_background_ = vector_to_color(color); }
 
     // 绘制像素
     void draw_pixel(int x, int y, const Color &color) {
@@ -119,5 +111,4 @@ public:
     void draw_arc(const Arc &arc);
 };
 
-
-#endif //RENDERENGINE_ENGINE_HPP
+#endif  //RENDERENGINE_ENGINE_HPP

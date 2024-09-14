@@ -11,20 +11,20 @@
 #ifndef RENDERENGINE_BITMAP_HPP
 #define RENDERENGINE_BITMAP_HPP
 
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <memory>
 #include <fstream>
+#include <memory>
 #include <vector>
 
 namespace RenderCore {
-    class Bitmap;
+class Bitmap;
 }
 
 class RenderCore::Bitmap {
-protected:
+   protected:
     // 宽度
     int32_t width_;
     // 高度
@@ -34,56 +34,39 @@ protected:
     // 数据
     uint8_t *data_;
 
-public:
-    inline Bitmap(int32_t width, int32_t height) :
-            width_(width),
-            height_(height),
-            pitch_(width * 4),
-            data_(new uint8_t[width * height * 4]) {}
+   public:
+    inline Bitmap(int32_t width, int32_t height)
+        : width_(width),
+          height_(height),
+          pitch_(width * 4),
+          data_(new uint8_t[width * height * 4]) {}
 
-    inline Bitmap(const Bitmap &bitmap) :
-            width_(bitmap.width_),
-            height_(bitmap.height_),
-            pitch_(bitmap.pitch_),
-            data_(new uint8_t[bitmap.width_ * bitmap.height_ * 4]) {
+    inline Bitmap(const Bitmap &bitmap)
+        : width_(bitmap.width_),
+          height_(bitmap.height_),
+          pitch_(bitmap.pitch_),
+          data_(new uint8_t[bitmap.width_ * bitmap.height_ * 4]) {
         std::memcpy(data_, bitmap.data_, width_ * height_ * 4);
     }
 
-    inline ~Bitmap() {
-        delete[] data_;
-    }
+    inline ~Bitmap() { delete[] data_; }
 
-public:
+   public:
+    [[nodiscard]] inline int width() const { return width_; }
 
-    [[nodiscard]] inline int width() const {
-        return width_;
-    }
+    [[nodiscard]] inline int height() const { return height_; }
 
-    [[nodiscard]] inline int height() const {
-        return height_;
-    }
+    [[nodiscard]] inline int pitch() const { return pitch_; }
 
-    [[nodiscard]] inline int pitch() const {
-        return pitch_;
-    }
+    [[nodiscard]] inline uint8_t *data() const { return data_; }
 
-    [[nodiscard]] inline uint8_t *data() const {
-        return data_;
-    }
+    [[nodiscard]] inline const uint8_t *data() { return data_; }
 
-    [[nodiscard]] inline const uint8_t *data() {
-        return data_;
-    }
+    [[nodiscard]] inline uint8_t *line(int32_t y) { return data_ + y * pitch_; }
 
-    [[nodiscard]] inline uint8_t *line(int32_t y) {
-        return data_ + y * pitch_;
-    }
+    [[nodiscard]] inline const uint8_t *line(int32_t y) const { return data_ + y * pitch_; }
 
-    [[nodiscard]] inline const uint8_t *line(int32_t y) const {
-        return data_ + y * pitch_;
-    }
-
-public:
+   public:
     inline void fill(uint32_t color) {
         for (int i = 0; i < height_; i++) {
             auto *row = reinterpret_cast<uint32_t *>(data_ + i * pitch_);
@@ -105,7 +88,7 @@ public:
         return *pixel;
     }
 
-private:
+   private:
     struct BitmapInfoHeader {
         uint32_t size;
         int32_t width;
@@ -119,7 +102,8 @@ private:
         uint32_t clr_used;
         uint32_t clr_important;
     };
-public:
+
+   public:
     using Buffer = std::vector<uint8_t>;
 
     inline static std::shared_ptr<Bitmap> load_bmp(const char *filename) {
@@ -166,19 +150,8 @@ public:
         const uint32_t pitch = (width_ * pixel_size + 3) & (~3);
         const uint32_t file_size = 14 + sizeof(BitmapInfoHeader) + pitch * height_;
         const uint32_t offset = 14 + sizeof(BitmapInfoHeader);
-        BitmapInfoHeader info_header{
-                sizeof(BitmapInfoHeader),
-                width_,
-                height_,
-                1,
-                static_cast<uint16_t>(pixel_size * 8),
-                0,
-                pitch * height_,
-                0,
-                0,
-                0,
-                0
-        };
+        BitmapInfoHeader info_header{sizeof(BitmapInfoHeader), width_, height_, 1,
+            static_cast<uint16_t>(pixel_size * 8), 0, pitch * height_, 0, 0, 0, 0};
         file.write("BM", 2);
         file.write(reinterpret_cast<const char *>(&file_size), 4);
         file.write("\0\0\0\0", 4);
@@ -204,8 +177,6 @@ public:
         }
         return true;
     }
-
-
 };
 
-#endif //RENDERENGINE_BITMAP_HPP
+#endif  //RENDERENGINE_BITMAP_HPP

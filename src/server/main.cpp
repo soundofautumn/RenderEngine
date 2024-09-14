@@ -1,10 +1,10 @@
-#include <thread>
 #include <spdlog/spdlog.h>
+
+#include <thread>
 
 #include "Listener.h"
 
 int main() {
-
 #ifdef NDEBUG
     spdlog::set_level(spdlog::level::info);
 #else
@@ -28,14 +28,9 @@ int main() {
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
 
-    for (auto i = threads - 1; i > 0; --i)
-        v.emplace_back(
-                [&ioc] {
-                    ioc.run();
-                });
+    for (auto i = threads - 1; i > 0; --i) v.emplace_back([&ioc] { ioc.run(); });
 
-    for (auto &t: v)
-        t.join();
+    for (auto &t : v) t.join();
 
     return 0;
 }

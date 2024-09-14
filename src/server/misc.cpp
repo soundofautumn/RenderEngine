@@ -3,7 +3,6 @@
 //
 #include "Server.h"
 
-void fail(boost::system::error_code ec, char const* what)
-{
+void fail(boost::system::error_code ec, char const* what) {
     logger::error("{}: {}", what, ec.message());
 }

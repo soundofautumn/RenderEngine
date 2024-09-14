@@ -6,13 +6,14 @@
 #define RENDERENGINE_PRIMITIVE_HPP
 
 #include <variant>
-#include "line.hpp"
+
 #include "circle.hpp"
+#include "line.hpp"
 
 namespace RenderCore {
 
-    using Primitive = std::variant<Line, Circle, Arc>;
+using Primitive = std::variant<Line, Circle, Arc>;
 
 }
 
-#endif //RENDERENGINE_PRIMITIVE_HPP
+#endif  //RENDERENGINE_PRIMITIVE_HPP

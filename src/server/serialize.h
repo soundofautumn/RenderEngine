@@ -6,10 +6,11 @@
 #define RENDERENGINE_SERIALIZE_H
 
 #include <boost/json.hpp>
+
 #include "primitive.hpp"
 
 RenderCore::Primitive deserialize_primitive(const boost::json::object &obj);
 
 boost::json::object serialize_primitive(const RenderCore::Primitive &primitive);
 
-#endif //RENDERENGINE_SERIALIZE_H
+#endif  //RENDERENGINE_SERIALIZE_H

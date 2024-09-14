@@ -9,8 +9,8 @@
 
 namespace RenderCore {
 
-    using Point = Vector2i;
+using Point = Vector2i;
 
-}// namespace RenderCore
+}  // namespace RenderCore
 
-#endif //RENDERENGINE_POINT_H
+#endif  //RENDERENGINE_POINT_H

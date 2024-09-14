@@ -12,7 +12,8 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
     boost::beast::flat_buffer buffer_;
     http::request<http::string_body> req_;
     http::response<http::string_body> res_;
-public:
+
+   public:
     explicit HttpSession(tcp::socket socket);
 
     void run();
@@ -26,5 +27,4 @@ public:
     void do_close();
 };
 
-
-#endif //RENDERENGINE_HTTPSESSION_H
+#endif  //RENDERENGINE_HTTPSESSION_H

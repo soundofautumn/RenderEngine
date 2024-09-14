@@ -2,13 +2,15 @@
 // Created by Autumn Sound on 2024/9/5.
 //
 
-#include <boost/json.hpp>
 #include "handle_request.h"
+
+#include <boost/json.hpp>
+
 #include "engine_manger.h"
 #include "serialize.h"
 
-using RenderCore::RenderEngine;
 using RenderCore::Primitive;
+using RenderCore::RenderEngine;
 
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;
@@ -79,7 +81,8 @@ void handle_engine_remove(const request &req, response &res) {
     res.body() = "Engine removed.";
 }
 
-std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(const request &req, response &res) {
+std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(
+    const request &req, response &res) {
     auto engine_name = get_engine_name(req, res);
     if (engine_name.empty()) {
         return nullptr;
@@ -93,7 +96,7 @@ std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(const request 
     return EngineManager::get_instance().get_engine_with_mutex(engine_name);
 }
 
-void draw_primitive( EngineManager::EngineMutex &engine_mutex, const Primitive &primitive) {
+void draw_primitive(EngineManager::EngineMutex &engine_mutex, const Primitive &primitive) {
     std::lock_guard<std::mutex> lock(engine_mutex.mutex);
     engine_mutex.engine.draw_primitive(primitive);
 }
