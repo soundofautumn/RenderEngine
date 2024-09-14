@@ -62,7 +62,8 @@ export default function App() {
 
   const clickedPointsRef = React.useRef<IPoint[]>([]);
   const [clickedPoints, setClickedPoints] = React.useState<IPoint[]>([]);
-  const currentDrawFunc = React.useRef(drawFuncs[1].drawFunc);
+  const currentDrawFunc = React.useRef(drawFuncs[0].drawFunc);
+  const [currentDrawFuncIndex, setCurrentDrawFuncIndex] = React.useState(0);
   const handleDraw = () => {
     const pointers = clickedPointsRef.current;
     clickedPointsRef.current = [];
@@ -103,6 +104,24 @@ export default function App() {
 
   return (<>
     <div id="mousePosition">Engine: {engine_name}; X: {coordinate.x}, Y: {coordinate.y}; {loading ? 'Loading...' : 'Ready.'}</div>
+    <div id="drawFuncs">
+      {
+        drawFuncs.map((drawFunc, index) => {
+          return (
+            <button
+              key={index}
+              onClick={() => {
+                currentDrawFunc.current = drawFunc.drawFunc;
+                setCurrentDrawFuncIndex(index);
+              }}
+              disabled={index === currentDrawFuncIndex}
+            >
+              {drawFunc.name}
+            </button>
+          )
+        })
+      }
+    </div>
     {
       ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])
         .map((point, index) => {
