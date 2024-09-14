@@ -26,14 +26,14 @@ ln -s build/src/server/RenderEngineServer ./RenderEngineServer
 ./RenderEngineServer
 ```
 
-## API文档
+## API Documentation
 
-[ApiFox链接](https://apifox.com/apidoc/shared-8cf19dc6-dfdb-48da-8ac1-0f19a5b58529)
+[Online Documentation at ApiFox](https://apifox.com/apidoc/shared-8cf19dc6-dfdb-48da-8ac1-0f19a5b58529)
 
 ## Frontend
 
 ```bash
 cd src/frontend
 yarn install # or npm install? is ok
-yarn dev # or npm run install
+yarn dev # or npm run dev
 ```
