@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { backend_endpoint, engine_name, fps, client } from './client';
-import { drawLine } from './drawFuncs';
+import drawFuncs from './drawFuncs';
 
 import './App.css';
 import { IPoint } from './types';
@@ -45,8 +45,7 @@ export default function App() {
             setLoading(false)
             loadingRef.current = false;
             drawingRef.current = false;
-            clickedPointsRef.current = [];
-            setClickedPoints([]);
+            setClickedPoints(clickedPointsRef.current);
           }
         }
       };
@@ -63,51 +62,79 @@ export default function App() {
 
   const clickedPointsRef = React.useRef<IPoint[]>([]);
   const [clickedPoints, setClickedPoints] = React.useState<IPoint[]>([]);
-  const currentDrawFunc = React.useRef(drawLine);
+  const currentDrawFunc = React.useRef(drawFuncs[1].drawFunc);
+  const handleDraw = () => {
+    const pointers = clickedPointsRef.current;
+    clickedPointsRef.current = [];
+    loadingRef.current = true;
+    setLoading(true);
+    currentDrawFunc.current.draw({ pointers })
+      .then(() => drawingRef.current = true)
+      .catch((e: string) => {
+        console.error(e);
+        loadingRef.current = false;
+        setLoading(false);
+        setClickedPoints([]);
+      })
+  }
+
   const drawingRef = React.useRef(false);
+  const draggingRef = React.useRef(false);
+  const [dragging, setDragging] = React.useState(false);
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (drawingRef.current) return;
     clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
     setClickedPoints(clickedPointsRef.current);
-    if (clickedPointsRef.current.length === currentDrawFunc.current.requiredPointers) {
-      loadingRef.current = true;
-      setLoading(true);
-      currentDrawFunc.current.draw(clickedPointsRef.current)
-        .then(() => drawingRef.current = true)
-        .catch((e: string) => {
-          console.error(e);
-          clickedPointsRef.current = [];
-          drawingRef.current = false;
-          loadingRef.current = false;
-          setLoading(false);
-          setClickedPoints([]);
-        })
+    if (currentDrawFunc.current.drawingMethod === 'drag') {
+      draggingRef.current = true;
+      setDragging(true);
+    } else if (clickedPointsRef.current.length === currentDrawFunc.current.requiredPointers) {
+      handleDraw();
+    }
+  }
+  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (draggingRef.current) {
+      draggingRef.current = false;
+      setDragging(false);
+      clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+      setClickedPoints(clickedPointsRef.current);
+      handleDraw();
     }
   }
 
   return (<>
-    <div id="mousePosition">X: {coordinate.x}, Y: {coordinate.y}; Engine: {engine_name}; {loading ? 'Loading...' : 'Ready.'}</div>
+    <div id="mousePosition">Engine: {engine_name}; X: {coordinate.x}, Y: {coordinate.y}; {loading ? 'Loading...' : 'Ready.'}</div>
     {
-      clickedPoints.map((point, index) => {
-        return (
-          <div
-            className='point'
-            key={index}
-            style={{
-              left: point.x,
-              top: point.y
-            }}
-          >
-            <div className='point-item'>
-              <div className='point-circle' />
-              <p className='point-text'>
-                ({point.x}, {point.y})
-              </p>
+      ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])
+        .map((point, index) => {
+          return (
+            <div
+              className='point'
+              key={index}
+              style={{
+                left: point.x,
+                top: point.y
+              }}
+            >
+              <div className='point-item'>
+                <div className='point-circle'
+                  style={{
+                    backgroundColor: point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
+                  }}
+                />
+                <p className='point-text'>
+                  ({point.x}, {point.y})
+                </p>
+              </div>
             </div>
-          </div>
-        )
-      })
+          )
+        })
     }
-    <canvas ref={canvasRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} />
+    <canvas
+      ref={canvasRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+
+    />
   </>)
 }

@@ -27,10 +27,12 @@ canvas {
     background: rgba(255, 255, 255, 0.3);
     padding: 5px;
     border-radius: 5px;
+    pointer-events: none;
 }
 
 .point {
     position: fixed;
+    pointer-events: none;
     .point-item {
         position: relative;
         .point-circle {
