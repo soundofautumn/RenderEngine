@@ -54,6 +54,7 @@ canvas {
             padding: 5px;
             border-radius: 5px;
             margin: 0;
+            user-select: none;
         }
     }
 }
