@@ -4,9 +4,9 @@ name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -45,44 +45,54 @@ jobs:
             c_compiler: cl
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install Boost dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libboost-all-dev
+      # 缓存CMake构建目录和Boost、spdlog的依赖项
+      - name: Cache CMake build directory
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/build
+          key: ${{ runner.os }}-cmake-build-${{ matrix.build_type }}-${{ matrix.cpp_compiler }}
 
-    - name: Install Boost dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install boost-msvc-14.2 -y
+      - name: Install boost
+        id: install-boost
+        uses: MarkusJx/install-boost@v2.4.5
+        with:
+          boost_version: 1.73.0
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+      - name: Cache spdlog FetchContent directory
+        id: spdlog-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/build/_deps
+          key: spdlog-${{ runner.os }}-${{ matrix.cpp_compiler }}
 
-    - name: Fetch spdlog using CMake FetchContent
-      # Use CMake to fetch spdlog dynamically without modifying CMakeLists.txt
-      run: |
-        cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DSPDLOG_DOWNLOAD=ON \
-          -DSPDLOG_FETCH_CONTENT=ON \
-          -S ${{ github.workspace }}
-      shell: bash
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      - name: Fetch spdlog using CMake FetchContent
+        if: steps.spdlog-cache.outputs.cache-hit != 'true'
+        # Use CMake to fetch spdlog dynamically without modifying CMakeLists.txt
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DSPDLOG_DOWNLOAD=ON \
+            -DSPDLOG_FETCH_CONTENT=ON \
+            -S ${{ github.workspace }}
+        shell: bash
 
-    - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest --build-config ${{ matrix.build_type }}
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Test
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest --build-config ${{ matrix.build_type }}
