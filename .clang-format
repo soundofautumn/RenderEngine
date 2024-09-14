@@ -1,0 +1,44 @@
+# 基于 Google 风格
+BasedOnStyle: Google
+
+# 缩进相关
+IndentWidth: 4                   # 缩进宽度为 4
+TabWidth: 4                       # Tab 的宽度为 4（如果使用 Tab，则显示为 4 个字符）
+UseTab: Never                     # 强制使用空格而不是 Tab 进行缩进
+
+# 控制最大行宽度
+ColumnLimit: 100                  # 每行的最大字符数为 100，超过此长度会自动换行
+
+# 括号与空格
+SpaceBeforeParens: ControlStatements # 在 if/for/while 等控制语句的括号前添加空格
+AlwaysBreakBeforeMultilineStrings: false # 多行字符串不强制断行
+AllowShortFunctionsOnASingleLine: Inline # 允许短函数定义在一行内
+
+# 换行和大括号样式
+BreakBeforeBraces: Attach          # 大括号样式为 "Attach" （即 K&R 风格，函数定义的左大括号与函数名同一行）
+BraceWrapping:
+  AfterClass: true                # 在类定义之后换行
+  AfterFunction: true             # 在函数定义之后换行
+  AfterNamespace: false           # 在 namespace 定义之后不换行
+  BeforeCatch: true               # 在 catch 前加换行
+  SplitEmptyFunction: false       # 空函数不换行
+
+# 命名空间设置
+NamespaceIndentation: None        # 不为 namespace 内的代码添加额外的缩进
+
+# 空格处理
+SpacesInAngles: false             # 禁止在模板类型的尖括号内两边添加空格
+SpacesInContainerLiterals: false  # 禁止在初始化列表中添加多余的空格
+SpacesBeforeTrailingComments: 2   # 注释前至少保留 2 个空格
+
+# 函数签名格式
+AlignAfterOpenBracket: DontAlign  # 函数参数不强制对齐
+PenaltyBreakBeforeFirstCallParameter: 19  # 控制函数调用参数的换行行为
+
+# 列表和参数
+ConstructorInitializerAllOnOneLineOrOnePerLine: true # 构造函数初始化列表使用一行或每个成员一行
+AlignConsecutiveAssignments: false # 不对齐连续的赋值语句
+
+# 注释格式
+CommentPragmas: "^ IWYU pragma:"  # 遇到匹配的注释 pragma 时保留格式
+ReflowComments: false             # 不重新格式化注释中的段落
