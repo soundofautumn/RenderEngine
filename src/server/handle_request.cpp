@@ -68,6 +68,17 @@ std::string get_engine_name(const request &req, response &res) {
     return req[ENGINE_NAME_HEADER];
 }
 
+void handle_engine_remove(const request &req, response &res) {
+    auto engine_name = get_engine_name(req, res);
+    if (engine_name.empty()) {
+        return;
+    }
+    EngineManager::get_instance().remove_engine(engine_name);
+    res.result(http::status::ok);
+    res.set(http::field::content_type, "text/plain");
+    res.body() = "Engine removed.";
+}
+
 std::shared_ptr<RenderEngine> get_engine(const request &req, response &res) {
     auto engine_name = get_engine_name(req, res);
     if (engine_name.empty()) {
@@ -92,8 +103,18 @@ void handle_engine_draw(const request &req, response &res) {
     if (!engine) {
         return;
     }
-    auto primitive = deserialize_primitive(j.as_object());
-    engine->draw_primitive(primitive);
+    try {
+        auto primitive = deserialize_primitive(j.as_object());
+        engine->draw_primitive(primitive);
+    } catch (const std::exception &e) {
+        res.result(http::status::bad_request);
+        res.set(http::field::content_type, "text/plain");
+#ifdef NDEBUG
+        res.body() = "Invalid primitive.";
+#else
+        res.body() = "Invalid primitive: " + std::string(e.what());
+#endif
+    }
 }
 
 void handle_request(const request &req, response &res) {
@@ -116,6 +137,8 @@ void handle_request(const request &req, response &res) {
         if (req.target().starts_with("/engine")) {
             if (req.target().starts_with("/engine/create")) {
                 handle_engine_create(req, res);
+            } else if (req.target().starts_with("/engine/remove")) {
+                handle_engine_remove(req, res);
             } else if (req.target().starts_with("/engine/draw")) {
                 handle_engine_draw(req, res);
             } else if (req.target().starts_with("/engine/ws")) {
