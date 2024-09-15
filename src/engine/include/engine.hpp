@@ -72,7 +72,9 @@ class RenderCore::RenderEngine {
     void set_background_color(uint32_t color) { color_background_ = color; }
 
     // 绘制像素
-    void draw_pixel(int x, int y, const Color &color) {
+    void draw_pixel(int x, int y, const Color &color) { draw_pixel(x, y, vector_to_color(color)); }
+
+    void draw_pixel(int x, int y, uint32_t color) {
         if (!frame_buffer_) {
             return;
         }
@@ -80,7 +82,7 @@ class RenderCore::RenderEngine {
         if (x < 0 || x >= width_ || y < 0 || y >= height_) {
             return;
         }
-        frame_buffer_->set_pixel(x, y, vector_to_color(color));
+        frame_buffer_->set_pixel(x, y, color);
     }
 
     // 保存到文件
@@ -99,7 +101,10 @@ class RenderCore::RenderEngine {
     }
 
     // 绘制图元
-    void draw_primitive(const Primitive &primitive);
+    void add_primitive(const Primitive &primitive);
+
+    // 获取图元
+    [[nodiscard]] const std::stack<Primitive> &get_primitives() const { return primitives_; }
 
     // 渲染
     bool render();

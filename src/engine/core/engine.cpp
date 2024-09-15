@@ -9,10 +9,11 @@
 
 using namespace RenderCore;
 
-void RenderEngine::draw_primitive(const Primitive &primitive) {
+void RenderEngine::add_primitive(const Primitive &primitive) {
     if (!frame_buffer_) {
         return;
     }
+    primitives_.push(primitive);
     if (std::holds_alternative<Line>(primitive)) {
         const auto &line = std::get<Line>(primitive);
         draw_line(line);

@@ -98,7 +98,7 @@ std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(
 
 void draw_primitive(EngineManager::EngineMutex &engine_mutex, const Primitive &primitive) {
     std::lock_guard<std::mutex> lock(engine_mutex.mutex);
-    engine_mutex.engine.draw_primitive(primitive);
+    engine_mutex.engine.add_primitive(primitive);
 }
 
 void handle_engine_draw(const request &req, response &res) {
