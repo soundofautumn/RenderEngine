@@ -124,6 +124,23 @@ void handle_engine_draw(const request &req, response &res) {
     }
 }
 
+void handle_engine_get_primitives(const request &req, response &res) {
+    auto engine = get_engine_with_mutex(req, res);
+    if (!engine) {
+        return;
+    }
+    auto primitives = engine->engine.get_primitives();
+    boost::json::array j_primitives;
+    while (!primitives.empty()) {
+        auto primitive = primitives.top();
+        primitives.pop();
+        j_primitives.push_back(serialize_primitive(primitive));
+    }
+    res.result(http::status::ok);
+    res.set(http::field::content_type, "application/json");
+    res.body() = boost::json::serialize(j_primitives);
+}
+
 void handle_request(const request &req, response &res) {
     if (req.method() == http::verb::options) {
         res.result(http::status::ok);
@@ -148,6 +165,8 @@ void handle_request(const request &req, response &res) {
                 handle_engine_remove(req, res);
             } else if (req.target().starts_with("/engine/draw")) {
                 handle_engine_draw(req, res);
+            }else if (req.target().starts_with("/engine/get_primitives")) {
+                handle_engine_get_primitives(req, res);
             } else if (req.target().starts_with("/engine/ws")) {
                 res.result(http::status::ok);
             } else {
