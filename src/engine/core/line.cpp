@@ -132,8 +132,6 @@ void RenderEngine::draw_line(const Line &line) {
             draw_point(x, y, line.options, index++);
         }
         return;
-    } else {
-        return;
     }
     switch (line.algorithm) {
         case Line::LineAlgorithm::DDA:
