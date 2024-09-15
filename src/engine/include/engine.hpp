@@ -5,6 +5,8 @@
 #ifndef RENDERENGINE_ENGINE_HPP
 #define RENDERENGINE_ENGINE_HPP
 
+#include <stack>
+
 #include "bitmap.hpp"
 #include "options.hpp"
 #include "point.hpp"
@@ -16,6 +18,8 @@ class RenderEngine;
 
 class RenderCore::RenderEngine {
     Bitmap *frame_buffer_;
+
+    std::stack<Primitive> primitives_;
 
     int32_t width_;
     int32_t height_;
@@ -65,6 +69,8 @@ class RenderCore::RenderEngine {
     // 设置背景色
     void set_background_color(const Color &color) { color_background_ = vector_to_color(color); }
 
+    void set_background_color(uint32_t color) { color_background_ = color; }
+
     // 绘制像素
     void draw_pixel(int x, int y, const Color &color) {
         if (!frame_buffer_) {
@@ -98,6 +104,7 @@ class RenderCore::RenderEngine {
     // 渲染
     bool render();
 
+   private:
     // 绘制点
     void draw_point(int x, int y, const PenOptions &options = PenOptions(), int index = -1);
 
@@ -109,6 +116,23 @@ class RenderCore::RenderEngine {
 
     // 绘制圆弧
     void draw_arc(const Arc &arc);
+
+   private:
+    // DDA 算法绘制线段
+    void draw_line_dda(const Point &start, const Point &end, const PenOptions &options);
+
+    // 中点算法绘制线段
+    void draw_line_midpoint(const Point &start, const Point &end, const PenOptions &options);
+
+    // Bresenham 算法绘制线段
+    void draw_line_bresenham(const Point &start, const Point &end, const PenOptions &options);
+
+    // 中点画圆算法
+    void draw_circle_midpoint(const Point &center, int radius, const PenOptions &options);
+
+    // 中点画圆弧算法
+    void draw_arc_midpoint(const Point &center, int radius, float start_angle, float end_angle,
+        const PenOptions &options);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP

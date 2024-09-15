@@ -8,22 +8,22 @@
 
 using namespace RenderCore;
 
-void draw_circle_by_midpoint(
-    RenderEngine *engine, const Point &center, int radius, const PenOptions &options) {
+void RenderEngine::draw_circle_midpoint(
+    const Point &center, int radius, const PenOptions &options) {
     int x = 0;
     int y = radius;
     int d = 1 - radius;  // 初始决策参数
 
     // 绘制圆的八个对称点
     auto draw_circle_points = [&](int cx, int cy) {
-        engine->draw_point(cx + x, cy + y, options);
-        engine->draw_point(cx - x, cy + y, options);
-        engine->draw_point(cx + x, cy - y, options);
-        engine->draw_point(cx - x, cy - y, options);
-        engine->draw_point(cx + y, cy + x, options);
-        engine->draw_point(cx - y, cy + x, options);
-        engine->draw_point(cx + y, cy - x, options);
-        engine->draw_point(cx - y, cy - x, options);
+        draw_point(cx + x, cy + y, options);
+        draw_point(cx - x, cy + y, options);
+        draw_point(cx + x, cy - y, options);
+        draw_point(cx - x, cy - y, options);
+        draw_point(cx + y, cy + x, options);
+        draw_point(cx - y, cy + x, options);
+        draw_point(cx + y, cy - x, options);
+        draw_point(cx - y, cy - x, options);
     };
 
     draw_circle_points(center.x, center.y);  // 绘制初始点
@@ -40,32 +40,59 @@ void draw_circle_by_midpoint(
     }
 }
 
-void draw_arc_by_midpoint(RenderEngine *engine, const Point &center, int radius, float start_angle,
+void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float start_angle,
     float end_angle, const PenOptions &options) {
+    // TODO: 实现绘制圆弧
     throw std::runtime_error("Not implemented yet");
+}
+
+// 根据三点求圆心和半径
+std::pair<Point, int> circle_center_radius(const Point &p1, const Point &p2, const Point &p3) {
+    // 两条中垂线的交点即为圆心
+    // 两条中垂线分别为：
+    // 1. 由 p1, p2 两点的中点和斜率为 -(x2 - x1) / (y2 - y1) 的直线
+    // 2. 由 p2, p3 两点的中点和斜率为 -(x3 - x2) / (y3 - y2) 的直线
+    // 两直线的交点即为圆心
+    auto mid_point1 = (p1 + p2) / 2;
+    auto mid_point2 = (p2 + p3) / 2;
+    auto k1 = -(p2.x - p1.x) / (p2.y - p1.y);
+    auto k2 = -(p3.x - p2.x) / (p3.y - p2.y);
+    auto x = (mid_point2.y - mid_point1.y + k1 * mid_point1.x - k2 * mid_point2.x) / (k1 - k2);
+    auto y = k1 * (x - mid_point1.x) + mid_point1.y;
+    auto center = Point{static_cast<int>(x), static_cast<int>(y)};
+    auto radius = vector_length(center - p1);
+    return {center, radius};
 }
 
 void RenderEngine::draw_circle(const Circle &circle) {
     if (std::holds_alternative<CircleUseCenterRadius>(circle)) {
         auto &center_radius = std::get<CircleUseCenterRadius>(circle);
-        draw_circle_by_midpoint(
-            this, center_radius.center, center_radius.radius, center_radius.options);
+        draw_circle_midpoint(center_radius.center, center_radius.radius, center_radius.options);
         return;
     } else if (std::holds_alternative<CircleUseThreePoints>(circle)) {
         auto &three_points = std::get<CircleUseThreePoints>(circle);
-        throw std::runtime_error("Not implemented yet");
+        // 根据三点求圆心和半径
+        auto [center, radius] =
+            circle_center_radius(three_points.p1, three_points.p2, three_points.p3);
+        draw_circle_midpoint(center, radius, three_points.options);
     }
 }
 
 void RenderEngine::draw_arc(const Arc &arc) {
     if (std::holds_alternative<ArcUseCenterRadiusAngle>(arc)) {
         auto &center_radius_angle = std::get<ArcUseCenterRadiusAngle>(arc);
-        draw_arc_by_midpoint(this, center_radius_angle.center, center_radius_angle.radius,
+        draw_arc_midpoint(center_radius_angle.center, center_radius_angle.radius,
             center_radius_angle.start_angle, center_radius_angle.end_angle,
             center_radius_angle.options);
         return;
     } else if (std::holds_alternative<ArcUseThreePoints>(arc)) {
         auto &three_points = std::get<ArcUseThreePoints>(arc);
-        throw std::runtime_error("Not implemented yet");
+        // 根据三点求圆心和半径
+        auto [center, radius] =
+            circle_center_radius(three_points.p1, three_points.p2, three_points.p3);
+        // 计算起始角度和终止角度
+        auto start_angle = atan2(three_points.p1.y - center.y, three_points.p1.x - center.x);
+        auto end_angle = atan2(three_points.p3.y - center.y, three_points.p3.x - center.x);
+        draw_arc_midpoint(center, radius, start_angle, end_angle, three_points.options);
     }
 }

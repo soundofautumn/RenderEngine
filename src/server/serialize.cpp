@@ -33,7 +33,6 @@ Primitive deserialize_primitive(const boost::json::object &primitive) {
             .p2 = deserialize_point(p2),
             .options = {.color = deserialize_color(color)},
             .algorithm = static_cast<RenderCore::Line::LineAlgorithm>(algorithm)};
-
     } else if (primitive.contains("Circle")) {
         auto circle = primitive.at("Circle").as_object();
         auto center = circle.at("center").as_object();
