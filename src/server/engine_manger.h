@@ -64,6 +64,10 @@ class EngineManager {
 
     void create_engine(const std::string &name, int width, int height) {
         std::lock_guard<std::mutex> lock(map_mutex_);
+        if (engines_.find(name) != engines_.end()) {
+            logger::warn("Engine {} already exists", name);
+            return;
+        }
         logger::info("Create engine: {}", name);
         engines_[name] = std::make_shared<EngineMutex>(width, height);
         reset_timer(name);
