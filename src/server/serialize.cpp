@@ -68,9 +68,9 @@ boost::json::object serialize_primitive(const Primitive &primitive) {
         const auto &circle = std::get<RenderCore::Circle>(primitive);
         if (std::holds_alternative<CircleUseCenterRadius>(circle)) {
             const auto &circle_ = std::get<CircleUseCenterRadius>(circle);
-            return {{"Circle", {{"center", {{"x", circle_.center.x}, {"y", circle_.center.y}},
+            return {{"Circle", {{"center", {{"x", circle_.center.x}, {"y", circle_.center.y}}},
                                    {"radius", circle_.radius},
-                                   {"color", serialize_color(circle_.options.color)}}}}};
+                                   {"color", serialize_color(circle_.options.color)}}}};
         };
     } else if (std::holds_alternative<RenderCore::Arc>(primitive)) {
         const auto &arc = std::get<RenderCore::Arc>(primitive);

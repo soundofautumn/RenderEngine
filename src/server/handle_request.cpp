@@ -101,6 +101,7 @@ void handle_engine_draw(const request &req, response &res) {
 #endif
         error_response(res, http::status::bad_request, msg);
     }
+    success_response(res, "Primitive added.");
 }
 
 void handle_engine_get_primitives(const request &req, response &res) {
