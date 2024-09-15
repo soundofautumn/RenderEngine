@@ -6,6 +6,7 @@
 
 #include <boost/json.hpp>
 
+#include "common_response.hpp"
 #include "engine_manger.h"
 #include "serialize.h"
 
@@ -15,26 +16,15 @@ using RenderCore::RenderEngine;
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;
 
-void not_found_response(const request &req, response &res) {
-    res.result(http::status::not_found);
-    res.set(http::field::server, "RenderEngine");
-    res.set(http::field::content_type, "text/plain");
-    res.body() = "The resource '" + std::string(req.target()) + "' was not found.";
-}
-
 boost::json::value get_request_body(const request &req, response &res) {
     if (req.method() != http::verb::post) {
-        res.result(http::status::bad_request);
-        res.set(http::field::content_type, "text/plain");
-        res.body() = "The request method must be POST.";
+        error_response(res, http::status::bad_request, "The request method must be POST.");
         return {};
     }
     const auto &body = req.body();
     auto j = boost::json::parse(body);
     if (!j.is_object()) {
-        res.result(http::status::bad_request);
-        res.set(http::field::content_type, "text/plain");
-        res.body() = "The request body must be a JSON object.";
+        error_response(res, http::status::bad_request, "The request body must be a JSON object.");
         return {};
     }
     return j;
@@ -47,24 +37,18 @@ void handle_engine_create(const request &req, response &res) {
     }
     auto engine_name = j.at("name").as_string().c_str();
     if (EngineManager::get_instance().check_engine(engine_name)) {
-        res.result(http::status::ok);
-        res.set(http::field::content_type, "text/plain");
-        res.body() = "Engine already exists.";
+        success_response(res, "Engine already exists.");
         return;
     }
     auto width = static_cast<int>(j.at("width").as_int64());
     auto height = static_cast<int>(j.at("height").as_int64());
     EngineManager::get_instance().create_engine(engine_name, width, height);
-    res.result(http::status::ok);
-    res.set(http::field::content_type, "text/plain");
-    res.body() = "Engine created.";
+    success_response(res, "Engine created.");
 }
 
 std::string get_engine_name(const request &req, response &res) {
     if (req.find(ENGINE_NAME_HEADER) == req.end()) {
-        res.result(http::status::bad_request);
-        res.set(http::field::content_type, "text/plain");
-        res.body() = "Engine name not found.";
+        error_response(res, http::status::bad_request, "Engine name not found.");
         return {};
     }
     return req[ENGINE_NAME_HEADER];
@@ -76,9 +60,7 @@ void handle_engine_remove(const request &req, response &res) {
         return;
     }
     EngineManager::get_instance().remove_engine(engine_name);
-    res.result(http::status::ok);
-    res.set(http::field::content_type, "text/plain");
-    res.body() = "Engine removed.";
+    success_response(res, "Engine removed.");
 }
 
 std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(
@@ -88,9 +70,7 @@ std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(
         return nullptr;
     }
     if (!EngineManager::get_instance().check_engine(engine_name)) {
-        res.result(http::status::not_found);
-        res.set(http::field::content_type, "text/plain");
-        res.body() = "Engine not found.";
+        error_response(res, http::status::not_found, "Engine not found.");
         return nullptr;
     }
     return EngineManager::get_instance().get_engine_with_mutex(engine_name);
@@ -114,13 +94,12 @@ void handle_engine_draw(const request &req, response &res) {
         auto primitive = deserialize_primitive(j.as_object());
         draw_primitive(*engine, primitive);
     } catch (const std::exception &e) {
-        res.result(http::status::bad_request);
-        res.set(http::field::content_type, "text/plain");
 #ifdef NDEBUG
-        res.body() = "Invalid primitive.";
+        auto msg = "Invalid primitive.";
 #else
-        res.body() = "Invalid primitive: " + std::string(e.what());
+        auto msg = "Invalid primitive: " + std::string(e.what());
 #endif
+        error_response(res, http::status::bad_request, msg);
     }
 }
 
@@ -165,7 +144,7 @@ void handle_request(const request &req, response &res) {
                 handle_engine_remove(req, res);
             } else if (req.target().starts_with("/engine/draw")) {
                 handle_engine_draw(req, res);
-            }else if (req.target().starts_with("/engine/get_primitives")) {
+            } else if (req.target().starts_with("/engine/get_primitives")) {
                 handle_engine_get_primitives(req, res);
             } else if (req.target().starts_with("/engine/ws")) {
                 res.result(http::status::ok);
@@ -176,13 +155,12 @@ void handle_request(const request &req, response &res) {
             return not_found_response(req, res);
         }
     } catch (const std::exception &e) {
-        res.result(http::status::internal_server_error);
-        res.set(http::field::content_type, "text/plain");
-#ifdef NDEBUG
-        res.body() = "Internal server error.";
+        #ifdef NDEBUG
+        auto msg = "Internal server error.";
 #else
-        res.body() = "Internal server error: " + std::string(e.what());
+        auto msg = "Internal server error: " + std::string(e.what());
 #endif
+        error_response(res, http::status::bad_request, msg);
     }
     res.prepare_payload();
 }
