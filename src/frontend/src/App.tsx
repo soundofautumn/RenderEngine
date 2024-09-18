@@ -13,7 +13,10 @@ export default function App() {
   const loadingRef = React.useRef(true);
   const fpsRef = React.useRef(0);
   const [fps, setFps] = React.useState(0);
+  const first = React.useRef(true);
   React.useEffect(() => {
+    if (!first.current) return;
+    first.current = false;
     setInterval(() => {
       setFps(fpsRef.current);
     }, 500)
