@@ -42,27 +42,19 @@ void RenderEngine::draw_circle_midpoint(
 
 void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float start_angle,
     float end_angle, const PenOptions &options) {
-    // 将角度转换为弧度
-    auto to_radians = [](float degrees) { return degrees * (3.1415926 / 180.0f); };
-    float start_radian = to_radians(start_angle);
-    float end_radian = to_radians(end_angle);
 
     // 计算弧的角度范围
-    float angle_range = end_radian - start_radian;
-    if (angle_range < 0) angle_range += 2 * 3.1415926;  // 处理负角度范围的情况
-
-    int x = radius;
-    int y = 0;
-    int d = 1 - radius;
+    float angle_range = end_angle - start_angle;
+    if (angle_range < 0) angle_range += 2 * M_PI;  // 处理负角度范围的情况
 
     // 绘制起始和结束角度之间的弧
-    auto draw_arc_points = [&](int cx, int cy, int x, int y) {
+    auto draw_arc_points = [&](int cx, int cy) {
         // 计算弧度范围的步长，控制每次角度增加的精度
         float step = 0.001;  // 可以根据需要调整步长的大小，步长越小，圆弧越光滑
 
-        if (start_radian <= end_radian) {  // 起点角度值不大于终点角度值
+        if (start_angle <= end_angle) {  // 起点角度值不大于终点角度值
             // 从起始角度绘制到结束角度
-            for (float theta = start_radian; theta <= end_radian; theta += step) {
+            for (float theta = start_angle; theta <= end_angle; theta += step) {
                 int x = cx + radius * cos(theta);  // 计算极坐标的 x 坐标
                 int y = cy + radius * sin(theta);  // 计算极坐标的 y 坐标
 
@@ -70,7 +62,7 @@ void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float star
                 draw_point(x, 2 * cy - y, options);
             }
         } else {  // 起点角度值大于终点角度值
-            for (float theta = end_radian; theta <= start_radian; theta += step) {
+            for (float theta = end_angle; theta <= end_angle; theta += step) {
                 int x = cx + radius * cos(theta);  // 计算极坐标的 x 坐标
                 int y = cy + radius * sin(theta);  // 计算极坐标的 y 坐标
 
@@ -81,7 +73,7 @@ void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float star
     };
 
     // 绘制圆弧
-    draw_arc_points(center.x, center.y, x, y);
+    draw_arc_points(center.x, center.y);
 }
 
 // 根据三点求圆心和半径
