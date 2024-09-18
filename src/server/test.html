@@ -30,7 +30,7 @@
 
     const width = 800;
     const height = 600;
-    const engine_name = "test";
+    const engine_name = "default";
     await fetch(`http://${backend_endpoint}/engine/create`, {
         method: "POST",
         headers: {
@@ -66,43 +66,6 @@
         ctx.putImageData(imageData, 0, 0);
     };
 
-    // 画线功能
-    const canvas = document.getElementById("frame");
-    let drawing = false;
-    let lastX = 0;
-    let lastY = 0;
-
-    canvas.addEventListener("mousedown", (e) => {
-        drawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-        const mousePosition = document.getElementById("mousePosition");
-        mousePosition.textContent = `X: ${e.offsetX}, Y: ${e.offsetY}`;
-    });
-
-    canvas.addEventListener("mouseup", (e) => {
-        if (!drawing) return;
-
-        // 发送绘制数据到服务器
-        fetch(`http://${backend_endpoint}/engine/draw`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Engine-Name": engine_name,
-            },
-            body: JSON.stringify({
-                Line: {
-                    p1: { x: lastX, y: lastY },
-                    p2: { x: e.offsetX, y: e.offsetY },
-                    color: { r: 255, g: 255, b: 255, a: 255},
-                    algorithm: 0,
-                },
-            }),
-        });
-    });
-    canvas.addEventListener("mouseout", () => (drawing = false));
 </script>
 </body>
 </html>
