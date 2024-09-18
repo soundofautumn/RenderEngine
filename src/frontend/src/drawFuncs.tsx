@@ -184,4 +184,25 @@ drawFuncs.push({
   }),
 })
 
+drawFuncs.push({
+  name: 'Arc with Three Points',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+      },
+      {
+        type: 'point',
+      },
+      {
+        type: 'point',
+      },
+    ],
+    requiredPointers: 3,
+    apiEndpoint: 'Arc',
+    drawingMethod: 'click',
+    type: 'three_points',
+  }),
+})
+
 export default drawFuncs;
