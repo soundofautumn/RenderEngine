@@ -60,7 +60,7 @@ void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float star
         // 计算弧度范围的步长，控制每次角度增加的精度
         float step = 0.001;  // 可以根据需要调整步长的大小，步长越小，圆弧越光滑
 
-        if (start_radian <= end_radian) {   // 起点角度值不大于终点角度值
+        if (start_radian <= end_radian) {  // 起点角度值不大于终点角度值
             // 从起始角度绘制到结束角度
             for (float theta = start_radian; theta <= end_radian; theta += step) {
                 int x = cx + radius * cos(theta);  // 计算极坐标的 x 坐标
@@ -69,7 +69,7 @@ void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float star
                 // 绘制当前角度下的点
                 draw_point(x, 2 * cy - y, options);
             }
-        } else {                            // 起点角度值大于终点角度值
+        } else {  // 起点角度值大于终点角度值
             for (float theta = end_radian; theta <= start_radian; theta += step) {
                 int x = cx + radius * cos(theta);  // 计算极坐标的 x 坐标
                 int y = cy + radius * sin(theta);  // 计算极坐标的 y 坐标
@@ -82,7 +82,6 @@ void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float star
 
     // 绘制圆弧
     draw_arc_points(center.x, center.y, x, y);
-    
 }
 
 // 根据三点求圆心和半径
