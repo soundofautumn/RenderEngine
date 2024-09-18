@@ -18,6 +18,12 @@ export default function App() {
       setFps(fpsRef.current);
     }, 500)
 
+    // setInterval(() => {
+    //   client('/engine/get_primitives').then(r => {
+    //     console.log(r.data);
+    //   })
+    // }, 1000)
+
     const width = document.body.clientWidth;
     const height = document.body.clientHeight;
     client('/engine/create', {
