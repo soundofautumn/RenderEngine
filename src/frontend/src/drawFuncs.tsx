@@ -114,7 +114,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Circle with Center and Radius',
+  name: 'Click to Circle',
   drawFunc: new DrawFunc({
     params: [
       {
@@ -134,6 +134,31 @@ drawFuncs.push({
     requiredPointers: 2,
     apiEndpoint: 'Circle',
     drawingMethod: 'click',
+    type: 'center_radius',
+  }),
+})
+
+drawFuncs.push({
+  name: 'Drag to Circle',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+        name: 'point_on_circle',
+      },
+      {
+        type: 'point',
+        name: 'center'
+      },
+      {
+        type: 'func',
+        name: 'radius',
+        func: (point_on_circle, center) => Math.floor(Math.sqrt((point_on_circle.x - center.x) ** 2 + (point_on_circle.y - center.y) ** 2)),
+      }
+    ],
+    requiredPointers: 2,
+    apiEndpoint: 'Circle',
+    drawingMethod: 'drag',
     type: 'center_radius',
   }),
 })
