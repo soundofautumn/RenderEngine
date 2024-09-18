@@ -19,7 +19,7 @@ int main() {
         {0, 300}, {799, 300}, {.color = Colors::Yellow, .type = PenOptions::LineType::DOT}));
     engine.add_primitive(make_circle_center_radius({400, 300}, 200, {.color = Colors::White}));
     engine.add_primitive(
-        make_arc_center_radius_angle({400, 300}, 250, 0, 143, {.color = Colors::White}));
+        make_arc_center_radius_angle({400, 300}, 200, 0, M_PI / 2, {.color = Colors::Cyan}));
     engine.save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");
