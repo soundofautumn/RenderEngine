@@ -8,7 +8,7 @@
 
 #include "common_response.hpp"
 #include "engine_manger.h"
-#include "serialize.h"
+#include "serialize/serialize.h"
 
 using RenderCore::Primitive;
 using RenderCore::RenderEngine;
