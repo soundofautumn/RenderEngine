@@ -1,8 +1,9 @@
 //
 // Created by Autumn Sound on 2024/9/6.
 //
-
 #include "circle.hpp"
+
+#include <numbers>
 
 #include "engine.hpp"
 
@@ -42,10 +43,9 @@ void RenderEngine::draw_circle_midpoint(
 
 void RenderEngine::draw_arc_midpoint(const Point &center, int radius, float start_angle,
     float end_angle, const PenOptions &options) {
-
     // 计算弧的角度范围
     float angle_range = end_angle - start_angle;
-    if (angle_range < 0) angle_range += 2 * M_PI;  // 处理负角度范围的情况
+    if (angle_range < 0) angle_range += 2 * std::numbers::pi;  // 处理负角度范围的情况
 
     // 绘制起始和结束角度之间的弧
     auto draw_arc_points = [&](int cx, int cy) {

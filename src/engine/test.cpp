@@ -1,6 +1,8 @@
 //
 // Created by Autumn Sound on 2024/9/5.
 //
+#include <numbers>
+
 #include "color.hpp"
 #include "engine.hpp"
 
@@ -18,8 +20,8 @@ int main() {
     engine.add_primitive(make_line(
         {0, 300}, {799, 300}, {.color = Colors::Yellow, .type = PenOptions::LineType::DOT}));
     engine.add_primitive(make_circle_center_radius({400, 300}, 200, {.color = Colors::White}));
-    engine.add_primitive(
-        make_arc_center_radius_angle({400, 300}, 200, 0, M_PI / 2, {.color = Colors::Cyan}));
+    engine.add_primitive(make_arc_center_radius_angle(
+        {400, 300}, 200, 0, std::numbers::pi / 2, {.color = Colors::Cyan}));
     engine.save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");
