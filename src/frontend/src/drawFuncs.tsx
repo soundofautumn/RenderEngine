@@ -27,6 +27,13 @@ class DrawFunc {
     this.apiEndpoint = props.apiEndpoint;
     this.drawingMethod = props.drawingMethod || 'drag';
     this.type = props.type;
+
+    if (this.requiredPointers < this.params.filter(param => param.type === 'point').length)
+      throw new Error("Illegal number of required pointers");
+    if (this.params.some(param => param.type === 'func' && (!param.func || !param.name)))
+      throw new Error("Function parameter missing function or name");
+    if (this.params.filter(param => param.type === 'point').length !== 2 && this.drawingMethod === 'drag')
+      throw new Error("Drag drawing method only supports 2 points");
   }
 
   public draw(props: IDrawFuncParams): Promise<void> {
