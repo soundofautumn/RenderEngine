@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { backend_endpoint, engine_name, fps, client } from './client';
+import { backend_endpoint, engine_name, engine_fps, client } from './client';
 import drawFuncs from './drawFuncs';
 
 import './App.css';
@@ -11,7 +11,13 @@ export default function App() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = React.useState(true);
   const loadingRef = React.useRef(true);
+  const fpsRef = React.useRef(0);
+  const [fps, setFps] = React.useState(0);
   React.useEffect(() => {
+    setInterval(() => {
+      setFps(fpsRef.current);
+    }, 500)
+
     const width = document.body.clientWidth;
     const height = document.body.clientHeight;
     client('/engine/create', {
@@ -25,13 +31,19 @@ export default function App() {
       console.log(`Engine ${engine_name} created with ${width}x${height}`);
       const ws = new WebSocket(`ws://${backend_endpoint}/engine/${engine_name}`);
       ws.onopen = function () {
-        ws.send(`set_fps ${fps}`);
+        ws.send(`set_fps ${engine_fps}`);
         setLoading(false);
         loadingRef.current = false;
       };
       ws.binaryType = "arraybuffer";
       ws.onmessage = function (event) {
         if (!canvasRef.current) return;
+
+        fpsRef.current += 1;
+        setTimeout(() => {
+          fpsRef.current -= 1;
+        }, 1000)
+
         const ctx = canvasRef.current.getContext("2d");
         canvasRef.current.width = width;
         canvasRef.current.height = height;
@@ -103,7 +115,7 @@ export default function App() {
   }
 
   return (<>
-    <div id="mousePosition">Engine: {engine_name}; X: {coordinate.x}, Y: {coordinate.y}; {loading ? 'Loading...' : 'Ready.'}</div>
+    <div id="mousePosition">Engine: {engine_name}; X: {coordinate.x}, Y: {coordinate.y}; fps: {fps}; {loading ? 'Loading...' : 'Ready.'}</div>
     <div id="drawFuncs">
       {
         drawFuncs.map((drawFunc, index) => {
