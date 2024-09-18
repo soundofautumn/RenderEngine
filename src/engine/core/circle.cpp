@@ -85,10 +85,28 @@ std::pair<Point, int> circle_center_radius(const Point &p1, const Point &p2, con
     // 两直线的交点即为圆心
     auto mid_point1 = (p1 + p2) / 2;
     auto mid_point2 = (p2 + p3) / 2;
-    auto k1 = -(p2.x - p1.x) / (p2.y - p1.y);
-    auto k2 = -(p3.x - p2.x) / (p3.y - p2.y);
-    auto x = (mid_point2.y - mid_point1.y + k1 * mid_point1.x - k2 * mid_point2.x) / (k1 - k2);
-    auto y = k1 * (x - mid_point1.x) + mid_point1.y;
+    float k1, k2;
+    if (p2.y != p1.y) {
+        k1 = -(p2.x - p1.x) / static_cast<float>(p2.y - p1.y);
+    } else {
+        k1 = std::numeric_limits<float>::infinity();
+    }
+    if (p3.y != p2.y) {
+        k2 = -(p3.x - p2.x) / static_cast<float>(p3.y - p2.y);
+    } else {
+        k2 = std::numeric_limits<float>::infinity();
+    }
+    float x, y;
+    if (k1 == std::numeric_limits<float>::infinity()) {
+        x = mid_point1.x;
+        y = k2 * (x - mid_point2.x) + mid_point2.y;
+    } else if (k2 == std::numeric_limits<float>::infinity()) {
+        x = mid_point2.x;
+        y = k1 * (x - mid_point1.x) + mid_point1.y;
+    } else {
+        x = (mid_point2.y - mid_point1.y + k1 * mid_point1.x - k2 * mid_point2.x) / (k1 - k2);
+        y = k1 * (x - mid_point1.x) + mid_point1.y;
+    }
     auto center = Point{static_cast<int>(x), static_cast<int>(y)};
     auto radius = vector_length(center - p1);
     return {center, radius};
