@@ -7,7 +7,6 @@
 
 #include <variant>
 
-#include "options.hpp"
 #include "point.hpp"
 
 namespace RenderCore {
