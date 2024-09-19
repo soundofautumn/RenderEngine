@@ -5,7 +5,6 @@
 #ifndef RENDERENGINE_LINE_HPP
 #define RENDERENGINE_LINE_HPP
 
-#include "options.hpp"
 #include "point.hpp"
 
 namespace RenderCore {
