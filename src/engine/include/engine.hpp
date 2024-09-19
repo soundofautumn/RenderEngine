@@ -120,7 +120,6 @@ class RenderCore::RenderEngine {
 
     // 设置画笔选项
     void set_pen_options(const PenOptions &options) {
-        pen_options_ = options;
         add_primitive(options);
     }
 
