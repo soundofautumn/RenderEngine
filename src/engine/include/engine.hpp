@@ -26,6 +26,8 @@ class RenderCore::RenderEngine {
 
     uint32_t color_background_{vector_to_color(Colors::Black)};
 
+    PenOptions pen_options_;
+
    public:
     using Buffer = Bitmap::Buffer;
 
@@ -104,14 +106,25 @@ class RenderCore::RenderEngine {
     void add_primitive(const Primitive &primitive);
 
     // 获取图元
-    [[nodiscard]] const std::vector<Primitive> get_primitives() const { return std::vector(primitives_.begin(), primitives_.end()); }
+    [[nodiscard]] const std::vector<Primitive> get_primitives() const {
+        return std::vector(primitives_.begin(), primitives_.end());
+    }
+
+    // 设置画笔选项
+    void set_pen_options(const PenOptions &options) {
+        pen_options_ = options;
+        add_primitive(options);
+    }
+
+    // 获取画笔选项
+    [[nodiscard]] const PenOptions &get_pen_options() const { return pen_options_; }
 
     // 渲染
     bool render();
 
    private:
     // 绘制点
-    void draw_point(int x, int y, const PenOptions &options = PenOptions(), int index = -1);
+    void draw_point(int x, int y, int index = -1);
 
     // 绘制线段
     void draw_line(const Line &line);
@@ -124,20 +137,19 @@ class RenderCore::RenderEngine {
 
    private:
     // DDA 算法绘制线段
-    void draw_line_dda(const Point &start, const Point &end, const PenOptions &options);
+    void draw_line_dda(const Point &start, const Point &end);
 
     // 中点算法绘制线段
-    void draw_line_midpoint(const Point &start, const Point &end, const PenOptions &options);
+    void draw_line_midpoint(const Point &start, const Point &end);
 
     // Bresenham 算法绘制线段
-    void draw_line_bresenham(const Point &start, const Point &end, const PenOptions &options);
+    void draw_line_bresenham(const Point &start, const Point &end);
 
     // 中点画圆算法
-    void draw_circle_midpoint(const Point &center, int radius, const PenOptions &options);
+    void draw_circle_midpoint(const Point &center, int radius);
 
     // 中点画圆弧算法
-    void draw_arc_midpoint(const Point &center, int radius, float start_angle, float end_angle,
-        const PenOptions &options);
+    void draw_arc_midpoint(const Point &center, int radius, float start_angle, float end_angle);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP

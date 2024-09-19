@@ -14,7 +14,8 @@ const uint16_t DOT_PATTERN = 0b1000'1000'1000'1000;
 // 点划线
 const uint16_t DASH_DOT_PATTERN = 0b1111'1010'1111'1010;
 
-void RenderEngine::draw_point(int x, int y, const PenOptions &options, int index) {
+void RenderEngine::draw_point(int x, int y, int index) {
+    const auto &options = pen_options_;
     if (options.type == PenOptions::LineType::SOLID && options.width <= 1) {
         draw_pixel(x, y, options.color);
         return;

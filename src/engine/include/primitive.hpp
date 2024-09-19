@@ -9,10 +9,11 @@
 
 #include "circle.hpp"
 #include "line.hpp"
+#include "options.hpp"
 
 namespace RenderCore {
 
-using Primitive = std::variant<Line, Circle, Arc>;
+using Primitive = std::variant<Line, Circle, Arc, PenOptions>;
 
 }
 

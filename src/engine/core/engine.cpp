@@ -31,6 +31,9 @@ bool RenderEngine::render() {
         } else if (std::holds_alternative<Arc>(primitive)) {
             const auto &arc = std::get<Arc>(primitive);
             draw_arc(arc);
+        } else if (std::holds_alternative<PenOptions>(primitive)) {
+            const auto &options = std::get<PenOptions>(primitive);
+            pen_options_ = options;
         }
     }
     return true;
