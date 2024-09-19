@@ -42,6 +42,13 @@ struct Vector {
         }
     }
 
+    inline Vector &operator=(const Vector<N, T> &v) {
+        for (size_t i = 0; i < N; i++) {
+            m[i] = v.m[i];
+        }
+        return *this;
+    }
+
     inline const T &operator[](size_t i) const {
         assert(i < N);
         return m[i];
@@ -83,6 +90,12 @@ struct Vector<2, T> {
     inline Vector(T x, T y) : x(x), y(y) {}
 
     inline Vector(const Vector<2, T> &v) : x(v.x), y(v.y) {}
+
+    inline Vector &operator=(const Vector<2, T> &v) {
+        x = v.x;
+        y = v.y;
+        return *this;
+    }
 
     inline const T &operator[](size_t i) const {
         assert(i < 2);
@@ -129,6 +142,13 @@ struct Vector<3, T> {
     inline Vector(T x, T y, T z) : x(x), y(y), z(z) {}
 
     inline Vector(const Vector<3, T> &v) : x(v.x), y(v.y), z(v.z) {}
+
+    inline Vector &operator=(const Vector<3, T> &v) {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        return *this;
+    }
 
     inline const T &operator[](size_t i) const {
         assert(i < 3);
@@ -177,6 +197,14 @@ struct Vector<4, T> {
     inline Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 
     inline Vector(const Vector<4, T> &v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
+
+    inline Vector &operator=(const Vector<4, T> &v) {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = v.w;
+        return *this;
+    }
 
     inline const T &operator[](size_t i) const {
         assert(i < 4);
