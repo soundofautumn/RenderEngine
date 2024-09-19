@@ -80,7 +80,7 @@ void RenderEngine::draw_line_midpoint(const Point &p1, const Point &p2) {
     }
 
     // 绘制终点
-    draw_point(x1, y1, index++);
+    draw_point(x1, y1, index);
 }
 
 void RenderEngine::draw_line_bresenham(const Point &p1, const Point &p2) {
