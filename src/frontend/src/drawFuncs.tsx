@@ -74,7 +74,7 @@ interface IDrawFunc {
 const drawFuncs: IDrawFunc[] = []
 
 drawFuncs.push({
-  name: 'Click to Draw Line',
+  name: '点画线',
   drawFunc: new DrawFunc(
     {
       params: [
@@ -93,7 +93,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Drag to Draw Line',
+  name: '拖画线',
   drawFunc: new DrawFunc({
     params: [
       {
@@ -110,7 +110,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Click to Circle',
+  name: '点画圆',
   drawFunc: new DrawFunc({
     params: [
       {
@@ -135,7 +135,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Drag to Circle',
+  name: '拖画圆',
   drawFunc: new DrawFunc({
     params: [
       {
@@ -160,7 +160,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Circle with Three Points',
+  name: '三点画圆',
   drawFunc: new DrawFunc({
     params: [
       {
@@ -181,7 +181,7 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
-  name: 'Arc with Three Points',
+  name: '三点画弧',
   drawFunc: new DrawFunc({
     params: [
       {
