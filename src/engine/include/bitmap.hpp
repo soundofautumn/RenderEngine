@@ -163,10 +163,10 @@ class RenderCore::Bitmap {
             const uint32_t padding = pitch - width_ * pixel_size;
             for (int j = 0; j < width_; j++) {
                 // bmp文件是BGRA顺序
-                const uint8_t r = line[3];
-                const uint8_t g = line[2];
-                const uint8_t b = line[1];
-                const uint8_t a = with_alpha ? line[0] : 0xFF;
+                const uint8_t r = line[0];
+                const uint8_t g = line[1];
+                const uint8_t b = line[2];
+                const uint8_t a = with_alpha ? line[3] : 0xFF;
                 const uint32_t pixel = (r << 16) | (g << 8) | b | (a << 24);
                 file.write(reinterpret_cast<const char *>(&pixel), pixel_size);
                 line += 4;
