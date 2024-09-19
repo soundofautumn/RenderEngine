@@ -5,11 +5,24 @@ import drawFuncs from './drawFuncs';
 import './App.css';
 import { IPoint } from './types';
 
+function getHeightUnfold(dom: HTMLElement) {
+  const fakeNode = dom.cloneNode(true) as HTMLElement;
+  fakeNode.style.position = 'absolute';
+  dom.parentNode?.insertBefore(fakeNode, dom);
+  fakeNode.style.height = 'auto';
+  fakeNode.style.visibility = 'hidden';
+
+  const height = fakeNode.getBoundingClientRect().height;
+  dom.parentNode?.removeChild(fakeNode);
+
+  return height;
+}
+
 export default function App() {
   const coordinateRef = React.useRef({ x: 0, y: 0 });
   const [coordinate, setCoordinate] = React.useState({ x: 0, y: 0 });
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [, setLoading] = React.useState(true);
   const loadingRef = React.useRef(true);
   const fpsRef = React.useRef(0);
   const [fps, setFps] = React.useState(0);
@@ -153,15 +166,16 @@ export default function App() {
   const [hideToolbar, setHideToolbar] = React.useState(false);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
   React.useEffect(() => {
-    setToolbarHeight((document.getElementById('drawFuncs')?.clientHeight || 0) - 12);
-  }, [])
+    if (hideToolbar) return;
+    setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 12);
+  }, [hideToolbar, penOptions])
 
   return (<>
     <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
     <div id="drawFuncs-wrapper">
       <div id="drawFuncs"
         style={{
-          height: (hideToolbar && toolbarHeight) ? 0 : (toolbarHeight || undefined),
+          height: (hideToolbar && toolbarHeight) ? 0 : toolbarHeight,
           padding: hideToolbar ? '0 4px' : undefined,
         }}>
         {
