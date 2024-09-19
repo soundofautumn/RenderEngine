@@ -225,13 +225,12 @@ export default function App() {
           线性
           <select
             value={penOptions.type}
-            onChange={(e) => {
-              const type = e.target.value as unknown as 0 | 1 | 2 | 3;
+            onChange={e =>
               setPenOptions({
                 ...penOptions,
-                type,
+                type: parseInt(e.target.value) as 0 | 1 | 2 | 3,
               })
-            }}>
+            }>
             <option value={0}>实线</option>
             <option value={1}>虚线</option>
             <option value={2}>点线</option>
@@ -255,7 +254,7 @@ export default function App() {
           </div>
         }
       </div>
-    </div>
+    </div >
     {
       ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])
         .map((point, index) => {
