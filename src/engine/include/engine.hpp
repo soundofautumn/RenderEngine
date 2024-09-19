@@ -103,7 +103,15 @@ class RenderCore::RenderEngine {
     }
 
     // 绘制图元
-    void add_primitive(const Primitive &primitive);
+    void add_primitive(const Primitive &primitive) {
+        if (!frame_buffer_) {
+            return;
+        }
+        primitives_.push_back(primitive);
+        if (std::holds_alternative<PenOptions>(primitive)) {
+            pen_options_ = std::get<PenOptions>(primitive);
+        }
+    }
 
     // 获取图元
     [[nodiscard]] const std::vector<Primitive> get_primitives() const {
@@ -120,7 +128,28 @@ class RenderCore::RenderEngine {
     [[nodiscard]] const PenOptions &get_pen_options() const { return pen_options_; }
 
     // 渲染
-    bool render();
+    bool render() {
+        if (!frame_buffer_) {
+            return false;
+        }
+        clear();
+        for (const auto &primitive : primitives_) {
+            if (std::holds_alternative<Line>(primitive)) {
+                const auto &line = std::get<Line>(primitive);
+                draw_line(line);
+            } else if (std::holds_alternative<Circle>(primitive)) {
+                const auto &circle = std::get<Circle>(primitive);
+                draw_circle(circle);
+            } else if (std::holds_alternative<Arc>(primitive)) {
+                const auto &arc = std::get<Arc>(primitive);
+                draw_arc(arc);
+            } else if (std::holds_alternative<PenOptions>(primitive)) {
+                const auto &options = std::get<PenOptions>(primitive);
+                pen_options_ = options;
+            }
+        }
+        return true;
+    }
 
    private:
     // 绘制点
