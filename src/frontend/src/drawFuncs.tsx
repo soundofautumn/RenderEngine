@@ -37,7 +37,7 @@ class DrawFunc {
   }
 
   public draw(props: IDrawFuncParams): Promise<void> {
-    const { pointers, color = '#ffffffff', algorithm = 0 } = props;
+    const { pointers, algorithm = 0 } = props;
     return new Promise((resolve, reject) => {
       if (pointers.length < this.requiredPointers) {
         reject("Not enough pointers");
@@ -54,17 +54,6 @@ class DrawFunc {
               else return [param.name || `u${index + 1}`, null];
             })),
             algorithm,
-            options: {
-              color: {
-                r: parseInt(color.slice(1, 3), 16),
-                g: parseInt(color.slice(3, 5), 16),
-                b: parseInt(color.slice(5, 7), 16),
-                a: parseInt(color.slice(7, 9), 16),
-              },
-              width: 1,
-              type: 0,
-              dash: 0,
-            }
           }
         }
       }).then(() => {

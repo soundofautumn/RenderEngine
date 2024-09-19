@@ -124,7 +124,7 @@ export default function App() {
   }
 
   return (<>
-    <div id="mousePosition">Engine: {engine_name}; X: {coordinate.x}, Y: {coordinate.y}; fps: {fps}; {loading ? 'Loading...' : 'Ready.'}</div>
+    <div id="mousePosition">Engine: {engine_name}; FPS: {fps}; {loading ? 'Loading...' : 'Ready.'}</div>
     <div id="drawFuncs">
       {
         drawFuncs.map((drawFunc, index) => {
