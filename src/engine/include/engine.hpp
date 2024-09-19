@@ -6,6 +6,7 @@
 #define RENDERENGINE_ENGINE_HPP
 
 #include <deque>
+#include <functional>
 
 #include "bitmap.hpp"
 #include "options.hpp"
@@ -114,14 +115,12 @@ class RenderCore::RenderEngine {
     }
 
     // 获取图元
-    [[nodiscard]] const std::vector<Primitive> get_primitives() const {
-        return std::vector(primitives_.begin(), primitives_.end());
+    [[nodiscard]] std::vector<std::reference_wrapper<const Primitive>> get_primitives() const {
+        return {primitives_.begin(), primitives_.end()};
     }
 
     // 设置画笔选项
-    void set_pen_options(const PenOptions &options) {
-        add_primitive(options);
-    }
+    void set_pen_options(const PenOptions &options) { add_primitive(options); }
 
     // 获取画笔选项
     [[nodiscard]] const PenOptions &get_pen_options() const { return pen_options_; }

@@ -109,6 +109,7 @@ void handle_engine_get_primitives(const request &req, response &res) {
     if (!engine) {
         return;
     }
+    std::lock_guard<std::mutex> lock(engine->mutex);
     auto primitives = engine->engine.get_primitives();
     boost::json::array j_primitives;
     for (const auto &primitive : primitives) {
