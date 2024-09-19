@@ -20,6 +20,7 @@ bool RenderEngine::render() {
     if (!frame_buffer_) {
         return false;
     }
+    clear();
     for (const auto &primitive : primitives_) {
         if (std::holds_alternative<Line>(primitive)) {
             const auto &line = std::get<Line>(primitive);
