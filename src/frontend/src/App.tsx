@@ -150,110 +150,125 @@ export default function App() {
     }), 100);
   }, [penOptions])
 
+  const [hideToolbar, setHideToolbar] = React.useState(false);
+  const [toolbarHeight, setToolbarHeight] = React.useState(0);
+  React.useEffect(() => {
+    setToolbarHeight((document.getElementById('drawFuncs')?.clientHeight || 0) - 12);
+  }, [])
+
   return (<>
     <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
-    <div id="drawFuncs">
-      {
-        drawFuncs.map((drawFunc, index) => {
-          return (
-            <button
-              key={index}
-              onClick={() => {
-                currentDrawFunc.current = drawFunc.drawFunc;
-                setCurrentDrawFuncIndex(index);
-              }}
-              disabled={index === currentDrawFuncIndex}
-            >
-              {drawFunc.name}
-            </button>
-          )
-        })
-      }
-      <div id="pen-options">
-        <div className="option no-text">
-          颜色
-          <input
-            type="color"
-            value={`#${penOptions.color.r.toString(16).padStart(2, '0')}${penOptions.color.g.toString(16).padStart(2, '0')}${penOptions.color.b.toString(16).padStart(2, '0')}`}
-            onChange={e => {
-              const color = e.target.value;
-              setPenOptions({
-                ...penOptions,
-                color: {
-                  r: parseInt(color.slice(1, 3), 16),
-                  g: parseInt(color.slice(3, 5), 16),
-                  b: parseInt(color.slice(5, 7), 16),
-                  a: penOptions.color.a,
-                }
-              })
-            }}
-          />
-        </div>
-        <div className="option no-text">
-          透明
-          <input
-            type="range" min="0" max="255"
-            value={penOptions.color.a}
-            onChange={e => {
-              setPenOptions({
-                ...penOptions,
-                color: {
-                  ...penOptions.color,
-                  a: parseInt(e.target.value)
-                }
-              })
-            }}
-            style={{
-              '--color': `rgba(${penOptions.color.r}, ${penOptions.color.g}, ${penOptions.color.b}, ${penOptions.color.a / 255})`
-            } as React.CSSProperties}
-          />
-        </div>
-        <div className="option">
-          线宽
-          <input
-            type="number"
-            value={penOptions.width}
-            onChange={e =>
-              setPenOptions({
-                ...penOptions,
-                width: parseInt(e.target.value)
-              })
-            }
-          />
-        </div>
-        <div className="option">
-          线性
-          <select
-            value={penOptions.type}
-            onChange={e =>
-              setPenOptions({
-                ...penOptions,
-                type: parseInt(e.target.value) as 0 | 1 | 2 | 3,
-              })
-            }>
-            <option value={0}>实线</option>
-            <option value={1}>虚线</option>
-            <option value={2}>点线</option>
-            <option value={3}>点划线</option>
-          </select>
-        </div>
+    <div id="drawFuncs-wrapper">
+      <div id="drawFuncs"
+        style={{
+          height: (hideToolbar && toolbarHeight) ? 0 : (toolbarHeight || undefined),
+          padding: hideToolbar ? '0 4px' : undefined,
+        }}>
         {
-          penOptions.type > 0 &&
+          drawFuncs.map((drawFunc, index) => {
+            return (
+              <button
+                key={index}
+                onClick={() => {
+                  currentDrawFunc.current = drawFunc.drawFunc;
+                  setCurrentDrawFuncIndex(index);
+                }}
+                disabled={index === currentDrawFuncIndex}
+              >
+                {drawFunc.name}
+              </button>
+            )
+          })
+        }
+        <div id="pen-options">
+          <div className="option no-text">
+            颜色
+            <input
+              type="color"
+              value={`#${penOptions.color.r.toString(16).padStart(2, '0')}${penOptions.color.g.toString(16).padStart(2, '0')}${penOptions.color.b.toString(16).padStart(2, '0')}`}
+              onChange={e => {
+                const color = e.target.value;
+                setPenOptions({
+                  ...penOptions,
+                  color: {
+                    r: parseInt(color.slice(1, 3), 16),
+                    g: parseInt(color.slice(3, 5), 16),
+                    b: parseInt(color.slice(5, 7), 16),
+                    a: penOptions.color.a,
+                  }
+                })
+              }}
+            />
+          </div>
+          <div className="option no-text">
+            透明
+            <input
+              type="range" min="0" max="255"
+              value={penOptions.color.a}
+              onChange={e => {
+                setPenOptions({
+                  ...penOptions,
+                  color: {
+                    ...penOptions.color,
+                    a: parseInt(e.target.value)
+                  }
+                })
+              }}
+              style={{
+                '--color': `rgba(${penOptions.color.r}, ${penOptions.color.g}, ${penOptions.color.b}, ${penOptions.color.a / 255})`
+              } as React.CSSProperties}
+            />
+          </div>
           <div className="option">
-            虚长
+            线宽
             <input
               type="number"
-              value={penOptions.dash}
+              value={penOptions.width}
               onChange={e =>
                 setPenOptions({
                   ...penOptions,
-                  dash: parseInt(e.target.value)
+                  width: parseInt(e.target.value)
                 })
               }
             />
           </div>
-        }
+          <div className="option">
+            线性
+            <select
+              value={penOptions.type}
+              onChange={e =>
+                setPenOptions({
+                  ...penOptions,
+                  type: parseInt(e.target.value) as 0 | 1 | 2 | 3,
+                })
+              }>
+              <option value={0}>实线</option>
+              <option value={1}>虚线</option>
+              <option value={2}>点线</option>
+              <option value={3}>点划线</option>
+            </select>
+          </div>
+          {
+            penOptions.type > 0 &&
+            <div className="option">
+              虚长
+              <input
+                type="number"
+                value={penOptions.dash}
+                onChange={e =>
+                  setPenOptions({
+                    ...penOptions,
+                    dash: parseInt(e.target.value)
+                  })
+                }
+              />
+            </div>
+          }
+        </div>
       </div>
+      <button id="toolbar-control" onClick={() => setHideToolbar(!hideToolbar)}>
+        {hideToolbar ? '展开' : '收起'}工具栏
+      </button>
     </div >
     {
       ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])

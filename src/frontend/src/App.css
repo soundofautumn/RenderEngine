@@ -63,19 +63,10 @@ canvas {
     }
 }
 
-#drawFuncs {
+#drawFuncs-wrapper {
     position: absolute;
     top: 10px;
     right: 10px;
-    color: white;
-    background: rgba(255, 255, 255, 0.3);
-    padding: 4px;
-    border-radius: 5px;
-    pointer-events: all;
-    display: flex;
-    flex-direction: column;
-    cursor: default;
-    font-size: 14px;
     button,
     input,
     select {
@@ -96,6 +87,25 @@ canvas {
             cursor: default;
         }
     }
+    #toolbar-control {
+        width: 100%;
+        position: relative;
+        left: -2px;
+    }
+}
+
+#drawFuncs {
+    padding: 4px;
+    border-radius: 5px;
+    pointer-events: all;
+    display: flex;
+    flex-direction: column;
+    cursor: default;
+    font-size: 14px;
+    transition: 1s;
+    overflow: hidden;
+    color: white;
+    background: rgba(255, 255, 255, 0.3);
     #pen-options {
         display: flex;
         flex-direction: column;
