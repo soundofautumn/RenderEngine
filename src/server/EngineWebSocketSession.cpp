@@ -92,6 +92,12 @@ void EngineWebSocketSession::send_frame() {
         logger::trace("Write in progress, frame dropped");
         return;
     }
+    // 测量渲染时间
+    auto start = std::chrono::steady_clock::now();
+    engine_with_mutex->engine.render();
+    auto end = std::chrono::steady_clock::now();
+    logger::trace("Render time: {} ms",
+        std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     frame_buffer_ = engine_with_mutex->engine.get_frame_buffer();
     write_in_progress_ = true;
     ws_.async_write(boost::asio::buffer(frame_buffer_),

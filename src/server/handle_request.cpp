@@ -111,9 +111,7 @@ void handle_engine_get_primitives(const request &req, response &res) {
     }
     auto primitives = engine->engine.get_primitives();
     boost::json::array j_primitives;
-    while (!primitives.empty()) {
-        auto primitive = primitives.top();
-        primitives.pop();
+    for (const auto &primitive : primitives) {
         j_primitives.push_back(serialize_primitive(primitive));
     }
     res.result(http::status::ok);

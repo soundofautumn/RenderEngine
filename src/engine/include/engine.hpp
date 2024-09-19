@@ -5,7 +5,7 @@
 #ifndef RENDERENGINE_ENGINE_HPP
 #define RENDERENGINE_ENGINE_HPP
 
-#include <stack>
+#include <deque>
 
 #include "bitmap.hpp"
 #include "options.hpp"
@@ -19,7 +19,7 @@ class RenderEngine;
 class RenderCore::RenderEngine {
     Bitmap *frame_buffer_;
 
-    std::stack<Primitive> primitives_;
+    std::deque<Primitive> primitives_;
 
     int32_t width_;
     int32_t height_;
@@ -104,7 +104,7 @@ class RenderCore::RenderEngine {
     void add_primitive(const Primitive &primitive);
 
     // 获取图元
-    [[nodiscard]] const std::stack<Primitive> &get_primitives() const { return primitives_; }
+    [[nodiscard]] const std::vector<Primitive> get_primitives() const { return std::vector(primitives_.begin(), primitives_.end()); }
 
     // 渲染
     bool render();
