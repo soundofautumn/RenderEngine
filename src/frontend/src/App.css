@@ -72,7 +72,11 @@ canvas {
     pointer-events: all;
     display: flex;
     flex-direction: column;
-    button {
+    cursor: default;
+    font-size: 14px;
+    button,
+    input,
+    select {
         margin: 2px 2px;
         padding: 5px;
         border-radius: 5px;
@@ -88,6 +92,54 @@ canvas {
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.5);
             cursor: default;
+        }
+    }
+    #pen-options {
+        display: flex;
+        flex-direction: column;
+        margin: 2px 2px;
+        .option {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: baseline;
+            button,
+            input,
+            select {
+                margin-left: 4px;
+                margin-right: 0;
+                flex-grow: 1;
+            }
+            input[type="color"] {
+                padding: 0 2px;
+                height: 18px;
+            }
+            input[type="color"]::-webkit-color-swatch {
+                border-radius: 8px;
+            }
+            input[type="number"] {
+                width: 0;
+            }
+            --color: #fff;
+            input[type="range"] {
+                appearance: none;
+                height: 5px;
+                background: rgba(255, 255, 255, 0.1);
+                &:hover {
+                    background: black;
+                }
+            }
+            input[type="range"]::-webkit-slider-thumb {
+                appearance: none;
+                background-color: var(--color);
+                width: 50px;
+                height: 8px;
+                cursor: pointer;
+                border-radius: 3px;
+            }
+        }
+        .option.no-text {
+            align-items: center;
         }
     }
 }

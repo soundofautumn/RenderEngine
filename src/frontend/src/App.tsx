@@ -123,8 +123,35 @@ export default function App() {
     }
   }
 
+  const [penOptions, setPenOptions] = React.useState<{
+    color: {
+      r: number;
+      g: number;
+      b: number;
+      a: number;
+    },
+    width: number,
+    type: 0 | 1 | 2 | 3,
+    dash: number,
+  }>({
+    color: { r: 255, g: 255, b: 255, a: 255 },
+    width: 1,
+    type: 0,
+    dash: 1,
+  });
+
+  const changePenOptionsTimeout = React.useRef<number | null>(null);
+  React.useEffect(() => {
+    if (changePenOptionsTimeout.current) clearTimeout(changePenOptionsTimeout.current);
+    changePenOptionsTimeout.current = setTimeout(() => client('/engine/draw', {
+      data: {
+        PenOptions: penOptions,
+      }
+    }), 100);
+  }, [penOptions])
+
   return (<>
-    <div id="mousePosition">Engine: {engine_name}; FPS: {fps}; {loading ? 'Loading...' : 'Ready.'}</div>
+    <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
     <div id="drawFuncs">
       {
         drawFuncs.map((drawFunc, index) => {
@@ -142,6 +169,92 @@ export default function App() {
           )
         })
       }
+      <div id="pen-options">
+        <div className="option no-text">
+          颜色
+          <input
+            type="color"
+            value={`#${penOptions.color.r.toString(16).padStart(2, '0')}${penOptions.color.g.toString(16).padStart(2, '0')}${penOptions.color.b.toString(16).padStart(2, '0')}`}
+            onChange={e => {
+              const color = e.target.value;
+              setPenOptions({
+                ...penOptions,
+                color: {
+                  r: parseInt(color.slice(1, 3), 16),
+                  g: parseInt(color.slice(3, 5), 16),
+                  b: parseInt(color.slice(5, 7), 16),
+                  a: penOptions.color.a,
+                }
+              })
+            }}
+          />
+        </div>
+        <div className="option no-text">
+          透明
+          <input
+            type="range" min="0" max="255"
+            value={penOptions.color.a}
+            onChange={e => {
+              setPenOptions({
+                ...penOptions,
+                color: {
+                  ...penOptions.color,
+                  a: parseInt(e.target.value)
+                }
+              })
+            }}
+            style={{
+              '--color': `rgba(${penOptions.color.r}, ${penOptions.color.g}, ${penOptions.color.b}, ${penOptions.color.a / 255})`
+            } as React.CSSProperties}
+          />
+        </div>
+        <div className="option">
+          线宽
+          <input
+            type="number"
+            value={penOptions.width}
+            onChange={e =>
+              setPenOptions({
+                ...penOptions,
+                width: parseInt(e.target.value)
+              })
+            }
+          />
+        </div>
+        <div className="option">
+          线性
+          <select
+            value={penOptions.type}
+            onChange={(e) => {
+              const type = e.target.value as unknown as 0 | 1 | 2 | 3;
+              setPenOptions({
+                ...penOptions,
+                type,
+              })
+            }}>
+            <option value={0}>实线</option>
+            <option value={1}>虚线</option>
+            <option value={2}>点线</option>
+            <option value={3}>点划线</option>
+          </select>
+        </div>
+        {
+          penOptions.type > 0 &&
+          <div className="option">
+            虚长
+            <input
+              type="number"
+              value={penOptions.dash}
+              onChange={e =>
+                setPenOptions({
+                  ...penOptions,
+                  dash: parseInt(e.target.value)
+                })
+              }
+            />
+          </div>
+        }
+      </div>
     </div>
     {
       ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])
@@ -174,7 +287,6 @@ export default function App() {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-
     />
   </>)
 }
