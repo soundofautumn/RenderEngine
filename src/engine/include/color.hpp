@@ -14,10 +14,10 @@ using Color = Vector4f;
 
 // 矢量转整数颜色
 inline static uint32_t vector_to_color(const Vector4f &v) {
-    const auto r = (uint32_t)saturate(v.r) * 255;
-    const auto g = (uint32_t)saturate(v.g) * 255;
-    const auto b = (uint32_t)saturate(v.b) * 255;
-    const auto a = (uint32_t)saturate(v.a) * 255;
+    const auto r = (uint32_t)(saturate(v.r) * 255);
+    const auto g = (uint32_t)(saturate(v.g) * 255);
+    const auto b = (uint32_t)(saturate(v.b) * 255);
+    const auto a = (uint32_t)(saturate(v.a) * 255);
     return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
