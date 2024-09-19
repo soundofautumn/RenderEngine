@@ -113,10 +113,11 @@ canvas {
             }
             input[type="color"] {
                 padding: 0 2px;
-                height: 18px;
+                height: 16px;
             }
             input[type="color"]::-webkit-color-swatch {
-                border-radius: 8px;
+                border: none;
+                border-radius: 3px;
             }
             input[type="number"] {
                 width: 0;
