@@ -101,7 +101,7 @@ canvas {
     flex-direction: column;
     cursor: default;
     font-size: 14px;
-    transition: 1s;
+    transition: 0.8s ease;
     overflow: hidden;
     color: white;
     background: rgba(255, 255, 255, 0.3);
