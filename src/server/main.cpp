@@ -1,15 +1,22 @@
-#include <spdlog/spdlog.h>
 
+#include <csignal>
 #include <thread>
 
 #include "Listener.h"
+#include "logger.h"
+
+void handle_signal(int signal) {
+    if (signal == SIGINT) {
+        spdlog::info("Received SIGINT, shutting down...");
+        spdlog::shutdown();
+        std::exit(0);
+    }
+}
 
 int main() {
-#ifdef NDEBUG
-    spdlog::set_level(spdlog::level::info);
-#else
-    spdlog::set_level(spdlog::level::debug);
-#endif
+    init_logger();
+
+    std::signal(SIGINT, handle_signal);
 
     auto const address = boost::asio::ip::make_address("0.0.0.0");
     auto const port = static_cast<unsigned short>(3000);
@@ -31,6 +38,8 @@ int main() {
     for (auto i = threads - 1; i > 0; --i) v.emplace_back([&ioc] { ioc.run(); });
 
     for (auto &t : v) t.join();
+
+    spdlog::shutdown();
 
     return 0;
 }
