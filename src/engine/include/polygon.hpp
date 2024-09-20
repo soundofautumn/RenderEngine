@@ -12,7 +12,7 @@ namespace RenderCore {
 
 struct Polygon {
     std::vector<Point> points;
-    enum class Action { Draw, Fill, Clip };
+    enum class Action { Draw, Clip };
     Action action{Action::Draw};
 };
 

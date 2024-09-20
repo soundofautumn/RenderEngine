@@ -163,9 +163,6 @@ class RenderCore::RenderEngine {
                     case Rectangle::Action::Draw:
                         draw_rectangle(rectangle);
                         break;
-                    case Rectangle::Action::Fill:
-                        fill_rectangle(rectangle);
-                        break;
                     case Rectangle::Action::Clip:
                         break;
                     default:
@@ -177,9 +174,6 @@ class RenderCore::RenderEngine {
                 switch (polygon.action) {
                     case Polygon::Action::Draw:
                         draw_polygon(polygon);
-                        break;
-                    case Polygon::Action::Fill:
-                        fill_polygon(polygon);
                         break;
                     case Rectangle::Action::Clip:
                         break;
@@ -211,14 +205,11 @@ class RenderCore::RenderEngine {
     // 绘制矩形
     void draw_rectangle(const Rectangle &rectangle);
 
-    // 填充矩形
-    void fill_rectangle(const Rectangle &rectangle);
-
     // 绘制多边形
     void draw_polygon(const Polygon &polygon);
 
-    // 填充多边形
-    void fill_polygon(const Polygon &polygon);
+    // 填充
+    void fill(const Fill &fill);
 
     // 矩形窗口裁剪
     void rectangle_clip(const Rectangle &window);
@@ -246,7 +237,7 @@ class RenderCore::RenderEngine {
     void draw_polygon_scanline(const Polygon &polygon);
 
     // 种子填充算法填充多边形
-    void fill_polygon_seedfill(const Polygon &polygon);
+    void fill_polygon_seedfill(const Fill &polygon);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP

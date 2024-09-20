@@ -8,14 +8,14 @@
 #include <variant>
 
 #include "circle.hpp"
+#include "fill.hpp"
 #include "line.hpp"
 #include "options.hpp"
 #include "polygon.hpp"
 #include "rectangle.hpp"
-
 namespace RenderCore {
 
-using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, PenOptions>;
+using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions>;
 
 }
 
