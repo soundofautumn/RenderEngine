@@ -17,7 +17,7 @@ int main() {
     engine.init(800, 600);
     engine.clear();
 
-    // lab_1();
+    lab_1();
     lab_2();
 
     engine.render();
@@ -44,6 +44,7 @@ void lab_1() {
 }
 
 void lab_2() {
+    engine.set_pen_options({.color = Colors::Red, .fill_color = Colors::Green});
     // 矩形绘制
     engine.add_primitive(make_rectangle({100, 100}, {200, 200}, Rectangle::Action::Draw));
     // 多边形绘制
