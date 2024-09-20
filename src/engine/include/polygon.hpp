@@ -16,5 +16,10 @@ struct Polygon {
     Action action{Action::Draw};
 };
 
+inline Polygon make_polygon(
+    const std::vector<Point> &points, Polygon::Action action = Polygon::Action::Draw) {
+    return Polygon{points, .action = action};
+};
+
 }  // namespace RenderCore
 #endif
