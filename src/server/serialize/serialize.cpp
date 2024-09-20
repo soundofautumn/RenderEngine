@@ -8,6 +8,8 @@
 #include "serialize_color.h"
 #include "serialize_line.h"
 #include "serialize_point.h"
+#include "serialize_polygon.h"
+#include "serialize_rectangle.h"
 
 using namespace RenderCore;
 

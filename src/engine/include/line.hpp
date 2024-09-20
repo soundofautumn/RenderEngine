@@ -15,7 +15,7 @@ struct Line {
         DDA,       // DDA算法
         MIDPOINT,  // 中点算法
         BRESENHAM  // Bresenham算法
-    } algorithm;
+    } algorithm{LineAlgorithm::BRESENHAM};
 };
 
 inline Line make_line(const Point &p1, const Point &p2,
