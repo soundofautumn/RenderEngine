@@ -14,6 +14,8 @@ namespace RenderCore {
 struct PenOptions {
     // 画笔颜色
     Color color{Colors::White};
+    // 填充颜色
+    Color fill_color{Colors::White};
     // 画笔宽度
     int width{1};
     // 画笔类型
