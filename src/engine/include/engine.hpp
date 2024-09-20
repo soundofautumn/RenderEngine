@@ -134,6 +134,7 @@ class RenderCore::RenderEngine {
             return false;
         }
         clear();
+        render_primitives_ = std::vector<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         for (const auto &primitive : primitives_) {
             if (std::holds_alternative<Rectangle>(primitive) &&
