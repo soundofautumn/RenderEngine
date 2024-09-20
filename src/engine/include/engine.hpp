@@ -20,7 +20,10 @@ class RenderEngine;
 class RenderCore::RenderEngine {
     Bitmap *frame_buffer_;
 
-    std::deque<Primitive> primitives_;
+    std::deque<const Primitive> primitives_;
+
+    // 存储需要渲染的图元
+    std::vector<Primitive> render_primitives_;
 
     int32_t width_;
     int32_t height_;
@@ -131,7 +134,20 @@ class RenderCore::RenderEngine {
             return false;
         }
         clear();
+        // 裁剪
         for (const auto &primitive : primitives_) {
+            if (std::holds_alternative<Rectangle>(primitive) &&
+                std::get<Rectangle>(primitive).action == Rectangle::Action::Clip) {
+                auto window = std::get<Rectangle>(primitive);
+                rectangle_clip(window);
+            } else if (std::holds_alternative<Polygon>(primitive) &&
+                       std::get<Polygon>(primitive).action == Polygon::Action::Clip) {
+                auto window = std::get<Polygon>(primitive);
+                polygon_clip(window);
+            }
+        }
+        // 遍历绘制图元
+        for (const auto &primitive : render_primitives_) {
             if (std::holds_alternative<Line>(primitive)) {
                 const auto &line = std::get<Line>(primitive);
                 draw_line(line);
@@ -150,6 +166,8 @@ class RenderCore::RenderEngine {
                     case Rectangle::Action::Fill:
                         fill_rectangle(rectangle);
                         break;
+                    case Rectangle::Action::Clip:
+                        break;
                     default:
                         throw std::runtime_error("Not implemented");
                         break;
@@ -162,6 +180,8 @@ class RenderCore::RenderEngine {
                         break;
                     case Polygon::Action::Fill:
                         fill_polygon(polygon);
+                        break;
+                    case Rectangle::Action::Clip:
                         break;
                     default:
                         throw std::runtime_error("Not implemented");
@@ -199,6 +219,12 @@ class RenderCore::RenderEngine {
 
     // 填充多边形
     void fill_polygon(const Polygon &polygon);
+
+    // 矩形窗口裁剪
+    void rectangle_clip(const Rectangle &window);
+
+    // 任意凸多边形裁剪
+    void polygon_clip(const Polygon &window);
 
    private:
     // DDA 算法绘制线段
