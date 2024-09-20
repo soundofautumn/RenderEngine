@@ -141,6 +141,32 @@ class RenderCore::RenderEngine {
             } else if (std::holds_alternative<Arc>(primitive)) {
                 const auto &arc = std::get<Arc>(primitive);
                 draw_arc(arc);
+            } else if (std::holds_alternative<Rectangle>(primitive)) {
+                const auto &rectangle = std::get<Rectangle>(primitive);
+                switch (rectangle.action) {
+                    case Rectangle::Action::Draw:
+                        draw_rectangle(rectangle);
+                        break;
+                    case Rectangle::Action::Fill:
+                        fill_rectangle(rectangle);
+                        break;
+                    default:
+                        throw std::runtime_error("Not implemented");
+                        break;
+                }
+            } else if (std::holds_alternative<Polygon>(primitive)) {
+                const auto &polygon = std::get<Polygon>(primitive);
+                switch (polygon.action) {
+                    case Polygon::Action::Draw:
+                        draw_polygon(polygon);
+                        break;
+                    case Polygon::Action::Fill:
+                        fill_polygon(polygon);
+                        break;
+                    default:
+                        throw std::runtime_error("Not implemented");
+                        break;
+                }
             } else if (std::holds_alternative<PenOptions>(primitive)) {
                 const auto &options = std::get<PenOptions>(primitive);
                 pen_options_ = options;
@@ -162,6 +188,18 @@ class RenderCore::RenderEngine {
     // 绘制圆弧
     void draw_arc(const Arc &arc);
 
+    // 绘制矩形
+    void draw_rectangle(const Rectangle &rectangle);
+
+    // 填充矩形
+    void fill_rectangle(const Rectangle &rectangle);
+
+    // 绘制多边形
+    void draw_polygon(const Polygon &polygon);
+
+    // 填充多边形
+    void fill_polygon(const Polygon &polygon);
+
    private:
     // DDA 算法绘制线段
     void draw_line_dda(const Point &start, const Point &end);
@@ -177,6 +215,12 @@ class RenderCore::RenderEngine {
 
     // 中点画圆弧算法
     void draw_arc_midpoint(const Point &center, int radius, float start_angle, float end_angle);
+
+    // 扫描线算法绘制多边形
+    void draw_polygon_scanline(const Polygon &polygon);
+
+    // 种子填充算法填充多边形
+    void fill_polygon_seedfill(const Polygon &polygon);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP
