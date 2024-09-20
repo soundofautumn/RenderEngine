@@ -6,12 +6,24 @@
 #define RENDERENGINE_RECTANGLE_HPP
 
 #include "point.hpp"
+#include "utils.hpp"
 #include "vector.hpp"
 
 namespace RenderCore {
 
 struct Rectangle {
-    Vector<4, Point> points;
+    union {
+        struct {
+            Point top_left;
+            Point bottom_right;
+        };
+        struct {
+            int min_x;
+            int min_y;
+            int max_x;
+            int max_y;
+        };
+    };
 };
 
 }  // namespace RenderCore
