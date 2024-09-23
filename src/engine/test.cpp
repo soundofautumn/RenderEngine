@@ -1,6 +1,7 @@
 //
 // Created by Autumn Sound on 2024/9/5.
 //
+#include <chrono>
 #include <numbers>
 
 #include "color.hpp"
@@ -20,7 +21,12 @@ int main() {
     lab_1();
     lab_2();
 
+    // 计时
+    auto start = std::chrono::high_resolution_clock::now();
     engine.render();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Elapsed time: " << elapsed.count() << " s" << std::endl;
     engine.save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");
@@ -48,9 +54,10 @@ void lab_2() {
     // 矩形绘制
     engine.add_primitive(make_rectangle({100, 100}, {200, 200}, Rectangle::Action::Draw));
     // 多边形绘制
-   engine.add_primitive(make_polygon({{300, 100}, {400, 100}, {350, 200}}, Polygon::Action::Draw));
+    engine.add_primitive(make_polygon({{300, 100}, {400, 100}, {350, 200}}, Polygon::Action::Draw));
     engine.set_pen_options({.color = Colors::Blue, .fill_color = Colors::Yellow});
-    engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {650, 200}, {500, 300}}, Polygon::Action::Draw));
+    engine.add_primitive(
+        make_polygon({{500, 100}, {600, 100}, {650, 200}, {500, 300}}, Polygon::Action::Draw));
     // 区域填充
     engine.set_pen_options({.color = Colors::Red, .fill_color = Colors::Cyan});
     engine.add_primitive(make_fill({350, 150}));
