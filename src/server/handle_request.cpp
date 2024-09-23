@@ -9,6 +9,7 @@
 #include "common_response.hpp"
 #include "engine_manger.h"
 #include "serialize/serialize.h"
+#include "serialize/serialize_options.h"
 
 using RenderCore::Primitive;
 using RenderCore::RenderEngine;
@@ -120,6 +121,25 @@ void handle_engine_get_primitives(const request &req, response &res) {
     res.body() = boost::json::serialize(j_primitives);
 }
 
+void handle_engine_set_global_options(const request &req, response &res) {
+    auto j = get_request_body(req, res);
+    if (j.is_null()) {
+        return;
+    }
+    auto engine = get_engine_with_mutex(req, res);
+    if (!engine) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(engine->mutex);
+    if (!j.as_object().contains("GlobalOptions")) {
+        error_response(res, http::status::bad_request, "Global options not found.");
+        return;
+    }
+    auto global_options = deserialize_global_options(j.at("GlobalOptions").as_object());
+    engine->engine.set_global_options(global_options);
+    success_response(res, "Global options set.");
+}
+
 void handle_request(const request &req, response &res) {
     if (req.method() == http::verb::options) {
         res.result(http::status::ok);
@@ -146,6 +166,8 @@ void handle_request(const request &req, response &res) {
                 handle_engine_draw(req, res);
             } else if (req.target().starts_with("/engine/get_primitives")) {
                 handle_engine_get_primitives(req, res);
+            } else if (req.target().starts_with("/engine/set_global_options")) {
+                handle_engine_set_global_options(req, res);
             } else if (req.target().starts_with("/engine/ws")) {
                 res.result(http::status::ok);
             } else {
@@ -155,7 +177,7 @@ void handle_request(const request &req, response &res) {
             return not_found_response(req, res);
         }
     } catch (const std::exception &e) {
-        #ifdef NDEBUG
+#ifdef NDEBUG
         auto msg = "Internal server error.";
 #else
         auto msg = "Internal server error: " + std::string(e.what());

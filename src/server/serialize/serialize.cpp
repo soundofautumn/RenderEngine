@@ -6,6 +6,7 @@
 
 #include "serialize_circle.h"
 #include "serialize_color.h"
+#include "serialize_fill.h"
 #include "serialize_line.h"
 #include "serialize_point.h"
 #include "serialize_polygon.h"
@@ -26,6 +27,8 @@ Primitive deserialize_primitive(const boost::json::object &primitive) {
         return deserialize_polygon(primitive.at("Polygon").as_object());
     } else if (primitive.contains("Rectangle")) {
         return deserialize_rectangle(primitive.at("Rectangle").as_object());
+    } else if (primitive.contains("Fill")) {
+        return deserialize_fill(primitive.at("Fill").as_object());
     }
     return {};
 }
@@ -43,6 +46,8 @@ boost::json::object serialize_primitive(const Primitive &primitive) {
         return {{"Polygon", serialize_polygon(std::get<RenderCore::Polygon>(primitive))}};
     } else if (std::holds_alternative<RenderCore::Rectangle>(primitive)) {
         return {{"Rectangle", serialize_rectangle(std::get<RenderCore::Rectangle>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Fill>(primitive)) {
+        return {{"Fill", serialize_fill(std::get<RenderCore::Fill>(primitive))}};
     }
     return {};
 }
