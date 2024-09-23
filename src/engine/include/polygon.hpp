@@ -12,8 +12,6 @@ namespace RenderCore {
 
 struct Polygon {
     std::vector<Point> points;
-    enum class Action { Draw, Clip };
-    Action action{Action::Draw};
 
     size_t size() const { return points.size(); }
 
@@ -22,9 +20,8 @@ struct Polygon {
     const Point &operator[](size_t index) const { return points[index]; }
 };
 
-inline Polygon make_polygon(
-    const std::vector<Point> &points, Polygon::Action action = Polygon::Action::Draw) {
-    return Polygon{points, .action = action};
+inline Polygon make_polygon(const std::vector<Point> &points) {
+    return Polygon{points};
 };
 
 }  // namespace RenderCore

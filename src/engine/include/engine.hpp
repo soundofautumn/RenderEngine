@@ -28,9 +28,8 @@ class RenderCore::RenderEngine {
     int32_t width_;
     int32_t height_;
 
-    uint32_t color_background_{vector_to_color(Colors::Black)};
-
     PenOptions pen_options_;
+    GlobalOptions global_options_;
 
    public:
     using Buffer = Bitmap::Buffer;
@@ -59,8 +58,9 @@ class RenderCore::RenderEngine {
 
     // 清空画布，以背景色填充
     void clear() {
+        const auto color = vector_to_color(global_options_.background_color);
         if (frame_buffer_) {
-            frame_buffer_->fill(color_background_);
+            frame_buffer_->fill(color);
         }
     }
 
@@ -72,10 +72,9 @@ class RenderCore::RenderEngine {
         }
     }
 
-    // 设置背景色
-    void set_background_color(const Color &color) { color_background_ = vector_to_color(color); }
+    void set_global_options(const GlobalOptions &options) { global_options_ = options; }
 
-    void set_background_color(uint32_t color) { color_background_ = color; }
+    [[nodiscard]] const GlobalOptions &get_global_options() const { return global_options_; }
 
     // 绘制像素
     void draw_pixel(int x, int y, const Color &color) { draw_pixel(x, y, vector_to_color(color)); }
@@ -136,17 +135,7 @@ class RenderCore::RenderEngine {
         clear();
         render_primitives_ = std::vector<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
-        for (const auto &primitive : primitives_) {
-            if (std::holds_alternative<Rectangle>(primitive) &&
-                std::get<Rectangle>(primitive).action == Rectangle::Action::Clip) {
-                auto window = std::get<Rectangle>(primitive);
-                rectangle_clip(window);
-            } else if (std::holds_alternative<Polygon>(primitive) &&
-                       std::get<Polygon>(primitive).action == Polygon::Action::Clip) {
-                auto window = std::get<Polygon>(primitive);
-                polygon_clip(window);
-            }
-        }
+        clip();
         // 遍历绘制图元
         for (const auto &primitive : render_primitives_) {
             if (std::holds_alternative<Line>(primitive)) {
@@ -160,28 +149,10 @@ class RenderCore::RenderEngine {
                 draw_arc(arc);
             } else if (std::holds_alternative<Rectangle>(primitive)) {
                 const auto &rectangle = std::get<Rectangle>(primitive);
-                switch (rectangle.action) {
-                    case Rectangle::Action::Draw:
-                        draw_rectangle(rectangle);
-                        break;
-                    case Rectangle::Action::Clip:
-                        break;
-                    default:
-                        throw std::runtime_error("Not implemented");
-                        break;
-                }
+                draw_rectangle(rectangle);
             } else if (std::holds_alternative<Polygon>(primitive)) {
                 const auto &polygon = std::get<Polygon>(primitive);
-                switch (polygon.action) {
-                    case Polygon::Action::Draw:
-                        draw_polygon(polygon);
-                        break;
-                    case Rectangle::Action::Clip:
-                        break;
-                    default:
-                        throw std::runtime_error("Not implemented");
-                        break;
-                }
+                draw_polygon(polygon);
             } else if (std::holds_alternative<Fill>(primitive)) {
                 fill(std::get<Fill>(primitive));
             } else if (std::holds_alternative<PenOptions>(primitive)) {
@@ -214,11 +185,8 @@ class RenderCore::RenderEngine {
     // 填充
     void fill(const Fill &fill);
 
-    // 矩形窗口裁剪
-    void rectangle_clip(const Rectangle &window);
-
-    // 任意凸多边形裁剪
-    void polygon_clip(const Polygon &window);
+    // 裁剪
+    void clip();
 
    private:
     // DDA 算法绘制线段
@@ -240,7 +208,13 @@ class RenderCore::RenderEngine {
     void draw_polygon_scanline(const Polygon &polygon);
 
     // 种子填充算法填充多边形
-    void fill_polygon_seedfill(const Fill &polygon);
+    void fill_polygon_seedfill(const Fill &fill);
+
+    // 矩形窗口裁剪
+    void rectangle_clip(const Rectangle &window);
+
+    // 任意凸多边形裁剪
+    void polygon_clip(const Polygon &window);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP

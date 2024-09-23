@@ -25,17 +25,12 @@ struct Rectangle {
     int min_y() const { return top_left.y; }
     int max_x() const { return bottom_right.x; }
     int max_y() const { return bottom_right.y; }
-
-    using Action = Polygon::Action;
-    Action action{Action::Draw};
 };
 
-inline Rectangle make_rectangle(const Point &top_left, const Point &bottom_right,
-    Rectangle::Action action = Rectangle::Action::Draw) {
+inline Rectangle make_rectangle(const Point &top_left, const Point &bottom_right) {
     Rectangle rectangle;
     rectangle.top_left = top_left;
     rectangle.bottom_right = bottom_right;
-    rectangle.action = action;
     return rectangle;
 }
 

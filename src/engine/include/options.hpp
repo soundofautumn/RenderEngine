@@ -5,6 +5,7 @@
 #ifndef RENDERENGINE_OPTIONS_HPP
 #define RENDERENGINE_OPTIONS_HPP
 
+#include "clip.hpp"
 #include "color.hpp"
 #include "point.hpp"
 
@@ -27,6 +28,14 @@ struct PenOptions {
     } type{LineType::SOLID};
     // 虚线间隔
     int dash{5};
+};
+
+// 全局选项
+struct GlobalOptions {
+    // 背景色
+    Color background_color{Colors::Black};
+    // 裁剪窗口
+    Clip clip;
 };
 
 }  // namespace RenderCore
