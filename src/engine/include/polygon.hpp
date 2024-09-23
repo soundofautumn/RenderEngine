@@ -14,6 +14,12 @@ struct Polygon {
     std::vector<Point> points;
     enum class Action { Draw, Clip };
     Action action{Action::Draw};
+
+    size_t size() const { return points.size(); }
+
+    Point &operator[](size_t index) { return points[index]; }
+
+    const Point &operator[](size_t index) const { return points[index]; }
 };
 
 inline Polygon make_polygon(
