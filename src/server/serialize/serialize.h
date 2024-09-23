@@ -16,9 +16,7 @@
 #include "serialize_polygon.h"
 #include "serialize_rectangle.h"
 
-using namespace RenderCore;
-
-Primitive deserialize_primitive(const boost::json::object &primitive) {
+RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive) {
     if (primitive.contains("Line")) {
         return deserialize_line(primitive.at("Line").as_object());
     } else if (primitive.contains("Circle")) {
@@ -37,7 +35,7 @@ Primitive deserialize_primitive(const boost::json::object &primitive) {
     return {};
 }
 
-boost::json::object serialize_primitive(const Primitive &primitive) {
+boost::json::object serialize_primitive(const RenderCore::Primitive &primitive) {
     if (std::holds_alternative<RenderCore::Line>(primitive)) {
         return {{"Line", serialize_line(std::get<RenderCore::Line>(primitive))}};
     } else if (std::holds_alternative<RenderCore::Circle>(primitive)) {

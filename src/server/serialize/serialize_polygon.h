@@ -9,17 +9,15 @@
 #include "polygon.hpp"
 #include "serialize_point.h"
 
-using namespace RenderCore;
-
-Polygon deserialize_polygon(const boost::json::object &obj) {
-    Polygon polygon;
+RenderCore::Polygon deserialize_polygon(const boost::json::object &obj) {
+    RenderCore::Polygon polygon;
     for (const auto &point : obj.at("points").as_array()) {
         polygon.points.push_back(deserialize_point(point.as_object()));
     }
     return polygon;
 }
 
-boost::json::object serialize_polygon(const Polygon &polygon) {
+boost::json::object serialize_polygon(const RenderCore::Polygon &polygon) {
     boost::json::array points;
     for (const auto &point : polygon.points) {
         points.push_back(serialize_point(point));
