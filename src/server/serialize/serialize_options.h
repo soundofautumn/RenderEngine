@@ -7,16 +7,15 @@
 #include <boost/json.hpp>
 
 #include "options.hpp"
-#include "serialize_color.h"
 #include "serialize_clip.h"
+#include "serialize_color.h"
 
 using namespace RenderCore;
 
 boost::json::object serialize_pen_options(const PenOptions &options) {
     return {{"color", serialize_color(options.color)},
-        {"fill_color", serialize_color(options.fill_color)},
-        {"width", options.width}, {"type", static_cast<int64_t>(options.type)},
-        {"dash", options.dash}};
+        {"fill_color", serialize_color(options.fill_color)}, {"width", options.width},
+        {"type", static_cast<int64_t>(options.type)}, {"dash", options.dash}};
 }
 
 PenOptions deserialize_pen_options(const boost::json::object &obj) {
@@ -33,7 +32,8 @@ boost::json::object serialize_global_options(const GlobalOptions &options) {
 }
 
 GlobalOptions deserialize_global_options(const boost::json::object &obj) {
-    return GlobalOptions{.background_color = deserialize_color(obj.at("background_color").as_object()),
+    return GlobalOptions{
+        .background_color = deserialize_color(obj.at("background_color").as_object()),
         .clip = deserialize_clip(obj.at("clip").as_object())};
 }
 
