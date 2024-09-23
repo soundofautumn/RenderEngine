@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE HEADERS "*.h" "*.hpp")
+file(GLOB SOURCES "${source_dir}/core/*.cpp")
+file(GLOB HEADERS "${source_dir}/include/*.h" "${source_dir}/include/*.hpp")
 
 add_library(RenderEngineCore STATIC ${SOURCES})
 
