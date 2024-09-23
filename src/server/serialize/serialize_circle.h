@@ -37,7 +37,7 @@ RenderCore::Circle deserialize_circle(const boost::json::object &obj) {
     return {};
 }
 
-boost::json::object serialize_arc(const Arc &arc) {
+boost::json::object serialize_arc(const RenderCore::Arc &arc) {
     if (std::holds_alternative<RenderCore::ArcUseCenterRadiusAngle>(arc)) {
         const auto &arc_ = std::get<RenderCore::ArcUseCenterRadiusAngle>(arc);
         return {{"type", "center_radius_angle"}, {"center", serialize_point(arc_.center)},
