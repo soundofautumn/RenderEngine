@@ -48,6 +48,10 @@ inline Arc make_arc_center_radius_angle(
     return ArcUseCenterRadiusAngle{center, radius, start_angle, end_angle};
 }
 
+inline Arc make_arc_three_points(const Point &p1, const Point &p2, const Point &p3) {
+    return ArcUseThreePoints{p1, p2, p3};
+}
+
 }  // namespace RenderCore
 
 #endif  //RENDERENGINE_CIRCLE_HPP
