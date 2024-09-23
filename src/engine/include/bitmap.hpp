@@ -128,7 +128,6 @@ class RenderCore::Bitmap {
         }
         const int32_t width = info_header.width;
         const int32_t height = info_header.height;
-        const int32_t pitch = (width * 4 + 3) & (~3);
         auto bitmap = std::make_shared<Bitmap>(width, height);
         for (int i = 0; i < height; i++) {
             uint8_t *line = bitmap->line(height - i - 1);
