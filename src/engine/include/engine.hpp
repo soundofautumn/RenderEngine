@@ -6,7 +6,7 @@
 #define RENDERENGINE_ENGINE_HPP
 
 #include <deque>
-#include <forward_list>
+#include <list>
 #include <functional>
 
 #include "bitmap.hpp"
@@ -24,7 +24,7 @@ class RenderCore::RenderEngine {
     std::deque<const Primitive> primitives_;
 
     // 存储需要渲染的图元
-    std::forward_list<Primitive> render_primitives_;
+    std::list<Primitive> render_primitives_;
 
     int32_t width_;
     int32_t height_;
@@ -134,7 +134,7 @@ class RenderCore::RenderEngine {
             return false;
         }
         clear();
-        render_primitives_ = std::forward_list<Primitive>(primitives_.begin(), primitives_.end());
+        render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         clip();
         // 遍历绘制图元
@@ -216,6 +216,12 @@ class RenderCore::RenderEngine {
 
     // 任意凸多边形裁剪
     void polygon_clip(const Polygon &window);
+
+    // Cohen-Sutherland 裁剪算法
+    bool clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end);
+
+    // 中点分割裁剪算法
+    bool clip_line_midpoint(const Rectangle &window, Point &start, Point &end);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP
