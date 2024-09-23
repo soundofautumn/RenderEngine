@@ -157,8 +157,17 @@ class RenderCore::Bitmap {
         const uint32_t pitch = (width_ * pixel_size + 3) & (~3);
         const uint32_t file_size = 14 + sizeof(BitmapInfoHeader) + pitch * height_;
         const uint32_t offset = 14 + sizeof(BitmapInfoHeader);
-        BitmapInfoHeader info_header{sizeof(BitmapInfoHeader), width_, height_, 1,
-            static_cast<uint16_t>(pixel_size * 8), 0, pitch * height_, 0, 0, 0, 0};
+        BitmapInfoHeader info_header{.size = sizeof(BitmapInfoHeader),
+            .width = width_,
+            .height = height_,
+            .planes = 1,
+            .bit_count = static_cast<uint16_t>(pixel_size * 8),
+            .compression = 0,
+            .size_image = pitch * height_,
+            .x_pels_per_meter = 0,
+            .y_pels_per_meter = 0,
+            .clr_used = 0,
+            .clr_important = 0};
         file.write("BM", 2);
         file.write(reinterpret_cast<const char *>(&file_size), 4);
         file.write("\0\0\0\0", 4);
