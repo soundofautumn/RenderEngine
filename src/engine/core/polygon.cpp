@@ -63,14 +63,14 @@ void RenderEngine::draw_polygon_scanline(const Polygon &polygon) {
     // 3. 初始化活性边表
     std::vector<Edge *> active_edge_table;
     // 4. 扫描线填充
-    for (int y = 0; y < height_; y++) {
+    for (int y = 0; y < height_;) {
         // 4.1 更新活性边表
         for (auto edge = edge_table[y]; edge; edge = edge->next) {
             active_edge_table.push_back(edge);
         }
         // 4.2 按 x 排序
         std::sort(active_edge_table.begin(), active_edge_table.end(),
-                  [](const Edge *lhs, const Edge *rhs) { return lhs->x < rhs->x; });
+            [](const Edge *lhs, const Edge *rhs) { return lhs->x < rhs->x; });
         // 4.3 填充
         for (size_t i = 0; i < active_edge_table.size(); i += 2) {
             int x1 = std::ceil(active_edge_table[i]->x);
@@ -83,10 +83,10 @@ void RenderEngine::draw_polygon_scanline(const Polygon &polygon) {
         for (auto &edge : active_edge_table) {
             edge->x += edge->dx;
         }
+        y++;
         // 4.5 移除不再活动的边
-        active_edge_table.erase(
-            std::remove_if(active_edge_table.begin(), active_edge_table.end(),
-                           [y](const Edge *edge) { return edge->y_max == y; }),
+        active_edge_table.erase(std::remove_if(active_edge_table.begin(), active_edge_table.end(),
+                                    [y](const Edge *edge) { return edge->y_max == y; }),
             active_edge_table.end());
     }
     // 5. 释放内存
