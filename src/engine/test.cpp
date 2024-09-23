@@ -50,7 +50,7 @@ void lab_2() {
     // 多边形绘制
     engine.add_primitive(make_polygon({{300, 100}, {400, 100}, {350, 200}}, Polygon::Action::Draw));
     engine.set_pen_options({.color = Colors::Blue, .fill_color = Colors::Yellow});
-    engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}, {500, 200}, {550, 100}}, Polygon::Action::Draw));
+    engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {650, 200}, {500, 300}, {500, 200}}, Polygon::Action::Draw));
     // 区域填充
     // engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}}, Polygon::Action::Clip));
     // 矩形裁剪

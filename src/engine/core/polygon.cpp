@@ -26,6 +26,9 @@ void RenderEngine::draw_rectangle(const Rectangle &rectangle) {
 
 void RenderEngine::draw_polygon(const Polygon &polygon) {
     draw_polygon_scanline(polygon);
+    for (size_t i = 0; i < polygon.size(); i++) {
+        draw_line(make_line(polygon[i], polygon[(i + 1) % polygon.size()]));
+    }
 }
 
 struct Edge {
@@ -41,7 +44,7 @@ void RenderEngine::draw_polygon_scanline(const Polygon &polygon) {
         edge_table[i] = nullptr;
     }
     // 2. 构建边表
-    for (int i = 0; i < polygon.size(); i++) {
+    for (size_t i = 0; i < polygon.size(); i++) {
         auto start = polygon[i];
         auto end = polygon[(i + 1) % polygon.size()];
         if (start.y == end.y) {
