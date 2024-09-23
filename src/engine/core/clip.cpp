@@ -51,15 +51,14 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
         ++it;
     }
 }
+const uint8_t INSIDE = 0;  // 0000
+const uint8_t LEFT = 1;    // 0001
+const uint8_t RIGHT = 2;   // 0010
+const uint8_t BOTTOM = 4;  // 0100
+const uint8_t TOP = 8;     // 1000
 
-bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end) {
-    const uint8_t INSIDE = 0;  // 0000
-    const uint8_t LEFT = 1;    // 0001
-    const uint8_t RIGHT = 2;   // 0010
-    const uint8_t BOTTOM = 4;  // 0100
-    const uint8_t TOP = 8;     // 1000
-
-    auto encode = [&](const Point &point) {
+auto encode_f = [](const Rectangle &window) {
+    return [&](const Point &point) {
         uint8_t code = INSIDE;
         if (point.x < window.min_x()) {
             code |= LEFT;
@@ -72,6 +71,10 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
         }
         return code;
     };
+};
+
+bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end) {
+    auto encode = encode_f(window);
 
     auto start_code = encode(start);
     auto end_code = encode(end);
@@ -90,16 +93,20 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
             Point intersect;
             uint8_t out_code = start_code ? start_code : end_code;
             if (out_code & TOP) {
-                intersect.x = start.x + (end.x - start.x) * (window.max_y() - start.y) / (end.y - start.y);
+                intersect.x =
+                    start.x + (end.x - start.x) * (window.max_y() - start.y) / (end.y - start.y);
                 intersect.y = window.max_y();
             } else if (out_code & BOTTOM) {
-                intersect.x = start.x + (end.x - start.x) * (window.min_y() - start.y) / (end.y - start.y);
+                intersect.x =
+                    start.x + (end.x - start.x) * (window.min_y() - start.y) / (end.y - start.y);
                 intersect.y = window.min_y();
             } else if (out_code & RIGHT) {
-                intersect.y = start.y + (end.y - start.y) * (window.max_x() - start.x) / (end.x - start.x);
+                intersect.y =
+                    start.y + (end.y - start.y) * (window.max_x() - start.x) / (end.x - start.x);
                 intersect.x = window.max_x();
             } else if (out_code & LEFT) {
-                intersect.y = start.y + (end.y - start.y) * (window.min_x() - start.x) / (end.x - start.x);
+                intersect.y =
+                    start.y + (end.y - start.y) * (window.min_x() - start.x) / (end.x - start.x);
                 intersect.x = window.min_x();
             }
             if (out_code == start_code) {
