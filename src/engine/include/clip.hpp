@@ -15,6 +15,10 @@ namespace RenderCore {
 struct Clip {
     bool enable{false};
     std::variant<Rectangle, Polygon> window;
+    enum class Algorithm {
+        CohenSutherland,
+        Midpoint
+    } algorithm{Algorithm::CohenSutherland};
 };
 
 }  // namespace RenderCore

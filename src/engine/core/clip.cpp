@@ -24,6 +24,6 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
     throw std::runtime_error("Not implemented");
 }
 
-void RenderEngine::polygon_clip(const Polygon &window) {
+void RenderEngine::polygon_clip(const Polygon &) {
     throw std::runtime_error("Not implemented");
 }

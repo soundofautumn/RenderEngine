@@ -32,12 +32,14 @@ std::variant<RenderCore::Rectangle, RenderCore::Polygon> deserialize_clip_window
 }
 
 boost::json::object serialize_clip(const RenderCore::Clip &clip) {
-    return {{"enable", clip.enable}, {"window", serialize_clip_window(clip.window)}};
+    return {{"enable", clip.enable}, {"window", serialize_clip_window(clip.window)},
+        {"algorithm", static_cast<int64_t>(clip.algorithm)}};
 }
 
 RenderCore::Clip deserialize_clip(const boost::json::object &obj) {
     return RenderCore::Clip{.enable = obj.at("enable").as_bool(),
-        .window = deserialize_clip_window(obj.at("window").as_object())};
+        .window = deserialize_clip_window(obj.at("window").as_object()),
+        .algorithm = static_cast<RenderCore::Clip::Algorithm>(obj.at("algorithm").as_int64())};
 }
 
 #endif
