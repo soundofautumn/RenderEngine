@@ -52,6 +52,8 @@ void lab_2() {
     engine.set_pen_options({.color = Colors::Blue, .fill_color = Colors::Yellow});
     engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {650, 200}, {500, 300}, {500, 200}}, Polygon::Action::Draw));
     // 区域填充
+    engine.set_pen_options({.color = Colors::Red, .fill_color = Colors::Cyan});
+    engine.add_primitive(make_fill({350, 150}));
     // engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}}, Polygon::Action::Clip));
     // 矩形裁剪
     // engine.add_primitive(make_rectangle({100, 300}, {200, 400}, Rectangle::Action::Clip));

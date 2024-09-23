@@ -13,6 +13,8 @@ struct Fill {
     Point seed;
 };
 
+inline Fill make_fill(const Point &seed) { return Fill{seed}; }
+
 }  // namespace RenderCore
 
 #endif

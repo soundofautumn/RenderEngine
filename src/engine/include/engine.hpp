@@ -182,6 +182,8 @@ class RenderCore::RenderEngine {
                         throw std::runtime_error("Not implemented");
                         break;
                 }
+            } else if (std::holds_alternative<Fill>(primitive)) {
+                fill(std::get<Fill>(primitive));
             } else if (std::holds_alternative<PenOptions>(primitive)) {
                 const auto &options = std::get<PenOptions>(primitive);
                 pen_options_ = options;
