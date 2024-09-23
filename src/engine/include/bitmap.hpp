@@ -132,7 +132,15 @@ class RenderCore::Bitmap {
         auto bitmap = std::make_shared<Bitmap>(width, height);
         for (int i = 0; i < height; i++) {
             uint8_t *line = bitmap->line(height - i - 1);
-            file.read(reinterpret_cast<char *>(line), pitch);
+            for (int j = 0; j < width; j++) {
+                uint8_t pixel[4];
+                file.read(reinterpret_cast<char *>(pixel), info_header.bit_count / 8);
+                line[0] = pixel[2];
+                line[1] = pixel[1];
+                line[2] = pixel[0];
+                line[3] = info_header.bit_count == 32 ? pixel[3] : 0xFF;
+                line += 4;
+            }
         }
         return bitmap;
     }
