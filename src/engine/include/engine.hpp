@@ -6,6 +6,7 @@
 #define RENDERENGINE_ENGINE_HPP
 
 #include <deque>
+#include <forward_list>
 #include <functional>
 
 #include "bitmap.hpp"
@@ -23,7 +24,7 @@ class RenderCore::RenderEngine {
     std::deque<const Primitive> primitives_;
 
     // 存储需要渲染的图元
-    std::vector<Primitive> render_primitives_;
+    std::forward_list<Primitive> render_primitives_;
 
     int32_t width_;
     int32_t height_;
@@ -133,7 +134,7 @@ class RenderCore::RenderEngine {
             return false;
         }
         clear();
-        render_primitives_ = std::vector<Primitive>(primitives_.begin(), primitives_.end());
+        render_primitives_ = std::forward_list<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         clip();
         // 遍历绘制图元
