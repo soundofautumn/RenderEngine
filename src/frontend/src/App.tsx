@@ -148,16 +148,18 @@ export default function App() {
 
   const handleRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    if (!currentDrawFunc.current.multiplePoints) return;
     clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
     setClickedPoints(clickedPointsRef.current);
-    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
+    if (clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
       handleDraw();
   }
 
   const handleDoubleClick = () => {
+    if (!currentDrawFunc.current.multiplePoints) return;
     clickedPointsRef.current.pop();
     setClickedPoints(clickedPointsRef.current);
-    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
+    if (clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
       handleDraw();
   }
 
