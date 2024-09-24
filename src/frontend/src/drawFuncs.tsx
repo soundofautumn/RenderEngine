@@ -10,7 +10,7 @@ interface IDrawFuncParams {
 interface IDrawApiParam {
   type: 'point' | 'func' | 'multi_points';
   name?: string;
-  func?: (...pointers: IPoint[]) => number;
+  func?: (...pointers: IPoint[]) => number | object;
 }
 
 class DrawFunc {
@@ -212,12 +212,24 @@ drawFuncs.push({
   drawFunc: new DrawFunc({
     params: [
       {
-        type: 'point',
+        type: 'func',
         name: 'top_left',
+        func: (a: IPoint, b: IPoint) => {
+          return {
+            x: Math.min(a.x, b.x),
+            y: Math.min(a.y, b.y)
+          }
+        }
       },
       {
-        type: 'point',
+        type: 'func',
         name: 'bottom_right',
+        func: (a: IPoint, b: IPoint) => {
+          return {
+            x: Math.max(a.x, b.x),
+            y: Math.max(a.y, b.y)
+          }
+        }
       },
     ],
     requiredPointers: 2,
