@@ -148,11 +148,9 @@ export default function App() {
 
   const handleRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    if (!currentDrawFunc.current.multiplePoints) return;
-    clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+    clickedPointsRef.current.pop();
     setClickedPoints(clickedPointsRef.current);
-    if (clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
-      handleDraw();
+    return;
   }
 
   const handleDoubleClick = () => {
