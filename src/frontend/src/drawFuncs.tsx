@@ -8,7 +8,7 @@ interface IDrawFuncParams {
 }
 
 interface IDrawApiParam {
-  type: 'point' | 'func';
+  type: 'point' | 'func' | 'multi_points';
   name?: string;
   func?: (...pointers: IPoint[]) => number;
 }
@@ -17,16 +17,18 @@ class DrawFunc {
   public readonly requiredPointers: number;
   public readonly apiEndpoint: string;
   public readonly drawingMethod: 'click' | 'drag';
+  public readonly multiplePoints: boolean = false;
 
   private readonly params: IDrawApiParam[];
   private readonly type: string | undefined;
 
-  constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string }) {
+  constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string, multiplePoints?: boolean }) {
     this.params = props.params.sort((a) => a.type === 'point' ? -1 : 1);
     this.requiredPointers = props.requiredPointers;
     this.apiEndpoint = props.apiEndpoint;
     this.drawingMethod = props.drawingMethod || 'drag';
     this.type = props.type;
+    this.multiplePoints = props.multiplePoints || false;
 
     if (this.requiredPointers < this.params.filter(param => param.type === 'point').length)
       throw new Error("Illegal number of required pointers");
@@ -34,6 +36,8 @@ class DrawFunc {
       throw new Error("Function parameter missing function or name");
     if (this.params.filter(param => param.type === 'point').length !== 2 && this.drawingMethod === 'drag')
       throw new Error("Drag drawing method only supports 2 points");
+    if (this.multiplePoints && this.params.filter(param => param.type === 'multi_points').length !== 1)
+      throw new Error("Multiple points drawing method requires multi_points");
   }
 
   public draw(props: IDrawFuncParams): Promise<void> {
@@ -51,6 +55,8 @@ class DrawFunc {
                 return [param.name || `p${index + 1}`, pointers[index]];
               else if (param.type === 'func' && param.func)
                 return [param.name || `f${index + 1}`, param.func(...pointers)];
+              else if (param.type === 'multi_points')
+                return [param.name || `mp${index + 1}`, pointers];
               else return [param.name || `u${index + 1}`, null];
             })),
             algorithm,
@@ -217,6 +223,22 @@ drawFuncs.push({
     requiredPointers: 2,
     apiEndpoint: 'Rectangle',
     drawingMethod: 'click',
+  }),
+})
+
+drawFuncs.push({
+  name: '多边形',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'multi_points',
+        name: 'points',
+      }
+    ],
+    requiredPointers: 3,
+    apiEndpoint: 'Polygon',
+    drawingMethod: 'click',
+    multiplePoints: true,
   }),
 })
 
