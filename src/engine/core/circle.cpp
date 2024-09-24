@@ -3,7 +3,8 @@
 //
 #include "circle.hpp"
 
-#include <numbers>
+#include <cmath>
+#include <limits>
 
 #include "engine.hpp"
 

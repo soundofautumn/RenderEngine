@@ -12,6 +12,7 @@
 #define RENDERENGINE_VECTOR_HPP
 
 #include <cassert>
+#include <cmath>
 #include <initializer_list>
 #include <iostream>
 #include <sstream>
