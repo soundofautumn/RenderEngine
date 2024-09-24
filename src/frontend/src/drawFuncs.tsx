@@ -201,4 +201,23 @@ drawFuncs.push({
   }),
 })
 
+drawFuncs.push({
+  name: '长方形',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+        name: 'top_left',
+      },
+      {
+        type: 'point',
+        name: 'bottom_right',
+      },
+    ],
+    requiredPointers: 2,
+    apiEndpoint: 'Rectangle',
+    drawingMethod: 'click',
+  }),
+})
+
 export default drawFuncs;
