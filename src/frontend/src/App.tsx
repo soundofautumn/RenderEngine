@@ -116,13 +116,16 @@ export default function App() {
   const drawingRef = React.useRef(false);
   const draggingRef = React.useRef(false);
   const [dragging, setDragging] = React.useState(false);
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
-    setClickedPoints(clickedPointsRef.current);
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>, manual = false) => {
+    if (!manual && currentDrawFunc.current.drawingMethod === 'click') return;
+    if (!manual) {
+      clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+      setClickedPoints(clickedPointsRef.current);
+    }
     if (currentDrawFunc.current.drawingMethod === 'drag') {
       draggingRef.current = true;
       setDragging(true);
-    } else if (clickedPointsRef.current.length === currentDrawFunc.current.requiredPointers) {
+    } else if (clickedPointsRef.current.length === currentDrawFunc.current.requiredPointers && !currentDrawFunc.current.multiplePoints) {
       handleDraw();
     }
   }
@@ -134,6 +137,28 @@ export default function App() {
       setClickedPoints(clickedPointsRef.current);
       handleDraw();
     }
+  }
+
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (currentDrawFunc.current.drawingMethod === 'drag') return;
+    clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+    setClickedPoints(clickedPointsRef.current);
+    handleMouseDown(e, true);
+  }
+
+  const handleRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+    setClickedPoints(clickedPointsRef.current);
+    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
+      handleDraw();
+  }
+
+  const handleDoubleClick = () => {
+    clickedPointsRef.current.pop();
+    setClickedPoints(clickedPointsRef.current);
+    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers)
+      handleDraw();
   }
 
   const [penOptions, setPenOptions] = React.useState<{
@@ -315,6 +340,9 @@ export default function App() {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={handleRightClick}
     />
   </>)
 }
