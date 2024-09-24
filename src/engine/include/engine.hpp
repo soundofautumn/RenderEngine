@@ -21,7 +21,7 @@ class RenderEngine;
 class RenderCore::RenderEngine {
     Bitmap *frame_buffer_;
 
-    std::deque<const Primitive> primitives_;
+    std::deque<Primitive> primitives_;
 
     // 存储需要渲染的图元
     std::list<Primitive> render_primitives_;
