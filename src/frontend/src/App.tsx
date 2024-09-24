@@ -173,11 +173,18 @@ export default function App() {
     width: number,
     type: 0 | 1 | 2 | 3,
     dash: number,
+    fill_color: {
+      r: number;
+      g: number;
+      b: number;
+      a: number;
+    },
   }>({
     color: { r: 255, g: 255, b: 255, a: 255 },
     width: 1,
     type: 0,
     dash: 1,
+    fill_color: { r: 0, g: 0, b: 0, a: 255 },
   });
 
   const changePenOptionsTimeout = React.useRef<number | null>(null);
@@ -257,6 +264,44 @@ export default function App() {
               }}
               style={{
                 '--color': `rgba(${penOptions.color.r}, ${penOptions.color.g}, ${penOptions.color.b}, ${penOptions.color.a / 255})`
+              } as React.CSSProperties}
+            />
+          </div>
+          <div className="option no-text">
+            填充
+            <input
+              type="color"
+              value={`#${penOptions.fill_color.r.toString(16).padStart(2, '0')}${penOptions.fill_color.g.toString(16).padStart(2, '0')}${penOptions.fill_color.b.toString(16).padStart(2, '0')}`}
+              onChange={e => {
+                const color = e.target.value;
+                setPenOptions({
+                  ...penOptions,
+                  fill_color: {
+                    r: parseInt(color.slice(1, 3), 16),
+                    g: parseInt(color.slice(3, 5), 16),
+                    b: parseInt(color.slice(5, 7), 16),
+                    a: penOptions.fill_color.a,
+                  }
+                })
+              }}
+            />
+          </div>
+          <div className="option no-text">
+            透明
+            <input
+              type="range" min="0" max="255"
+              value={penOptions.fill_color.a}
+              onChange={e => {
+                setPenOptions({
+                  ...penOptions,
+                  fill_color: {
+                    ...penOptions.fill_color,
+                    a: parseInt(e.target.value)
+                  }
+                })
+              }}
+              style={{
+                '--color': `rgba(${penOptions.fill_color.r}, ${penOptions.fill_color.g}, ${penOptions.fill_color.b}, ${penOptions.fill_color.a / 255})`
               } as React.CSSProperties}
             />
           </div>
