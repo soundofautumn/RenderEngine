@@ -123,6 +123,7 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 }
 
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
+    RenderCore::ignore_unused(window, start, end);
     RENDERENGINE_UNIMPLEMENTED
 }
 
