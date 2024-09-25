@@ -2,6 +2,9 @@
     width: 100vw;
     height: 100vh;
     background-color: black;
+}
+
+canvas {
     cursor: none;
 }
 
@@ -27,6 +30,24 @@ canvas {
     background: rgba(255, 255, 255, 0.3);
     padding: 5px;
     border-radius: 5px;
+    pointer-events: none;
+}
+
+#slidingWindow .point .point-item .point-circle,
+.point.sliding .point-item .point-circle {
+    border: chartreuse 1px solid;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+#slidingWindow .point .point-item .point-circle {
+    cursor: all-scroll;
+    pointer-events: all;
+}
+
+#slidingWindowBorder {
+    position: absolute;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
     pointer-events: none;
 }
 

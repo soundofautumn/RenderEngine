@@ -42,6 +42,11 @@ export default function App() {
 
     const width = document.body.clientWidth;
     const height = document.body.clientHeight;
+    slidingWindowRef.current = {
+      top_left: { x: 0, y: 0 },
+      bottom_right: { x: width, y: height },
+    }
+    setSlidingWindow(slidingWindowRef.current)
     client('/engine/create', {
       data: {
         name: engine_name,
@@ -101,6 +106,22 @@ export default function App() {
   const handleDraw = () => {
     const pointers = clickedPointsRef.current;
     clickedPointsRef.current = [];
+    if (clickingSlidingWindowPoints) {
+      setClickingSlidingWindowPoints(false);
+      const top_left = {
+        x: Math.min(pointers[0].x, pointers[1].x),
+        y: Math.min(pointers[0].y, pointers[1].y),
+      }
+      const bottom_right = {
+        x: Math.max(pointers[0].x, pointers[1].x),
+        y: Math.max(pointers[0].y, pointers[1].y),
+      }
+      slidingWindowRef.current = { top_left, bottom_right };
+      setSlidingWindow(slidingWindowRef.current);
+      setClickedPoints([]);
+      handleSlidingWindowChanged();
+      return;
+    }
     loadingRef.current = true;
     setLoading(true);
     currentDrawFunc.current.draw({ pointers })
@@ -195,15 +216,166 @@ export default function App() {
     }), 100);
   }, [penOptions])
 
+  const slidingWindowRef = React.useRef<{
+    top_left: IPoint,
+    bottom_right: IPoint,
+  }>({
+    top_left: { x: 0, y: 0 },
+    bottom_right: { x: 0, y: 0 },
+  })
+  const [slidingWindow, setSlidingWindow] = React.useState<{
+    top_left: IPoint,
+    bottom_right: IPoint,
+  }>({
+    top_left: { x: 0, y: 0 },
+    bottom_right: { x: 0, y: 0 },
+  });
+  const [slidingWindowMoving, setSlidingWindowMoving] = React.useState(false);
+
+  const [clickingSlidingWindowPoints, setClickingSlidingWindowPoints] = React.useState<boolean>(false);
+
+  const [enableSlidingWindow, setEnableSlidingWindow] = React.useState(true);
+  const handleSlidingWindowChanged = (enable?: boolean) => {
+    const enabledSliding = enable === undefined ? enableSlidingWindow : enable;
+    const currentSlidingWindow = slidingWindowRef.current;
+    client('/engine/set_global_options', {
+      data: {
+        GlobalOptions: {
+          background_color: {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 255,
+          },
+          clip: {
+            enable: enabledSliding,
+            window: {
+              Rectangle: currentSlidingWindow,
+            },
+            algorithm: 0,
+          },
+        },
+      },
+    });
+  }
+
   const [hideToolbar, setHideToolbar] = React.useState(false);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
   React.useEffect(() => {
     if (hideToolbar) return;
-    setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 12);
-  }, [hideToolbar, penOptions])
+    setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 8);
+  }, [hideToolbar, penOptions, enableSlidingWindow])
 
   return (<>
     <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
+    <div id="slidingWindow">
+      {
+        ((enableSlidingWindow ? [
+          {
+            name: 'top-left',
+            x: slidingWindow.top_left.x,
+            y: slidingWindow.top_left.y,
+          },
+          {
+            name: 'top-right',
+            x: slidingWindow.bottom_right.x,
+            y: slidingWindow.top_left.y,
+          },
+          {
+            name: 'bottom-left',
+            x: slidingWindow.top_left.x,
+            y: slidingWindow.bottom_right.y,
+          },
+          {
+            name: 'bottom-right',
+            x: slidingWindow.bottom_right.x,
+            y: slidingWindow.bottom_right.y,
+          }
+        ] : []) as (IPoint & { name: string })[]).map((point, index) => {
+          return (
+            <div
+              key={index}
+              className='point'
+              style={{
+                left: point.x,
+                top: point.y
+              }}
+            >
+              <div className='point-item'>
+                <div className='point-circle'
+                  onMouseDown={e => {
+                    e.preventDefault();
+                    setSlidingWindowMoving(true);
+                    const handleMouseMove = (e: MouseEvent) => {
+                      const currentSlidingWindow = { ...slidingWindowRef.current };
+                      const target = point.name.split('-');
+                      if (target[0] === 'top') {
+                        currentSlidingWindow.top_left.y = e.clientY;
+                      } else {
+                        currentSlidingWindow.bottom_right.y = e.clientY;
+                      }
+                      if (target[1] === 'left') {
+                        currentSlidingWindow.top_left.x = e.clientX;
+                      } else {
+                        currentSlidingWindow.bottom_right.x = e.clientX;
+                      }
+                      if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
+                        const temp = currentSlidingWindow.top_left.x;
+                        currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
+                        currentSlidingWindow.bottom_right.x = temp;
+                      }
+                      if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
+                        const temp = currentSlidingWindow.top_left.y;
+                        currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
+                        currentSlidingWindow.bottom_right.y = temp;
+                      }
+                      if (currentSlidingWindow.top_left.x < 0) {
+                        currentSlidingWindow.top_left.x = 0;
+                      }
+                      if (currentSlidingWindow.top_left.y < 0) {
+                        currentSlidingWindow.top_left.y = 0;
+                      }
+                      if (currentSlidingWindow.bottom_right.x > document.body.clientWidth) {
+                        currentSlidingWindow.bottom_right.x = document.body.clientWidth;
+                      }
+                      if (currentSlidingWindow.bottom_right.y > document.body.clientHeight) {
+                        currentSlidingWindow.bottom_right.y = document.body.clientHeight;
+                      }
+                      setSlidingWindow(currentSlidingWindow);
+                    }
+                    const handleMouseUp = () => {
+                      slidingWindowRef.current = slidingWindow;
+                      setSlidingWindowMoving(false);
+                      handleSlidingWindowChanged();
+                      document.removeEventListener('mousemove', handleMouseMove);
+                      document.removeEventListener('mouseup', handleMouseUp);
+                    }
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                  }}
+                  onDoubleClick={() => {
+                    setSlidingWindow({
+                      top_left: { x: 0, y: 0 },
+                      bottom_right: { x: document.body.clientWidth, y: document.body.clientHeight },
+                    })
+                  }}
+                />
+                <p className='point-text'>
+                  {point.name} ({point.x}, {point.y})
+                </p>
+              </div>
+            </div>
+          )
+        })
+      }
+      <div id="slidingWindowBorder" style={{
+        left: slidingWindow.top_left.x,
+        top: slidingWindow.top_left.y,
+        width: slidingWindow.bottom_right.x - slidingWindow.top_left.x,
+        height: slidingWindow.bottom_right.y - slidingWindow.top_left.y,
+        display: enableSlidingWindow ? 'block' : 'none',
+      }} />
+    </div>
     <div id="drawFuncs-wrapper">
       <div id="drawFuncs"
         style={{
@@ -349,17 +521,31 @@ export default function App() {
             </div>
           }
         </div>
+        <button onClick={() => {
+          const newValue = !enableSlidingWindow;
+          setEnableSlidingWindow(newValue);
+          handleSlidingWindowChanged(newValue);
+        }}>
+          {enableSlidingWindow ? '关闭' : '开启'}裁剪框
+        </button>
+        {
+          enableSlidingWindow && (
+            <button onClick={() => setClickingSlidingWindowPoints(true)}>
+              圈画裁剪框
+            </button>
+          )
+        }
       </div>
       <button id="toolbar-control" onClick={() => setHideToolbar(!hideToolbar)}>
         {hideToolbar ? '展开' : '收起'}工具栏
       </button>
-    </div >
+    </div>
     {
-      ([...clickedPoints, { ...coordinate, type: dragging ? 'drag' : 'current' }] as IPoint[])
+      ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
         .map((point, index) => {
           return (
             <div
-              className='point'
+              className={clickingSlidingWindowPoints ? 'point sliding' : dragging ? 'point dragging' : 'point'}
               key={index}
               style={{
                 left: point.x,
@@ -369,7 +555,7 @@ export default function App() {
               <div className='point-item'>
                 <div className='point-circle'
                   style={{
-                    backgroundColor: point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
+                    backgroundColor: point.type === 'sliding' ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
                   }}
                 />
                 <p className='point-text'>
