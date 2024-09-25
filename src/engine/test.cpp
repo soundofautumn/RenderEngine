@@ -63,8 +63,4 @@ void lab_2() {
     // engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}}));
     // 矩形裁剪
     //engine.add_primitive(make_rectangle({100, 300}, {200, 400}));
-    engine.set_global_options({ .clip = {
-        .enable = true, .algorithm = 
-}
-        })
 }
