@@ -4,7 +4,8 @@ import { randomEngineName } from "./utils";
 export const backend_endpoint =
     import.meta.env.VITE_RENDER_ENGINE_ENDPOINT || "localhost:3000";
 
-export const engine_name = randomEngineName();
+export const engine_name =
+    sessionStorage.getItem("engine_name") || randomEngineName();
 
 export const engine_fps = 30;
 

@@ -4,6 +4,7 @@ import drawFuncs from './drawFuncs';
 
 import './App.css';
 import { IPoint } from './types';
+import { randomEngineName } from './utils';
 
 function getHeightUnfold(dom: HTMLElement) {
   const fakeNode = dom.cloneNode(true) as HTMLElement;
@@ -290,7 +291,12 @@ export default function App() {
   const previewSlidingWindowTimeout = React.useRef<number | null>(null);
 
   return (<>
-    <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
+    <div id="mousePosition">
+      Engine: {engine_name}<button id="switch-engine-name" onClick={() => {
+        randomEngineName();
+        window.location.reload();
+      }}>换</button>;
+      FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
     <div id="slidingWindow">
       {
         ((enableSlidingWindow ? [
@@ -370,9 +376,10 @@ export default function App() {
                         handleSlidingWindowChanged();
                       }, 100);
                     }
-                    const handleMouseUp = () => {
+                    const handleMouseUp = (e: MouseEvent) => {
                       if (previewSlidingWindowTimeout.current) clearTimeout(previewSlidingWindowTimeout.current);
                       slidingWindowRef.current = slidingWindow;
+                      setCoordinate({ x: e.clientX, y: e.clientY });
                       setSlidingWindowMoving(false);
                       handleSlidingWindowChanged();
                       document.removeEventListener('mousemove', handleMouseMove);

@@ -83,9 +83,41 @@ canvas {
             margin: 0;
             user-select: none;
         }
-        .point-text.top{
+        .point-text.top {
             bottom: 0;
         }
+    }
+}
+
+#switch-engine-name {
+  margin: 0 0 0 2px;
+  padding: 0 2px;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+button,
+input,
+select {
+    margin: 2px 2px;
+    padding: 5px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    &:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+    &:disabled {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.5);
+        cursor: default;
+    }
+    &:active {
+        background: rgba(255, 255, 255, 0.7);
     }
 }
 
@@ -93,26 +125,6 @@ canvas {
     position: absolute;
     top: 10px;
     right: 10px;
-    button,
-    input,
-    select {
-        margin: 2px 2px;
-        padding: 5px;
-        border-radius: 5px;
-        background: rgba(255, 255, 255, 0.3);
-        color: rgba(255, 255, 255, 0.8);
-        border: none;
-        cursor: pointer;
-        transition: 0.3s;
-        &:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-        &:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
-            cursor: default;
-        }
-    }
     #toolbar-control {
         width: 100%;
         position: relative;
