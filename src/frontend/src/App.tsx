@@ -285,7 +285,7 @@ export default function App() {
             window: {
               Rectangle: currentSlidingWindow,
             },
-            algorithm: 0,
+            algorithm: 1,
           },
         },
       },

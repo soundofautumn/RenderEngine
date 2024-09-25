@@ -123,8 +123,53 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 }
 
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
-    RenderCore::ignore_unused(window, start, end);
-    return true;
+    auto encode = encode_f(window);
+
+    auto start_code = encode(start);
+    auto end_code = encode(end);
+
+    // 全部在窗口外
+    if (start_code & end_code) {
+        return false;
+    }
+
+    while (true) {
+        // 全部在窗口内
+        if (!(start_code | end_code)) {
+            return true;
+        }
+
+        // 计算中点
+        Point mid;
+        mid.x = (start.x + end.x) / 2;
+        mid.y = (start.y + end.y) / 2;
+        auto mid_code = encode(mid);
+
+        // 如果线段非常短，认为它无法再细分
+        if (fabs(end.x - start.x) < 1 && fabs(end.y - start.y) < 1) {
+            return false;
+        }
+
+        // 如果中点在窗口内，继续递归分割线段
+        if (!(mid_code)) {
+            // 检查 start 到 mid 的部分
+            if (clip_line_midpoint(window, start, mid)) {
+                // 检查 mid 到 end 的部分
+                return clip_line_midpoint(window, mid, end);
+            }
+            return false;
+        }
+
+        // 如果 start 点在窗口外，用中点替换 start 并递归
+        if (start_code) {
+            return clip_line_midpoint(window, start, mid);
+        }
+        // 如果 end 点在窗口外，用中点替换 end 并递归
+        return clip_line_midpoint(window, mid, end);
+    }
+
+    //RenderCore::ignore_unused(window, start, end);
+    //return true;
     //RENDERENGINE_UNIMPLEMENTED
 }
 
