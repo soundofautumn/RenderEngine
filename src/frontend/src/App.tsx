@@ -238,6 +238,16 @@ export default function App() {
   const handleSlidingWindowChanged = (enable?: boolean) => {
     const enabledSliding = enable === undefined ? enableSlidingWindow : enable;
     const currentSlidingWindow = slidingWindowRef.current;
+    if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
+      const temp = currentSlidingWindow.top_left.x;
+      currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
+      currentSlidingWindow.bottom_right.x = temp;
+    }
+    if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
+      const temp = currentSlidingWindow.top_left.y;
+      currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
+      currentSlidingWindow.bottom_right.y = temp;
+    }
     client('/engine/set_global_options', {
       data: {
         GlobalOptions: {
@@ -265,6 +275,8 @@ export default function App() {
     if (hideToolbar) return;
     setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 8);
   }, [hideToolbar, penOptions, enableSlidingWindow])
+
+  const previewSlidingWindowTimeout = React.useRef<number | null>(null);
 
   return (<>
     <div id="mousePosition">Engine: {engine_name}; FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
@@ -342,8 +354,13 @@ export default function App() {
                         currentSlidingWindow.bottom_right.y = document.body.clientHeight;
                       }
                       setSlidingWindow(currentSlidingWindow);
+                      if (previewSlidingWindowTimeout.current) clearTimeout(previewSlidingWindowTimeout.current);
+                      previewSlidingWindowTimeout.current = setTimeout(() => {
+                        handleSlidingWindowChanged();
+                      }, 100);
                     }
                     const handleMouseUp = () => {
+                      if (previewSlidingWindowTimeout.current) clearTimeout(previewSlidingWindowTimeout.current);
                       slidingWindowRef.current = slidingWindow;
                       setSlidingWindowMoving(false);
                       handleSlidingWindowChanged();
