@@ -143,3 +143,6 @@ logs
 # environment file
 .env.*
 !.env.example
+CMakeSettings.json
+src/frontend/package-lock.json
+src/package-lock.json
