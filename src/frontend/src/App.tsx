@@ -32,6 +32,9 @@ export default function App() {
   const fpsRef = React.useRef(0);
   const [fps, setFps] = React.useState(0);
   const first = React.useRef(true);
+  const [start, setStart] = React.useState(true);
+  const startTimeoutRef = React.useRef<number | null>(null);
+  const [errorMessage, setErrorMessage] = React.useState('等待后端响应...');
   React.useEffect(() => {
     if (!first.current) return;
     first.current = false;
@@ -52,6 +55,11 @@ export default function App() {
       bottom_right: { x: width, y: height },
     }
     setSlidingWindow(slidingWindowRef.current)
+
+    startTimeoutRef.current = setTimeout(() => {
+      setStart(false);
+    }, 100);
+
     client('/engine/create', {
       data: {
         name: engine_name,
@@ -65,6 +73,8 @@ export default function App() {
       ws.onopen = function () {
         ws.send(`set_fps ${engine_fps}`);
         setLoading(false);
+        if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+        setStart(true);
         loadingRef.current = false;
       };
       ws.binaryType = "arraybuffer";
@@ -95,7 +105,8 @@ export default function App() {
       };
     }).catch(e => {
       console.error(e);
-      alert("Failed to create engine");
+      setErrorMessage("后端无响应，请检查后端是否正常运行。");
+      // alert("Failed to create engine");
     })
   }, [])
 
@@ -291,6 +302,9 @@ export default function App() {
   const previewSlidingWindowTimeout = React.useRef<number | null>(null);
 
   return (<>
+    <div id="hover" style={{ opacity: start ? 0 : 1 }}>
+      <div>{errorMessage}</div>
+    </div>
     <div id="mousePosition">
       Engine: {engine_name}<button id="switch-engine-name" onClick={() => {
         randomEngineName();
@@ -608,6 +622,8 @@ export default function App() {
         })
     }
     <canvas
+      width={0}
+      height={0}
       ref={canvasRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

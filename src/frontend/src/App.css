@@ -4,10 +4,6 @@
     background-color: black;
 }
 
-canvas {
-    cursor: none;
-}
-
 body {
     margin: 0;
     padding: 0;
@@ -19,7 +15,27 @@ body {
 }
 
 canvas {
+    cursor: none;
     outline: 1px solid black;
+}
+
+#hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 114514;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 1s;
+    div {
+        pointer-events: none;
+        color: rgba(255, 255, 255, 0.8);
+    }
 }
 
 #mousePosition {
@@ -90,11 +106,11 @@ canvas {
 }
 
 #switch-engine-name {
-  margin: 0 0 0 2px;
-  padding: 0 2px;
-  font-size: 12px;
-  cursor: pointer;
-  pointer-events: all;
+    margin: 0 0 0 2px;
+    padding: 0 2px;
+    font-size: 12px;
+    cursor: pointer;
+    pointer-events: all;
 }
 
 button,
