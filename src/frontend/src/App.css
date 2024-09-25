@@ -56,6 +56,8 @@ canvas {
     pointer-events: none;
     .point-item {
         position: relative;
+        display: flex;
+        justify-content: center;
         .point-circle {
             position: absolute;
             top: -5px;
@@ -79,6 +81,9 @@ canvas {
             border-radius: 5px;
             margin: 0;
             user-select: none;
+        }
+        .point-text.top{
+            bottom: 0;
         }
     }
 }
