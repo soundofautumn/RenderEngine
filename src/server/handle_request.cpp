@@ -77,23 +77,21 @@ std::shared_ptr<EngineManager::EngineMutex> get_engine_with_mutex(
     return EngineManager::get_instance().get_engine_with_mutex(engine_name);
 }
 
-void draw_primitive(EngineManager::EngineMutex &engine_mutex, const Primitive &primitive) {
-    std::lock_guard<std::mutex> lock(engine_mutex.mutex);
-    engine_mutex.engine.add_primitive(primitive);
-}
-
 void handle_engine_draw(const request &req, response &res) {
     auto j = get_request_body(req, res);
     if (j.is_null()) {
         return;
     }
-    auto engine = get_engine_with_mutex(req, res);
-    if (!engine) {
+    auto engine_mutex = get_engine_with_mutex(req, res);
+    if (!engine_mutex) {
         return;
     }
     try {
         auto primitive = deserialize_primitive(j.as_object());
-        draw_primitive(*engine, primitive);
+        {
+            std::lock_guard<std::mutex> lock(engine_mutex->mutex);
+            engine_mutex->engine.add_primitive(primitive);
+        }
     } catch (const std::exception &e) {
 #ifdef NDEBUG
         auto msg = "Invalid primitive.";
@@ -153,7 +151,7 @@ void handle_request(const request &req, response &res) {
         return;
     }
     res.version(req.version());
-    res.set(http::field::server, "RenderEngine");
+    res.set(http::field::server, SERVER_NAME);
     res.set(http::field::access_control_allow_origin, "*");
     res.keep_alive(req.keep_alive());
     try {
