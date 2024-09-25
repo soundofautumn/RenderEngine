@@ -2,6 +2,7 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 #include "circle.hpp"
+#define Pi 3.14159265358979323846
 
 #include <cmath>
 #include <limits>
@@ -145,10 +146,15 @@ void RenderEngine::draw_arc(const Arc &arc) {
         // 计算起始角度和终止角度
         auto start_angle = atan2(three_points.p1.y - center.y, three_points.p1.x - center.x);
         auto end_angle = atan2(three_points.p3.y - center.y, three_points.p3.x - center.x);
-        if (start_angle <= end_angle) {
+        auto p2place = atan2(three_points.p2.y - center.y, three_points.p2.x - center.x);
+        if (start_angle >= end_angle) {
+            std::swap(start_angle, end_angle);
+        }
+        if (p2place >= start_angle && p2place <= end_angle) {
             draw_arc_midpoint(center, radius, start_angle, end_angle);
         } else {
-            draw_arc_midpoint(center, radius, end_angle, start_angle);
+            draw_arc_midpoint(center, radius, -Pi, start_angle);
+            draw_arc_midpoint(center, radius, end_angle, Pi);
         }
     }
 }
