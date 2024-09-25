@@ -6,8 +6,8 @@
 #define RENDERENGINE_ENGINE_HPP
 
 #include <deque>
-#include <list>
 #include <functional>
+#include <list>
 
 #include "bitmap.hpp"
 #include "options.hpp"
@@ -31,6 +31,9 @@ class RenderCore::RenderEngine {
 
     PenOptions pen_options_;
     GlobalOptions global_options_;
+
+    // 需要重新渲染
+    bool need_render_{true};
 
    public:
     using Buffer = Bitmap::Buffer;
@@ -73,7 +76,10 @@ class RenderCore::RenderEngine {
         }
     }
 
-    void set_global_options(const GlobalOptions &options) { global_options_ = options; }
+    void set_global_options(const GlobalOptions &options) {
+        global_options_ = options;
+        need_render_ = true;
+    }
 
     [[nodiscard]] const GlobalOptions &get_global_options() const { return global_options_; }
 
@@ -111,6 +117,7 @@ class RenderCore::RenderEngine {
         if (!frame_buffer_) {
             return;
         }
+        need_render_ = true;
         primitives_.push_back(primitive);
         if (std::holds_alternative<PenOptions>(primitive)) {
             pen_options_ = std::get<PenOptions>(primitive);
@@ -132,6 +139,9 @@ class RenderCore::RenderEngine {
     bool render() {
         if (!frame_buffer_) {
             return false;
+        }
+        if (!need_render_) {
+            return true;
         }
         clear();
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
@@ -161,6 +171,7 @@ class RenderCore::RenderEngine {
                 pen_options_ = options;
             }
         }
+        need_render_ = false;
         return true;
     }
 
