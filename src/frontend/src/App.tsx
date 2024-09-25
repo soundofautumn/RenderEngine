@@ -18,6 +18,10 @@ function getHeightUnfold(dom: HTMLElement) {
   return height;
 }
 
+function getPointDistance(p1: IPoint, p2: IPoint) {
+  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+}
+
 export default function App() {
   const coordinateRef = React.useRef({ x: 0, y: 0 });
   const [coordinate, setCoordinate] = React.useState({ x: 0, y: 0 });
@@ -162,9 +166,16 @@ export default function App() {
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentDrawFunc.current.drawingMethod === 'drag') return;
-    clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
-    setClickedPoints(clickedPointsRef.current);
-    handleMouseDown(e, true);
+    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
+      const shadowPoint = { ...clickedPointsRef.current[0] };
+      clickedPointsRef.current.push(shadowPoint);
+      setClickedPoints(clickedPointsRef.current);
+      handleDraw();
+    } else {
+      clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+      setClickedPoints(clickedPointsRef.current);
+      handleMouseDown(e, true);
+    }
   }
 
   const handleRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -561,11 +572,11 @@ export default function App() {
       </button>
     </div>
     {
-      ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
+      ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : (currentDrawFunc.current.multiplePoints && clickedPoints.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPoints[0]) < 10) ? 'ending' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
         .map((point, index) => {
           return (
             <div
-              className={clickingSlidingWindowPoints ? 'point sliding' : dragging ? 'point dragging' : 'point'}
+              className={`point ${point.type}`}
               key={index}
               style={{
                 left: point.x,
@@ -575,11 +586,11 @@ export default function App() {
               <div className='point-item'>
                 <div className='point-circle'
                   style={{
-                    backgroundColor: point.type === 'sliding' ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
+                    backgroundColor: (point.type === 'sliding' || point.type === 'ending') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
                   }}
                 />
                 <p className='point-text top'>
-                  {index + 1}
+                  {point.type === 'ending' ? '结束' : (index + 1) === currentDrawFunc.current.requiredPointers ? '结束' : (index + 1)}
                 </p>
                 <p className='point-text'>
                   ({point.x}, {point.y})

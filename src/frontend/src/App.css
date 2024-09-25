@@ -34,7 +34,8 @@ canvas {
 }
 
 #slidingWindow .point .point-item .point-circle,
-.point.sliding .point-item .point-circle {
+.point.sliding .point-item .point-circle,
+.point.ending .point-item .point-circle {
     border: chartreuse 1px solid;
     border-radius: 0;
     background-color: transparent;
