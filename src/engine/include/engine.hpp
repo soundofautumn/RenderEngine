@@ -8,6 +8,7 @@
 #include <deque>
 #include <functional>
 #include <list>
+#include <memory>
 
 #include "bitmap.hpp"
 #include "options.hpp"
@@ -19,7 +20,7 @@ class RenderEngine;
 }
 
 class RenderCore::RenderEngine {
-    Bitmap *frame_buffer_;
+    std::unique_ptr<Bitmap> frame_buffer_;
 
     std::deque<Primitive> primitives_;
 
@@ -46,17 +47,14 @@ class RenderCore::RenderEngine {
         init(width, height);
     }
 
-    virtual ~RenderEngine() { reset(); }
-
     // 初始化
     void init() { init(width_, height_); }
 
     // 以指定宽高初始化
     void init(int32_t width, int32_t height) {
-        reset();
         width_ = width;
         height_ = height;
-        frame_buffer_ = new Bitmap(width, height);
+        frame_buffer_ = std::make_unique<Bitmap>(width, height);
         clear();
     }
 
@@ -65,14 +63,6 @@ class RenderCore::RenderEngine {
         const auto color = vector_to_color(global_options_.background_color);
         if (frame_buffer_) {
             frame_buffer_->fill(color);
-        }
-    }
-
-    // 重置
-    void reset() {
-        if (frame_buffer_) {
-            delete frame_buffer_;
-            frame_buffer_ = nullptr;
         }
     }
 
