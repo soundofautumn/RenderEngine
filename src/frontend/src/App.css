@@ -26,7 +26,7 @@ canvas {
     position: absolute;
     top: 10px;
     left: 10px;
-    color: white;
+    color: rgba(255, 255, 255, 0.8);
     background: rgba(255, 255, 255, 0.3);
     padding: 5px;
     border-radius: 5px;
@@ -74,7 +74,7 @@ canvas {
             position: absolute;
             width: fit-content;
             text-wrap: nowrap;
-            color: white;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 12px;
             background: rgba(255, 255, 255, 0);
             text-shadow: 0 0 5px black;
@@ -100,7 +100,7 @@ canvas {
         padding: 5px;
         border-radius: 5px;
         background: rgba(255, 255, 255, 0.3);
-        color: white;
+        color: rgba(255, 255, 255, 0.8);
         border: none;
         cursor: pointer;
         transition: 0.3s;
@@ -130,7 +130,7 @@ canvas {
     font-size: 14px;
     transition: 0.8s ease;
     overflow: hidden;
-    color: white;
+    color: rgba(255, 255, 255, 0.8);
     background: rgba(255, 255, 255, 0.3);
     #pen-options {
         display: flex;

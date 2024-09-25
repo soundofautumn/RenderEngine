@@ -214,7 +214,7 @@ export default function App() {
     width: 1,
     type: 0,
     dash: 1,
-    fill_color: { r: 0, g: 0, b: 0, a: 255 },
+    fill_color: { r: 0, g: 0, b: 0, a: 0 },
   });
 
   const changePenOptionsTimeout = React.useRef<number | null>(null);
@@ -590,7 +590,7 @@ export default function App() {
                   }}
                 />
                 <p className='point-text top'>
-                  {point.type === 'ending' ? '结束' : (index + 1) === currentDrawFunc.current.requiredPointers ? '结束' : (index + 1)}
+                  {point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)}
                 </p>
                 <p className='point-text'>
                   ({point.x}, {point.y})
