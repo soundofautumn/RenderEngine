@@ -24,6 +24,9 @@ namespace net = boost::asio;                    // from <boost/asio.hpp>
 
 constexpr const char SERVER_NAME[] = "RenderEngine";
 constexpr const char ENGINE_NAME_HEADER[] = "Engine-Name";
+constexpr const char ENGINE_ALLOW_ORIGIN[] = "*";
+constexpr const char ENGINE_ALLOW_METHODS[] = "GET, POST, OPTIONS";
 constexpr const char ENGINE_ALLOW_HEADERS[] = "Content-Type, Engine-Name";
+constexpr const char ENGINE_MAX_AGE[] = "86400";
 
 #endif  //RENDERENGINE_SERVER_H

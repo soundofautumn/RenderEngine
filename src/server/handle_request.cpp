@@ -139,21 +139,20 @@ void handle_engine_set_global_options(const request &req, response &res) {
 }
 
 void handle_request(const request &req, response &res) {
+    res.version(req.version());
+    res.set(http::field::server, SERVER_NAME);
+    res.set(http::field::access_control_allow_origin, ENGINE_ALLOW_ORIGIN);
+    res.set(http::field::access_control_allow_methods, ENGINE_ALLOW_METHODS);
+    res.set(http::field::access_control_allow_headers, ENGINE_ALLOW_HEADERS);
+    res.set(http::field::access_control_max_age, ENGINE_MAX_AGE);
+    res.keep_alive(req.keep_alive());
+
     if (req.method() == http::verb::options) {
         res.result(http::status::ok);
-        res.set(http::field::server, SERVER_NAME);
-        res.set(http::field::access_control_allow_origin, "*");
-        res.set(http::field::access_control_allow_methods, "GET, POST, OPTIONS");
-        res.set(http::field::access_control_allow_headers, ENGINE_ALLOW_HEADERS);
-        res.set(http::field::access_control_max_age, "86400");
-        res.keep_alive(req.keep_alive());
         res.prepare_payload();
         return;
     }
-    res.version(req.version());
-    res.set(http::field::server, SERVER_NAME);
-    res.set(http::field::access_control_allow_origin, "*");
-    res.keep_alive(req.keep_alive());
+
     try {
         if (req.target().starts_with("/engine")) {
             if (req.target().starts_with("/engine/create")) {
