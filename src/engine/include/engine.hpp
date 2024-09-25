@@ -84,9 +84,7 @@ class RenderCore::RenderEngine {
     [[nodiscard]] const GlobalOptions &get_global_options() const { return global_options_; }
 
     // 绘制像素
-    void draw_pixel(int x, int y, const Color &color) { draw_pixel(x, y, vector_to_color(color)); }
-
-    void draw_pixel(int x, int y, uint32_t color) {
+    void draw_pixel(int x, int y, const Color &color) {
         if (!frame_buffer_) {
             return;
         }
@@ -94,8 +92,15 @@ class RenderCore::RenderEngine {
         if (x < 0 || x >= width_ || y < 0 || y >= height_) {
             return;
         }
-        frame_buffer_->set_pixel(x, y, color);
+        // 颜色混合
+        const auto bg_color = color_to_vector(frame_buffer_->get_pixel(x, y));
+        const auto alpha = color.a;
+        const auto new_color = color * alpha + bg_color * (1 - alpha);
+
+        frame_buffer_->set_pixel(x, y, vector_to_color(new_color));
     }
+
+    void draw_pixel(int x, int y, uint32_t color) { draw_pixel(x, y, color_to_vector(color)); }
 
     // 保存到文件
     void save(const std::string &filename) {
