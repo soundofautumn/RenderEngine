@@ -139,3 +139,7 @@ RenderEngine*
 
 # server log
 logs
+
+# environment file
+.env.*
+!.env.example
