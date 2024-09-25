@@ -21,7 +21,12 @@ void RenderEngine::draw_point(int x, int y, int index) {
         return;
     }
     if (options.type != PenOptions::LineType::SOLID && index == -1) {
+#ifdef RENDERENGINE_DEBUG
         throw std::runtime_error("Unsupported line type");
+#else
+        draw_pixel(x, y, options.color);
+        return;
+#endif
     }
     const auto draw = [&](int x, int y) {
         // 以这个点为中心画一个正方形

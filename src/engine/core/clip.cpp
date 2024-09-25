@@ -3,6 +3,7 @@
 //
 #include <variant>
 
+#include "config.hpp"
 #include "engine.hpp"
 
 using namespace RenderCore;
@@ -51,6 +52,7 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
         ++it;
     }
 }
+
 const uint8_t INSIDE = 0;  // 0000
 const uint8_t LEFT = 1;    // 0001
 const uint8_t RIGHT = 2;   // 0010
@@ -121,9 +123,9 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 }
 
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
-    throw std::runtime_error("Not implemented");
+    RENDERENGINE_UNIMPLEMENTED
 }
 
 void RenderEngine::polygon_clip(const Polygon &) {
-    throw std::runtime_error("Not implemented");
+    RENDERENGINE_UNIMPLEMENTED
 }
