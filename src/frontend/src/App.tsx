@@ -582,7 +582,11 @@ export default function App() {
         </button>
         {
           enableSlidingWindow && (
-            <button onClick={() => setClickingSlidingWindowPoints(true)}>
+            <button onClick={() => {
+              setClickedPoints([]);
+              clickedPointsRef.current = [];
+              setClickingSlidingWindowPoints(true)
+            }}>
               圈画裁剪框
             </button>
           )
