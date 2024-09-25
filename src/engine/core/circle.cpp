@@ -145,6 +145,10 @@ void RenderEngine::draw_arc(const Arc &arc) {
         // 计算起始角度和终止角度
         auto start_angle = atan2(three_points.p1.y - center.y, three_points.p1.x - center.x);
         auto end_angle = atan2(three_points.p3.y - center.y, three_points.p3.x - center.x);
-        draw_arc_midpoint(center, radius, start_angle, end_angle);
+        if (start_angle <= end_angle) {
+            draw_arc_midpoint(center, radius, start_angle, end_angle);
+        } else {
+            draw_arc_midpoint(center, radius, end_angle, start_angle);
+        }
     }
 }
