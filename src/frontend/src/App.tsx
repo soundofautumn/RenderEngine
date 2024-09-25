@@ -234,7 +234,7 @@ export default function App() {
 
   const [clickingSlidingWindowPoints, setClickingSlidingWindowPoints] = React.useState<boolean>(false);
 
-  const [enableSlidingWindow, setEnableSlidingWindow] = React.useState(true);
+  const [enableSlidingWindow, setEnableSlidingWindow] = React.useState(false);
   const handleSlidingWindowChanged = (enable?: boolean) => {
     const enabledSliding = enable === undefined ? enableSlidingWindow : enable;
     const currentSlidingWindow = slidingWindowRef.current;
@@ -377,8 +377,11 @@ export default function App() {
                     })
                   }}
                 />
+                <p className='point-text top'>
+                  {point.name}
+                </p>
                 <p className='point-text'>
-                  {point.name} ({point.x}, {point.y})
+                  ({point.x}, {point.y})
                 </p>
               </div>
             </div>
@@ -575,6 +578,9 @@ export default function App() {
                     backgroundColor: point.type === 'sliding' ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
                   }}
                 />
+                <p className='point-text top'>
+                  {index + 1}
+                </p>
                 <p className='point-text'>
                   ({point.x}, {point.y})
                 </p>
