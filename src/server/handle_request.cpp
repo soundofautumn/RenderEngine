@@ -88,6 +88,7 @@ void handle_engine_draw(const request &req, response &res) {
     }
     try {
         auto primitive = deserialize_primitive(j.as_object());
+        logger::trace("Add primitive: {}", boost::json::serialize(j));
         {
             std::lock_guard<std::mutex> lock(engine_mutex->mutex);
             engine_mutex->engine.add_primitive(primitive);
@@ -128,13 +129,16 @@ void handle_engine_set_global_options(const request &req, response &res) {
     if (!engine) {
         return;
     }
-    std::lock_guard<std::mutex> lock(engine->mutex);
     if (!j.as_object().contains("GlobalOptions")) {
         error_response(res, http::status::bad_request, "Global options not found.");
         return;
     }
     auto global_options = deserialize_global_options(j.at("GlobalOptions").as_object());
-    engine->engine.set_global_options(global_options);
+    logger::trace("Set global options: {}", boost::json::serialize(j));
+    {
+        std::lock_guard<std::mutex> lock(engine->mutex);
+        engine->engine.set_global_options(global_options);
+    }
     success_response(res, "Global options set.");
 }
 

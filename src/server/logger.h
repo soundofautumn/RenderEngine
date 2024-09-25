@@ -12,6 +12,8 @@ void init_logger() {
     console_sink->set_level(spdlog::level::info);
 #else
     console_sink->set_level(spdlog::level::debug);
+    // 刷新缓冲区
+    spdlog::flush_on(spdlog::level::trace);
 #endif
     auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
         "logs/server.log", 1024 * 1024 * 5, 3);
