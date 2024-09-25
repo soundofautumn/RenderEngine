@@ -9,7 +9,7 @@ export const engine_name = randomEngineName();
 export const engine_fps = 30;
 
 export const client = axios.create({
-    baseURL: "http://" + backend_endpoint,
+    baseURL: "//" + backend_endpoint,
     method: "POST",
     headers: {
         "Content-Type": "application/json",

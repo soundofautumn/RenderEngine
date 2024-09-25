@@ -51,7 +51,7 @@ export default function App() {
     }).then(r => {
       console.log(r.data);
       console.log(`Engine ${engine_name} created with ${width}x${height}`);
-      const ws = new WebSocket(`ws://${backend_endpoint}/engine/${engine_name}`);
+      const ws = new WebSocket(`//${backend_endpoint}/engine/${engine_name}`);
       ws.onopen = function () {
         ws.send(`set_fps ${engine_fps}`);
         setLoading(false);
