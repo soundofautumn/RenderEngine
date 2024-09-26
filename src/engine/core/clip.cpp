@@ -60,15 +60,16 @@ const uint8_t BOTTOM = 4;  // 0100
 const uint8_t TOP = 8;     // 1000
 
 auto encode_f = [](const Rectangle &window) {
-    return [&](const Point &point) {
+    return [&](float x, float y) -> uint8_t {
         uint8_t code = INSIDE;
-        if (point.x < window.min_x()) {
+        if (x < window.min_x()) {
             code |= LEFT;
-        } else if (point.x > window.max_x()) {
+        } else if (x > window.max_x()) {
             code |= RIGHT;
-        } else if (point.y < window.min_y()) {
+        }
+        if (y < window.min_y()) {
             code |= BOTTOM;
-        } else if (point.y > window.max_y()) {
+        } else if (y > window.max_y()) {
             code |= TOP;
         }
         return code;
@@ -78,46 +79,50 @@ auto encode_f = [](const Rectangle &window) {
 bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end) {
     auto encode = encode_f(window);
 
-    auto start_code = encode(start);
-    auto end_code = encode(end);
+    float x1 = start.x, y1 = start.y, x2 = end.x, y2 = end.y;
 
-    if (start_code & end_code) {
-        // 全部在窗口外
-        return false;
-    }
+    uint8_t start_code = encode(x1, y1);
+    uint8_t end_code = encode(x2, y2);
 
     while (true) {
-        if (!(start_code | end_code)) {
-            // 全部在窗口内
+        // 全部在窗口内
+        if (start_code == INSIDE && end_code == INSIDE) {
+            start = {static_cast<int>(x1), static_cast<int>(y1)};
+            end = {static_cast<int>(x2), static_cast<int>(y2)};
             return true;
+        }
+
+        // 全部在窗口外
+        if ((start_code & end_code)) {
+            return false;
+        }
+
+        uint8_t code = start_code ? start_code : end_code;
+
+        float x, y;
+
+        if (code & TOP) {
+            x = x1 + (x2 - x1) * (window.max_y() - y1) / (y2 - y1);
+            y = window.max_y();
+        } else if (code & BOTTOM) {
+            x = x1 + (x2 - x1) * (window.min_y() - y1) / (y2 - y1);
+            y = window.min_y();
+        } else if (code & RIGHT) {
+            y = y1 + (y2 - y1) * (window.max_x() - x1) / (x2 - x1);
+            x = window.max_x();
+        } else if (code & LEFT) {
+            y = y1 + (y2 - y1) * (window.min_x() - x1) / (x2 - x1);
+            x = window.min_x();
+        }
+
+        if (code == start_code) {
+            x1 = x;
+            y1 = y;
+            start_code = encode(x1, y1);
         } else {
-            // 部分在窗口内
-            Point intersect;
-            uint8_t out_code = start_code ? start_code : end_code;
-            if (out_code & TOP) {
-                intersect.x =
-                    start.x + (end.x - start.x) * (window.max_y() - start.y) / (end.y - start.y);
-                intersect.y = window.max_y();
-            } else if (out_code & BOTTOM) {
-                intersect.x =
-                    start.x + (end.x - start.x) * (window.min_y() - start.y) / (end.y - start.y);
-                intersect.y = window.min_y();
-            } else if (out_code & RIGHT) {
-                intersect.y =
-                    start.y + (end.y - start.y) * (window.max_x() - start.x) / (end.x - start.x);
-                intersect.x = window.max_x();
-            } else if (out_code & LEFT) {
-                intersect.y =
-                    start.y + (end.y - start.y) * (window.min_x() - start.x) / (end.x - start.x);
-                intersect.x = window.min_x();
-            }
-            if (out_code == start_code) {
-                start = intersect;
-                start_code = encode(start);
-            } else {
-                end = intersect;
-                end_code = encode(end);
-            }
+            x2 = x;
+            y2 = y;
+            end_code = encode(x2, y2);
         }
     }
 }
@@ -125,55 +130,31 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
     auto encode = encode_f(window);
 
-    auto start_code = encode(start);
-    auto end_code = encode(end);
-
-    // 全部在窗口外
-    if (start_code & end_code) {
-        return false;
-    }
-
-    while (true) {
-        // 全部在窗口内
-        if (!(start_code | end_code)) {
-            return true;
+    std::function<Point(float, float, float, float)> nearest_point = [&](float x1, float y1,
+                                                                         float x2, float y2) {
+        if (near_equal(x1, x2, 0.01f) && near_equal(y1, y2, 0.01f)) {
+            return Point{static_cast<int>(x1), static_cast<int>(y1)};
         }
+        auto start_code = encode(x1, y1);
 
-        // 计算中点
-        Point mid;
-        mid.x = (start.x + end.x) / 2;
-        mid.y = (start.y + end.y) / 2;
-        auto mid_code = encode(mid);
+        float x = (x1 + x2) / 2, y = (y1 + y2) / 2;
 
-        // 如果线段非常短，认为它无法再细分
-        if (fabs(end.x - start.x) < 1 && fabs(end.y - start.y) < 1) {
-            return false;
+        auto mid_code = encode(x, y);
+
+        if (start_code & mid_code) {
+            return nearest_point(x, y, x2, y2);
+        } else {
+            return nearest_point(x1, y1, x, y);
         }
+    };
 
-        // 如果中点在窗口内，继续递归分割线段
-        if (!(mid_code)) {
-            // 检查 start 到 mid 的部分
-            if (clip_line_midpoint(window, start, mid)) {
-                // 检查 mid 到 end 的部分
-                return clip_line_midpoint(window, mid, end);
-            }
-            return false;
-        }
+    start = nearest_point(start.x, start.y, end.x, end.y);
+    end = nearest_point(end.x, end.y, start.x, start.y);
 
-        // 如果 start 点在窗口外，用中点替换 start 并递归
-        if (start_code) {
-            return clip_line_midpoint(window, start, mid);
-        }
-        // 如果 end 点在窗口外，用中点替换 end 并递归
-        return clip_line_midpoint(window, mid, end);
-    }
-
-    //RenderCore::ignore_unused(window, start, end);
-    //return true;
-    //RENDERENGINE_UNIMPLEMENTED
+    return start != end;
 }
 
 void RenderEngine::polygon_clip(const Polygon &) {
+    RENDERENGINE_UNIMPLEMENTED
     return;
-    //RENDERENGINE_UNIMPLEMENTED
 }
