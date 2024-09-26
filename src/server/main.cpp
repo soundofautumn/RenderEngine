@@ -19,8 +19,14 @@ int main(int argc, char *argv[]) {
 
     // 存储命令行参数的变量
     po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);  // 通知并解析参数
+
+    try {
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);                                           // 通知并解析参数
+    } catch (std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
     // 处理 --help 选项
     if (vm.count("help")) {
