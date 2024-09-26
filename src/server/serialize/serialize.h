@@ -9,14 +9,12 @@
 
 #include "primitive.hpp"
 #include "serialize_circle.h"
-#include "serialize_color.h"
 #include "serialize_fill.h"
 #include "serialize_line.h"
-#include "serialize_point.h"
-#include "serialize_polygon.h"
+#include "serialize_options.h"
 #include "serialize_rectangle.h"
 
-RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive) {
+inline RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive) {
     if (primitive.contains("Line")) {
         return deserialize_line(primitive.at("Line").as_object());
     } else if (primitive.contains("Circle")) {
@@ -35,7 +33,7 @@ RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive
     return {};
 }
 
-boost::json::object serialize_primitive(const RenderCore::Primitive &primitive) {
+inline boost::json::object serialize_primitive(const RenderCore::Primitive &primitive) {
     if (std::holds_alternative<RenderCore::Line>(primitive)) {
         return {{"Line", serialize_line(std::get<RenderCore::Line>(primitive))}};
     } else if (std::holds_alternative<RenderCore::Circle>(primitive)) {

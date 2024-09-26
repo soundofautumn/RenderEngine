@@ -9,12 +9,12 @@
 
 #include "point.hpp"
 
-RenderCore::Point deserialize_point(const boost::json::object &obj) {
+inline RenderCore::Point deserialize_point(const boost::json::object &obj) {
     return RenderCore::Point{
         static_cast<int>(obj.at("x").as_int64()), static_cast<int>(obj.at("y").as_int64())};
 }
 
-boost::json::object serialize_point(const RenderCore::Point &point) {
+inline boost::json::object serialize_point(const RenderCore::Point &point) {
     return {{"x", point.x}, {"y", point.y}};
 }
 

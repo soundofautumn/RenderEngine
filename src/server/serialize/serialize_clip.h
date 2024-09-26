@@ -7,11 +7,11 @@
 
 #include <boost/json.hpp>
 
-#include "fill.hpp"
+#include "clip.hpp"
 #include "serialize_polygon.h"
 #include "serialize_rectangle.h"
 
-boost::json::object serialize_clip_window(
+inline boost::json::object serialize_clip_window(
     const std::variant<RenderCore::Rectangle, RenderCore::Polygon> &window) {
     if (std::holds_alternative<RenderCore::Rectangle>(window)) {
         return {{"Rectangle", serialize_rectangle(std::get<RenderCore::Rectangle>(window))}};
@@ -21,7 +21,7 @@ boost::json::object serialize_clip_window(
     return {};
 }
 
-std::variant<RenderCore::Rectangle, RenderCore::Polygon> deserialize_clip_window(
+inline std::variant<RenderCore::Rectangle, RenderCore::Polygon> deserialize_clip_window(
     const boost::json::object &obj) {
     if (obj.contains("Rectangle")) {
         return deserialize_rectangle(obj.at("Rectangle").as_object());
@@ -31,12 +31,12 @@ std::variant<RenderCore::Rectangle, RenderCore::Polygon> deserialize_clip_window
     return {};
 }
 
-boost::json::object serialize_clip(const RenderCore::Clip &clip) {
+inline boost::json::object serialize_clip(const RenderCore::Clip &clip) {
     return {{"enable", clip.enable}, {"window", serialize_clip_window(clip.window)},
         {"algorithm", static_cast<int64_t>(clip.algorithm)}};
 }
 
-RenderCore::Clip deserialize_clip(const boost::json::object &obj) {
+inline RenderCore::Clip deserialize_clip(const boost::json::object &obj) {
     return RenderCore::Clip{.enable = obj.at("enable").as_bool(),
         .window = deserialize_clip_window(obj.at("window").as_object()),
         .algorithm = static_cast<RenderCore::Clip::Algorithm>(obj.at("algorithm").as_int64())};

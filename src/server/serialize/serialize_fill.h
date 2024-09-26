@@ -9,11 +9,11 @@
 #include "fill.hpp"
 #include "serialize_point.h"
 
-boost::json::object serialize_fill(const RenderCore::Fill &fill) {
+inline boost::json::object serialize_fill(const RenderCore::Fill &fill) {
     return {{"seed", serialize_point(fill.seed)}};
 }
 
-RenderCore::Fill deserialize_fill(const boost::json::object &obj) {
+inline RenderCore::Fill deserialize_fill(const boost::json::object &obj) {
     return RenderCore::Fill{.seed = deserialize_point(obj.at("seed").as_object())};
 }
 #endif  //RENDERENGINE_SERIALIZE_FILL_H
