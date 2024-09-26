@@ -5,13 +5,19 @@
 #ifndef RENDERENGINE_ENGINEMANGER_H
 #define RENDERENGINE_ENGINEMANGER_H
 
+#include <spdlog/spdlog.h>
+
+#include <boost/asio/steady_timer.hpp>
 #include <memory>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 #include "engine.hpp"
 
 using RenderCore::RenderEngine;
+
+namespace logger = spdlog;
 
 class EngineManager {
    public:
@@ -34,7 +40,8 @@ class EngineManager {
     const int timer_thread_count = 4;
     std::vector<std::thread> threads_;
     boost::asio::io_context ioc_{timer_thread_count};
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_{ioc_.get_executor()};
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_{
+        ioc_.get_executor()};
 
     void reset_timer(const std::string &name) {
         if (timers_.find(name) == timers_.end()) {

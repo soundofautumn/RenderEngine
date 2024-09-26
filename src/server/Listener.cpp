@@ -8,6 +8,9 @@
 
 extern void fail(boost::system::error_code ec, char const *what);
 
+namespace net = boost::beast::net;
+namespace logger = spdlog;
+
 Listener::Listener(net::io_context &ioc, const tcp::endpoint &endpoint)
     : acceptor_(ioc), socket_(ioc) {
     boost::system::error_code ec;

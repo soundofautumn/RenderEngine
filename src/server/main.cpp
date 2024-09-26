@@ -6,6 +6,7 @@
 #include "logger.h"
 
 namespace po = boost::program_options;
+namespace logger = spdlog;
 
 int main(int argc, char *argv[]) {
     // 定义一个描述命令行参数的对象

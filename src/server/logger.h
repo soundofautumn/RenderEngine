@@ -6,7 +6,7 @@
 #include <spdlog/spdlog.h>
 
 
-void init_logger() {
+inline void init_logger() {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 #ifdef NDEBUG
     console_sink->set_level(spdlog::level::info);

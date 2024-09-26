@@ -7,6 +7,9 @@
 
 #include "Server.h"
 
+namespace websocket = boost::beast::websocket;
+namespace http = boost::beast::http;
+
 class WebSocketSession : public std::enable_shared_from_this<WebSocketSession> {
     boost::beast::flat_buffer buffer_;
     websocket::stream<tcp::socket> ws_;
@@ -14,7 +17,7 @@ class WebSocketSession : public std::enable_shared_from_this<WebSocketSession> {
    public:
     explicit WebSocketSession(tcp::socket socket);
 
-    void do_accept(const http::request<boost::beast::http::string_body> &req);
+    void do_accept(const http::request<http::string_body> &req);
 
     void on_accept(boost::system::error_code ec);
 

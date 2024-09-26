@@ -7,6 +7,8 @@
 
 #include "Server.h"
 
+namespace http = boost::beast::http;
+
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
     tcp::socket socket_;
     boost::beast::flat_buffer buffer_;

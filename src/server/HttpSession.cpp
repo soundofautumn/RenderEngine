@@ -54,6 +54,8 @@ void HttpSession::on_read(boost::system::error_code ec) {
         });
 }
 
+namespace net = boost::beast::net;
+
 void HttpSession::on_write(boost::system::error_code ec, bool close) {
     // Happens when the timer closes the socket
     if (ec == net::error::operation_aborted) return;

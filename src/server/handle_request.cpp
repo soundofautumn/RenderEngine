@@ -6,13 +6,13 @@
 
 #include <boost/json.hpp>
 
+#include "Server.h"
 #include "common_response.hpp"
 #include "engine_manger.h"
 #include "serialize/serialize.h"
 #include "serialize/serialize_options.h"
 
 using RenderCore::Primitive;
-using RenderCore::RenderEngine;
 
 using request = http::request<boost::beast::http::string_body>;
 using response = http::response<boost::beast::http::string_body>;

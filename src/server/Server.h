@@ -15,12 +15,7 @@
 #include <boost/beast.hpp>
 #include <memory>
 
-namespace logger = spdlog;
-
-using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
-namespace http = boost::beast::http;            // from <boost/beast/http.hpp>
-namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
-namespace net = boost::asio;                    // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 constexpr const char SERVER_NAME[] = "RenderEngine";
 constexpr const char ENGINE_NAME_HEADER[] = "Engine-Name";

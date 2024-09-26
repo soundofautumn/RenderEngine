@@ -4,7 +4,7 @@
 
 #include "WebSocketSession.h"
 
-#include "EngineWebSocketSession.h"
+namespace logger = spdlog;
 
 extern void fail(boost::system::error_code ec, char const *what);
 

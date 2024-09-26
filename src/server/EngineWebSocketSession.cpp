@@ -4,8 +4,6 @@
 
 #include "EngineWebSocketSession.h"
 
-#include "handle_request.h"
-
 extern void fail(boost::system::error_code ec, char const *what);
 
 EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket)

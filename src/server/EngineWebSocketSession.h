@@ -10,6 +10,8 @@
 #include "engine_manger.h"
 
 using RenderCore::RenderEngine;
+namespace websocket = boost::beast::websocket;
+namespace http = boost::beast::http;
 
 class EngineWebSocketSession : public std::enable_shared_from_this<EngineWebSocketSession> {
     std::string engine_name_;
