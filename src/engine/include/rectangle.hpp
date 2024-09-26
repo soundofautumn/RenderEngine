@@ -7,7 +7,6 @@
 
 #include "point.hpp"
 #include "polygon.hpp"
-#include "utils.hpp"
 #include "vector.hpp"
 
 namespace RenderCore {

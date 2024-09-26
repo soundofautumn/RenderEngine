@@ -5,8 +5,8 @@
 #ifndef RENDERENGINE_POLYGON_HPP
 #define RENDERENGINE_POLYGON_HPP
 
+#include <vector>
 #include "point.hpp"
-#include "vector.hpp"
 
 namespace RenderCore {
 

@@ -260,7 +260,7 @@ inline T matrix_det(const Matrix<N, N, T> &m) {
 
 // 余子式：一阶
 template <typename T>
-inline T matrix_cofactor(const Matrix<1, 1, T> &m, size_t row, size_t col) {
+inline T matrix_cofactor(const Matrix<1, 1, T> &, size_t, size_t) {
     return 0;
 }
 

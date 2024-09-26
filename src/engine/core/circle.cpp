@@ -2,10 +2,10 @@
 // Created by Autumn Sound on 2024/9/6.
 //
 #include "circle.hpp"
-#define Pi 3.14159265358979323846
 
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 #include "engine.hpp"
 
@@ -153,8 +153,8 @@ void RenderEngine::draw_arc(const Arc &arc) {
         if (p2place >= start_angle && p2place <= end_angle) {
             draw_arc_midpoint(center, radius, start_angle, end_angle);
         } else {
-            draw_arc_midpoint(center, radius, -Pi, start_angle);
-            draw_arc_midpoint(center, radius, end_angle, Pi);
+            draw_arc_midpoint(center, radius, -std::numbers::pi, start_angle);
+            draw_arc_midpoint(center, radius, end_angle, std::numbers::pi);
         }
     }
 }

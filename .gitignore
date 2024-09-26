@@ -146,3 +146,8 @@ logs
 CMakeSettings.json
 src/frontend/package-lock.json
 src/package-lock.json
+
+#clangd
+compile_commands.json
+
+.cache

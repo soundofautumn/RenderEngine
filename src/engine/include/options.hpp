@@ -7,7 +7,6 @@
 
 #include "clip.hpp"
 #include "color.hpp"
-#include "point.hpp"
 
 namespace RenderCore {
 
