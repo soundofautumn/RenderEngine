@@ -6,19 +6,12 @@
 #define RENDERENGINE_POLYGON_HPP
 
 #include <vector>
+
 #include "point.hpp"
 
 namespace RenderCore {
 
-struct Polygon {
-    std::vector<Point> points;
-
-    size_t size() const { return points.size(); }
-
-    Point &operator[](size_t index) { return points[index]; }
-
-    const Point &operator[](size_t index) const { return points[index]; }
-};
+using Polygon = std::vector<Point>;
 
 inline Polygon make_polygon(const std::vector<Point> &points) {
     return Polygon{points};

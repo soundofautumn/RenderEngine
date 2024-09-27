@@ -185,12 +185,19 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
 
     const auto computeIntersection = [&](const Point &p1, const Point &p2, const Point &edge_start,
                                          const Point &edge_end) {
-        const auto u = p1 - edge_start;
-        const auto v = edge_end - edge_start;
-        const auto w = p2 - p1;
-        const auto t = vector_cross(u, w) / vector_cross(v, w);
-        return Point{
-            static_cast<int>(edge_start.x + v.x * t), static_cast<int>(edge_start.y + v.y * t)};
+        Point edge_vec = edge_end - edge_start;
+        Point poly_vec = p2 - p1;
+
+        int cross_product = vector_cross(poly_vec, edge_vec);
+
+        if (cross_product == 0) {
+            // 线段平行或重合，返回第一个点作为退化处理
+            return p1;
+        }
+
+        Point start_to_p1 = p1 - edge_start;
+        float t = float(vector_cross(start_to_p1, edge_vec)) / cross_product;
+        return Point{int(p1.x + t * poly_vec.x), int(p1.y + t * poly_vec.y)};
     };
 
     Polygon output_polygon = polygon;
@@ -200,7 +207,7 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
         Point edge_start = window[i];
         Point edge_end = window[(i + 1) % window.size()];  // 裁剪窗口边
         Polygon input_polygon = output_polygon;
-        output_polygon.points.clear();  // 清空输出多边形
+        output_polygon.clear();  // 清空输出多边形
 
         // 对被裁剪多边形的每条边进行裁剪
         for (size_t j = 0; j < input_polygon.size(); ++j) {
@@ -212,13 +219,13 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
             if (isInside(current_point, edge_start, edge_end)) {
                 if (!isInside(previous_point, edge_start, edge_end)) {
                     // 如果前一个点在外部，当前点在内部，计算交点并保留
-                    output_polygon.points.push_back(
+                    output_polygon.push_back(
                         computeIntersection(previous_point, current_point, edge_start, edge_end));
                 }
-                output_polygon.points.push_back(current_point);  // 当前点保留
+                output_polygon.push_back(current_point);  // 当前点保留
             } else if (isInside(previous_point, edge_start, edge_end)) {
                 // 如果前一个点在内部，当前点在外部，保留交点
-                output_polygon.points.push_back(
+                output_polygon.push_back(
                     computeIntersection(previous_point, current_point, edge_start, edge_end));
             }
         }
@@ -226,7 +233,7 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
 
     // 将裁剪后的多边形赋给输入多边形
     polygon = output_polygon;
-    return !polygon.points.empty();  // 如果裁剪后多边形非空，返回 true
+    return !polygon.empty();  // 如果裁剪后多边形非空，返回 true
 }
 
 void RenderEngine::polygon_clip(const Polygon &) {

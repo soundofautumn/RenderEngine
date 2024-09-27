@@ -35,23 +35,19 @@ inline Rectangle make_rectangle(const Point &top_left, const Point &bottom_right
 
 // 多边形转矩形
 inline bool try_cast_polygon_to_rectangle(const Polygon &polygon, Rectangle &rectangle) {
-    if (polygon.points.size() != 4) {
+    if (polygon.size() != 4) {
         return false;
     }
     // 找出x坐标和y坐标的最小值和最大值
-    int min_x = std::min(
-        {polygon.points[0].x, polygon.points[1].x, polygon.points[2].x, polygon.points[3].x});
-    int max_x = std::max(
-        {polygon.points[0].x, polygon.points[1].x, polygon.points[2].x, polygon.points[3].x});
-    int min_y = std::min(
-        {polygon.points[0].y, polygon.points[1].y, polygon.points[2].y, polygon.points[3].y});
-    int max_y = std::max(
-        {polygon.points[0].y, polygon.points[1].y, polygon.points[2].y, polygon.points[3].y});
+    int min_x = std::min({polygon[0].x, polygon[1].x, polygon[2].x, polygon[3].x});
+    int max_x = std::max({polygon[0].x, polygon[1].x, polygon[2].x, polygon[3].x});
+    int min_y = std::min({polygon[0].y, polygon[1].y, polygon[2].y, polygon[3].y});
+    int max_y = std::max({polygon[0].y, polygon[1].y, polygon[2].y, polygon[3].y});
 
     // 验证这四个点是否构成平行于坐标轴的矩形
     int x_count = 0;
     int y_count = 0;
-    for (const auto &point : polygon.points) {
+    for (const auto &point : polygon) {
         if (point.x == min_x || point.x == max_x) {
             ++x_count;
         }
@@ -76,10 +72,10 @@ inline bool try_cast_polygon_to_rectangle(const Polygon &polygon, Rectangle &rec
 // 矩形转多边形
 inline Polygon cast_rectangle_to_polygon(const Rectangle &rectangle) {
     Polygon polygon;
-    polygon.points.emplace_back(rectangle.min_x(), rectangle.min_y());
-    polygon.points.emplace_back(rectangle.max_x(), rectangle.min_y());
-    polygon.points.emplace_back(rectangle.max_x(), rectangle.max_y());
-    polygon.points.emplace_back(rectangle.min_x(), rectangle.max_y());
+    polygon.emplace_back(rectangle.min_x(), rectangle.min_y());
+    polygon.emplace_back(rectangle.max_x(), rectangle.min_y());
+    polygon.emplace_back(rectangle.max_x(), rectangle.max_y());
+    polygon.emplace_back(rectangle.min_x(), rectangle.max_y());
     return polygon;
 }
 

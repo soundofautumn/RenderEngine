@@ -12,14 +12,14 @@
 inline RenderCore::Polygon deserialize_polygon(const boost::json::object &obj) {
     RenderCore::Polygon polygon;
     for (const auto &point : obj.at("points").as_array()) {
-        polygon.points.push_back(deserialize_point(point.as_object()));
+        polygon.push_back(deserialize_point(point.as_object()));
     }
     return polygon;
 }
 
 inline boost::json::object serialize_polygon(const RenderCore::Polygon &polygon) {
     boost::json::array points;
-    for (const auto &point : polygon.points) {
+    for (const auto &point : polygon) {
         points.push_back(serialize_point(point));
     }
     return {{"points", points}};
