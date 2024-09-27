@@ -15,10 +15,10 @@ struct Rectangle {
     Point top_left;
     Point bottom_right;
 
-    int& min_x() { return top_left.x; }
-    int& min_y() { return top_left.y; }
-    int& max_x() { return bottom_right.x; }
-    int& max_y() { return bottom_right.y; }
+    int &min_x() { return top_left.x; }
+    int &min_y() { return top_left.y; }
+    int &max_x() { return bottom_right.x; }
+    int &max_y() { return bottom_right.y; }
 
     int min_x() const { return top_left.x; }
     int min_y() const { return top_left.y; }
@@ -33,7 +33,7 @@ inline Rectangle make_rectangle(const Point &top_left, const Point &bottom_right
     return rectangle;
 }
 
-// 矩形转多边形
+// 多边形转矩形
 inline bool try_cast_polygon_to_rectangle(const Polygon &polygon, Rectangle &rectangle) {
     if (polygon.points.size() != 4) {
         return false;
@@ -71,6 +71,16 @@ inline bool try_cast_polygon_to_rectangle(const Polygon &polygon, Rectangle &rec
     }
 
     return true;
+}
+
+// 矩形转多边形
+inline Polygon cast_rectangle_to_polygon(const Rectangle &rectangle) {
+    Polygon polygon;
+    polygon.points.emplace_back(rectangle.min_x(), rectangle.min_y());
+    polygon.points.emplace_back(rectangle.max_x(), rectangle.min_y());
+    polygon.points.emplace_back(rectangle.max_x(), rectangle.max_y());
+    polygon.points.emplace_back(rectangle.min_x(), rectangle.max_y());
+    return polygon;
 }
 
 }  // namespace RenderCore

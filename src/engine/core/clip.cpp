@@ -5,6 +5,8 @@
 
 #include "config.hpp"
 #include "engine.hpp"
+#include "polygon.hpp"
+#include "rectangle.hpp"
 
 using namespace RenderCore;
 
@@ -44,6 +46,28 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
             }
             if (should_draw) {
                 *it = new_line;
+            } else {
+                it = render_primitives_.erase(it);
+                continue;
+            }
+        } else if (std::holds_alternative<Rectangle>(primitive)) {
+            auto &rectangle = std::get<Rectangle>(primitive);
+            Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
+            bool should_draw = true;
+            should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
+            if (should_draw) {
+                *it = new_polygon;
+            } else {
+                it = render_primitives_.erase(it);
+                continue;
+            }
+        } else if (std::holds_alternative<Polygon>(primitive)) {
+            auto &polygon = std::get<Polygon>(primitive);
+            Polygon new_polygon = polygon;
+            bool should_draw = true;
+            should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
+            if (should_draw) {
+                *it = new_polygon;
             } else {
                 it = render_primitives_.erase(it);
                 continue;
@@ -152,6 +176,57 @@ bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Poi
     end = nearest_point(end.x, end.y, start.x, start.y);
 
     return start != end;
+}
+
+bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polygon) {
+    const auto isInside = [&](const Point &point, const Point &edge_start, const Point &edge_end) {
+        return vector_cross(edge_end - edge_start, point - edge_start) >= 0;
+    };
+
+    const auto computeIntersection = [&](const Point &p1, const Point &p2, const Point &edge_start,
+                                         const Point &edge_end) {
+        const auto u = p1 - edge_start;
+        const auto v = edge_end - edge_start;
+        const auto w = p2 - p1;
+        const auto t = vector_cross(u, w) / vector_cross(v, w);
+        return Point{
+            static_cast<int>(edge_start.x + v.x * t), static_cast<int>(edge_start.y + v.y * t)};
+    };
+
+    Polygon output_polygon = polygon;
+
+    // 对裁剪窗口的每条边依次进行裁剪
+    for (size_t i = 0; i < window.size(); ++i) {
+        Point edge_start = window[i];
+        Point edge_end = window[(i + 1) % window.size()];  // 裁剪窗口边
+        Polygon input_polygon = output_polygon;
+        output_polygon.points.clear();  // 清空输出多边形
+
+        // 对被裁剪多边形的每条边进行裁剪
+        for (size_t j = 0; j < input_polygon.size(); ++j) {
+            Point current_point = input_polygon[j];
+            Point previous_point =
+                input_polygon[(j + input_polygon.size() - 1) % input_polygon.size()];
+
+            // 判断前一个点和当前点是否在裁剪边的内部
+            if (isInside(current_point, edge_start, edge_end)) {
+                if (!isInside(previous_point, edge_start, edge_end)) {
+                    // 如果前一个点在外部，当前点在内部，计算交点并保留
+                    output_polygon.points.push_back(
+                        computeIntersection(previous_point, current_point, edge_start, edge_end));
+                }
+                output_polygon.points.push_back(current_point);  // 当前点保留
+            } else if (isInside(previous_point, edge_start, edge_end)) {
+                // 如果前一个点在内部，当前点在外部，保留交点
+                output_polygon.points.push_back(
+                    computeIntersection(previous_point, current_point, edge_start, edge_end));
+            }
+        }
+    }
+
+    // 将裁剪后的多边形赋给输入多边形
+    polygon = output_polygon;
+    return !polygon.points.empty();  // 如果裁剪后多边形非空，返回 true
 }
 
 void RenderEngine::polygon_clip(const Polygon &) {

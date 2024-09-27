@@ -13,6 +13,7 @@
 #include "bitmap.hpp"
 #include "options.hpp"
 #include "point.hpp"
+#include "polygon.hpp"
 #include "primitive.hpp"
 
 namespace RenderCore {
@@ -228,6 +229,10 @@ class RenderCore::RenderEngine {
 
     // 中点分割裁剪算法
     bool clip_line_midpoint(const Rectangle &window, Point &start, Point &end);
+
+    // 裁剪多边形
+    // Sutherland-Hodgman
+    bool clip_sutherland_hodgman(const Polygon &window, Polygon &polygon);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP
