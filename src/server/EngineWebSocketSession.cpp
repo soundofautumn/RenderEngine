@@ -98,7 +98,7 @@ void EngineWebSocketSession::send_frame() {
         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     frame_buffer_ = engine_with_mutex->engine.get_frame_buffer();
     write_in_progress_ = true;
-    ws_.async_write(boost::asio::buffer(frame_buffer_),
+    ws_.async_write(boost::asio::buffer(frame_buffer_.data(), frame_buffer_.size()),
         boost::beast::bind_front_handler(&EngineWebSocketSession::on_write, shared_from_this()));
 }
 
