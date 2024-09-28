@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { backend_endpoint, engine_name, engine_fps, client } from './client';
+import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } from './client';
 import drawFuncs from './drawFuncs';
 
 import './App.css';
@@ -38,9 +38,6 @@ export default function App() {
   React.useEffect(() => {
     if (!first.current) return;
     first.current = false;
-    setInterval(() => {
-      setFps(fpsRef.current);
-    }, 500)
 
     // setInterval(() => {
     //   client('/engine/get_primitives').then(r => {
@@ -60,15 +57,39 @@ export default function App() {
       setStart(false);
     }, 100);
 
-    client('/engine/create', {
-      data: {
-        name: engine_name,
-        width,
-        height,
-      }
-    }).then(r => {
-      console.log(r.data);
-      console.log(`Engine ${engine_name} created with ${width}x${height}`);
+    const ConnectToBackend = (retryTimes = 0) => new Promise((resolve, reject) => {
+      client('/engine/create', {
+        data: {
+          name: engine_name,
+          width,
+          height,
+        },
+        timeout: 1000,
+      }).then(r => {
+        console.log(r.data);
+        console.log(`Engine ${engine_name} created with ${width}x${height}`);
+        setInterval(() => {
+          setFps(fpsRef.current);
+          if (fpsRef.current === 0) {
+            window.location.reload();
+          }
+        }, 500)
+        resolve(1);
+      }).catch(e => {
+        console.error(e);
+        setErrorMessage(`后端无响应，重新尝试连接.. ${retryTimes + 1}/${retry_max_times}`);
+        if (retryTimes >= retry_max_times) {
+          reject('Failed to create engine');
+          return;
+        } else {
+          setTimeout(() => {
+            ConnectToBackend(retryTimes + 1).then(resolve).catch(reject);
+          }, 1000)
+        }
+      });
+    });
+
+    ConnectToBackend().then(() => {
       const ws = new WebSocket(`//${backend_endpoint}/engine/${engine_name}`);
       ws.onopen = function () {
         ws.send(`set_fps ${engine_fps}`);
@@ -107,7 +128,7 @@ export default function App() {
       console.error(e);
       setErrorMessage("后端无响应，请检查后端是否正常运行。");
       // alert("Failed to create engine");
-    })
+    });
   }, [])
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -147,6 +168,8 @@ export default function App() {
         loadingRef.current = false;
         setLoading(false);
         setClickedPoints([]);
+        setErrorMessage(e);
+        setStart(false);
       })
   }
 

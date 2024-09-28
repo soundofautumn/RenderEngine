@@ -9,6 +9,8 @@ export const engine_name =
 
 export const engine_fps = 30;
 
+export const retry_max_times = 114514;
+
 export const client = axios.create({
     baseURL: "//" + backend_endpoint,
     method: "POST",
