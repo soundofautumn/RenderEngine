@@ -154,15 +154,28 @@ export default function App() {
   const draggingRef = React.useRef(false);
   const [dragging, setDragging] = React.useState(false);
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>, manual = false) => {
-    if (!manual && currentDrawFunc.current.drawingMethod === 'click') return;
     if (!manual) {
-      clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
-      setClickedPoints(clickedPointsRef.current);
+      // canvas 点击事件
+      // 'handleClick' handles clicking add points
+      if (!clickingSlidingWindowPoints && currentDrawFunc.current.drawingMethod === 'click') return;
+      // handle dragging add points & clicking sliding window points
+      else {
+        clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
+        setClickedPoints(clickedPointsRef.current);
+      }
     }
-    if (currentDrawFunc.current.drawingMethod === 'drag') {
+    if (clickingSlidingWindowPoints) {
+      // 处理圈画裁剪框的点击
+      if (clickedPointsRef.current.length === 2) {
+        handleDraw();
+      }
+    } else if (currentDrawFunc.current.drawingMethod === 'drag') {
+      // drag 的绘制在 handleMouseUp 中处理
       draggingRef.current = true;
       setDragging(true);
     } else if (clickedPointsRef.current.length === currentDrawFunc.current.requiredPointers && !currentDrawFunc.current.multiplePoints) {
+      // 指定点数的绘制方法，达要求后直接绘制
+      // 多点绘制方法在 handleDoubleClick 和 handleClick 中处理
       handleDraw();
     }
   }
@@ -177,6 +190,8 @@ export default function App() {
   }
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // handleClick 仅处理 click 类型的绘制方法，drag 类型的绘制方法和圈画裁剪框在 handleMouseDown 中处理
+    if (clickingSlidingWindowPoints) return;
     if (currentDrawFunc.current.drawingMethod === 'drag') return;
     if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
       const shadowPoint = { ...clickedPointsRef.current[0] };
