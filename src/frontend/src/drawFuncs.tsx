@@ -254,4 +254,19 @@ drawFuncs.push({
   }),
 })
 
+drawFuncs.push({
+  name: '种子填充',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+        name: 'seed',
+      }
+    ],
+    requiredPointers: 1,
+    apiEndpoint: 'Fill',
+    drawingMethod: 'click',
+  }),
+})
+
 export default drawFuncs;
