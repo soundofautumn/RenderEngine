@@ -630,7 +630,10 @@ export default function App() {
                   }}
                 />
                 <p className='point-text top'>
-                  {point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)}
+                  {
+                    clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
+                      point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
+                  }
                 </p>
                 <p className='point-text'>
                   ({point.x}, {point.y})
