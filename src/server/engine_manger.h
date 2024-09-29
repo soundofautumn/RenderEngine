@@ -103,6 +103,8 @@ class EngineManager {
         for (auto &t : threads_) {
             t.join();
         }
+        engines_.clear();
+        timers_.clear();
     }
 };
 
