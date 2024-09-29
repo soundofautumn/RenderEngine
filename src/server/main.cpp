@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "Listener.h"
+#include "engine_manger.h"
 #include "logger.h"
 
 namespace po = boost::program_options;
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
     boost::asio::signal_set signals(ioc, SIGINT, SIGTERM);
     signals.async_wait([&ioc](boost::system::error_code const &, int signal_number) {
         spdlog::info("Received signal {}, shutting down...", signal_number);
+        EngineManager::get_instance().shutdown();
         ioc.stop();  // 停止 io_context
     });
 
@@ -60,6 +62,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::thread> v;
 
     for (auto i = threads - 1; i > 0; --i) v.emplace_back([&ioc] { ioc.run(); });
+
+    ioc.run();
 
     for (auto &t : v) t.join();
 

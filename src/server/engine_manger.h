@@ -96,6 +96,14 @@ class EngineManager {
         logger::info("Remove engine: {}", name);
         engines_.erase(name);
     }
+
+    void shutdown() {
+        work_guard_.reset();
+        ioc_.stop();
+        for (auto &t : threads_) {
+            t.join();
+        }
+    }
 };
 
 #endif  //RENDERENGINE_ENGINEMANGER_H
