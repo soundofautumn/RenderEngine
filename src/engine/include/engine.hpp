@@ -143,6 +143,7 @@ class RenderCore::RenderEngine {
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         clip();
+        pen_options_ = {};
         // 遍历绘制图元
         for (const auto &primitive : render_primitives_) {
             if (std::holds_alternative<Line>(primitive)) {

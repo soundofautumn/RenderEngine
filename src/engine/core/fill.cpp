@@ -28,7 +28,7 @@ void RenderEngine::fill_polygon_seedfill(const Fill &fill) {
             continue;
         }
 
-        draw_pixel(point.x, point.y, fill_color);
+        frame_buffer_->set_pixel(point.x, point.y, fill_color);
 
         if(point.x > 0) {
             queue.push_back({point.x - 1, point.y});
