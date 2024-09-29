@@ -115,9 +115,6 @@ class RenderCore::RenderEngine {
         }
         need_render_ = true;
         primitives_.push_back(primitive);
-        if (std::holds_alternative<PenOptions>(primitive)) {
-            pen_options_ = std::get<PenOptions>(primitive);
-        }
     }
 
     // 获取图元
