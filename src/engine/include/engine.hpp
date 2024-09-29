@@ -159,7 +159,8 @@ class RenderCore::RenderEngine {
                 const auto &polygon = std::get<Polygon>(primitive);
                 draw_polygon(polygon);
             } else if (std::holds_alternative<Fill>(primitive)) {
-                fill(std::get<Fill>(primitive));
+                const auto &fill = std::get<Fill>(primitive);
+                draw_fill(fill);
             } else if (std::holds_alternative<PenOptions>(primitive)) {
                 const auto &options = std::get<PenOptions>(primitive);
                 pen_options_ = options;
@@ -189,7 +190,7 @@ class RenderCore::RenderEngine {
     void draw_polygon(const Polygon &polygon);
 
     // 填充
-    void fill(const Fill &fill);
+    void draw_fill(const Fill &fill);
 
     // 裁剪
     void clip();

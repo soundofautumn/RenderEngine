@@ -5,7 +5,7 @@
 
 using namespace RenderCore;
 
-void RenderEngine::fill(const Fill &fill) {
+void RenderEngine::draw_fill(const Fill &fill) {
     fill_polygon_seedfill(fill);
 }
 
