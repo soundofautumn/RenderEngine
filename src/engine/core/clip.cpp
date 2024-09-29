@@ -3,7 +3,6 @@
 //
 #include <variant>
 
-#include "config.hpp"
 #include "engine.hpp"
 #include "polygon.hpp"
 #include "rectangle.hpp"
@@ -236,7 +235,44 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
     return !polygon.empty();  // 如果裁剪后多边形非空，返回 true
 }
 
-void RenderEngine::polygon_clip(const Polygon &) {
-    RENDERENGINE_UNIMPLEMENTED
+void RenderEngine::polygon_clip(const Polygon &window) {
+    auto it = render_primitives_.begin();
+    while (it != render_primitives_.end()) {
+        const auto &primitive = *it;
+        if (std::holds_alternative<Line>(primitive)) {
+            auto &line = std::get<Line>(primitive);
+            Polygon new_line = {line.p1, line.p2};
+            bool should_draw = true;
+            should_draw = clip_sutherland_hodgman(window, new_line);
+            if (should_draw) {
+                *it = Line{new_line[0], new_line[1]};
+            } else {
+                it = render_primitives_.erase(it);
+                continue;
+            }
+        } else if (std::holds_alternative<Rectangle>(primitive)) {
+            auto &rectangle = std::get<Rectangle>(primitive);
+            Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
+            bool should_draw = true;
+            should_draw = clip_sutherland_hodgman(window, new_polygon);
+            if (should_draw) {
+                *it = new_polygon;
+            } else {
+                it = render_primitives_.erase(it);
+                continue;
+            }
+        } else if (std::holds_alternative<Polygon>(primitive)) {
+            auto &polygon = std::get<Polygon>(primitive);
+            Polygon new_polygon = polygon;
+            bool should_draw = true;
+            should_draw = clip_sutherland_hodgman(window, new_polygon);
+            if (should_draw) {
+                *it = new_polygon;
+            } else {
+                it = render_primitives_.erase(it);
+                continue;
+            }
+        }
+    }
     return;
 }
