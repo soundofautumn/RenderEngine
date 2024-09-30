@@ -35,18 +35,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cmake-${{ matrix.build_type }}-
 
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          boost_version: 1.73.0
+
       # Step 3: 安装依赖（不同平台分别处理）
       - name: Install dependencies (Linux and macOS)
         if: runner.os != 'Windows'
         run: |
           sudo apt-get update || brew update
-          sudo apt-get install -y cmake g++ libboost-all-dev libspdlog-dev || brew install cmake boost spdlog
+          sudo apt-get install -y cmake g++ libspdlog-dev || brew install cmake boost spdlog
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
           choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-          choco install boost-msvc-14.2 spdlog
+          choco install spdlog
 
       # Step 4: 创建构建目录并运行 CMake 配置
       - name: Configure CMake project
