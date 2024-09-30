@@ -182,7 +182,7 @@ class RenderCore::RenderEngine {
 
     template <typename T>
     void apply_transform(T &t) {
-        if (can_apply_transform_matrix<T>::value) {
+        if (can_apply_transform_matrix_v<T>) {
             apply_transform_matrix(t, transform_matrix_);
             transform_matrix_ = Matrix3f::identity();
         }

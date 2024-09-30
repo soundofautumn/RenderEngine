@@ -62,6 +62,9 @@ template <typename T>
 using can_apply_transform_matrix = typename TransformMatrixApply<T>::type;
 
 template <typename T>
+constexpr bool can_apply_transform_matrix_v = can_apply_transform_matrix<T>::value;
+
+template <typename T>
 struct TransformMatrixApply : std::false_type {
     constexpr void operator()(T &, const Matrix3f &) const {};
 };
