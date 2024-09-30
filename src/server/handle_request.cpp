@@ -109,11 +109,13 @@ void handle_engine_get_primitives(const request &req, response &res) {
     if (!engine) {
         return;
     }
-    std::lock_guard<std::mutex> lock(engine->mutex);
-    auto primitives = engine->engine.get_primitives();
     boost::json::array j_primitives;
-    for (const auto &primitive : primitives) {
-        j_primitives.push_back(serialize_primitive(primitive));
+    {
+        std::lock_guard<std::mutex> lock(engine->mutex);
+        auto primitives = engine->engine.get_primitives();
+        for (const auto &primitive : primitives) {
+            j_primitives.push_back(serialize_primitive(primitive));
+        }
     }
     res.result(http::status::ok);
     res.set(http::field::content_type, "application/json");
