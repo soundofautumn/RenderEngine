@@ -14,6 +14,7 @@ static RenderEngine engine;
 void lab_1();
 void lab_2();
 void lab_3();
+void lab_4();
 
 int main() {
     engine.init(800, 600);
@@ -22,6 +23,7 @@ int main() {
     lab_1();
     lab_2();
     lab_3();
+    lab_4();
 
     // 计时
     auto start = std::chrono::high_resolution_clock::now();
@@ -73,4 +75,10 @@ void lab_3() {
     engine.add_primitive(make_translate(100, 0));
     // 三角形绘制
     engine.add_primitive(make_polygon({{100, 400}, {200, 400}, {150, 500}}));
+}
+
+void lab_4() {
+    engine.set_pen_options({.color = Colors::Yellow});
+    // 贝塞尔曲线绘制
+    engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
 }
