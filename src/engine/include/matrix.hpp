@@ -44,6 +44,11 @@ struct Matrix {
         }
     }
 
+    inline Matrix &operator=(const Matrix &other) {
+        if (this != &other) memcpy(m, other.m, sizeof(m));
+        return *this;
+    }
+
     inline const T *operator[](size_t row) const {
         assert(row < ROW);
         return m[row];

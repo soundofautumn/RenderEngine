@@ -5,16 +5,19 @@
 #ifndef RENDERENGINE_ENGINE_HPP
 #define RENDERENGINE_ENGINE_HPP
 
-#include <vector>
 #include <functional>
 #include <list>
 #include <memory>
+#include <variant>
+#include <vector>
 
 #include "bitmap.hpp"
+#include "matrix.hpp"
 #include "options.hpp"
 #include "point.hpp"
 #include "polygon.hpp"
 #include "primitive.hpp"
+#include "transform.hpp"
 
 namespace RenderCore {
 class RenderEngine;
@@ -33,6 +36,9 @@ class RenderCore::RenderEngine {
 
     PenOptions pen_options_;
     GlobalOptions global_options_;
+
+    // 变换矩阵
+    Matrix3f transform_matrix_;
 
     // 需要重新渲染
     bool need_render_{true};
@@ -196,7 +202,12 @@ class RenderCore::RenderEngine {
             } else if (std::holds_alternative<PenOptions>(primitive)) {
                 const auto &options = std::get<PenOptions>(primitive);
                 pen_options_ = options;
+            } else if (std::holds_alternative<Transform>(primitive)) {
+                const auto &transform = std::get<Transform>(primitive);
+                make_transform(transform);
+                continue;
             }
+            transform_matrix_ = Matrix3f::identity();
         }
         need_render_ = false;
         return true;
@@ -226,6 +237,9 @@ class RenderCore::RenderEngine {
 
     // 裁剪
     void clip();
+
+    // 变换
+    void make_transform(const Transform &transform);
 
    private:
     // DDA 算法绘制线段

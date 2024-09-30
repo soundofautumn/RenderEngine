@@ -13,9 +13,10 @@
 #include "options.hpp"
 #include "polygon.hpp"
 #include "rectangle.hpp"
+#include "transform.hpp"
 namespace RenderCore {
 
-using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions>;
+using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform>;
 
 }
 
