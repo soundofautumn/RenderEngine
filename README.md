@@ -1,6 +1,8 @@
 # Render Engine
 
-上海大学计算机工程与科学学院 《计算机图形学》课程项目
+School of Computer Engineering and Science, Shanghai University, Computer Graphics Course Project
+
+[中文文档](README.zh.md)
 
 ## Project Structure
 
