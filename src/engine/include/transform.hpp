@@ -14,7 +14,6 @@ namespace RenderCore {
 // 平移变换
 struct Translate {
     Point offset;
-    Point center;
 };
 
 // 旋转变换

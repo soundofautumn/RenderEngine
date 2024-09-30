@@ -183,7 +183,7 @@ constexpr inline Matrix<ROW, NEW_COL, T> operator*(
     Matrix<ROW, NEW_COL, T> out;
     for (size_t j = 0; j < ROW; j++) {
         for (size_t i = 0; i < NEW_COL; i++) {
-            out.m[j][i] = vector_dot(a.Row(j), b.Col(i));
+            out.m[j][i] = vector_dot(a.row(j), b.col(i));
         }
     }
     return out;
@@ -239,6 +239,30 @@ constexpr inline Vector<ROW, T> operator*(const Matrix<ROW, COL, T> &m, const Ve
     Vector<ROW, T> b;
     for (size_t i = 0; i < ROW; i++) b[i] = vector_dot(a, m.row(i));
     return b;
+}
+
+template <size_t ROW, size_t COL, typename T, typename Other>
+constexpr inline Matrix<ROW, COL, T> operator+=(Matrix<ROW, COL, T> &a, const Other &b) {
+    a = a + b;
+    return a;
+}
+
+template <size_t ROW, size_t COL, typename T, typename Other>
+constexpr inline Matrix<ROW, COL, T> operator-=(Matrix<ROW, COL, T> &a, const Other &b) {
+    a = a - b;
+    return a;
+}
+
+template <size_t ROW, size_t COL, typename T, typename Other>
+constexpr inline Matrix<ROW, COL, T> operator*=(Matrix<ROW, COL, T> &a, const Other &b) {
+    a = a * b;
+    return a;
+}
+
+template <size_t ROW, size_t COL, typename T, typename Other>
+constexpr inline Matrix<ROW, COL, T> operator/=(Matrix<ROW, COL, T> &a, const Other &b) {
+    a = a / b;
+    return a;
 }
 
 //---------------------------------------------------------------------

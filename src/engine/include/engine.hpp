@@ -18,6 +18,7 @@
 #include "polygon.hpp"
 #include "primitive.hpp"
 #include "transform.hpp"
+#include "vector.hpp"
 
 namespace RenderCore {
 class RenderEngine;
@@ -38,7 +39,7 @@ class RenderCore::RenderEngine {
     GlobalOptions global_options_;
 
     // 变换矩阵
-    Matrix3f transform_matrix_;
+    Matrix3f transform_matrix_ = Matrix3f::identity();
 
     // 需要重新渲染
     bool need_render_{true};
@@ -89,6 +90,19 @@ class RenderCore::RenderEngine {
         if (x < 0 || x >= width_ || y < 0 || y >= height_) {
             return;
         }
+
+        // 变换
+        if (transform_matrix_ != Matrix3f::identity()) {
+            const auto point = transform_matrix_ * Vector2f(x, y).xy1();
+            x = static_cast<int>(point.x);
+            y = static_cast<int>(point.y);
+
+            // 重新检查
+            if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+                return;
+            }
+        }
+
         // 颜色混合
         const auto bg_color = color_to_vector(frame_buffer_->get_pixel(x, y));
         const auto alpha = color.a;
