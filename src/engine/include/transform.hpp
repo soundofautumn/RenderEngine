@@ -72,6 +72,9 @@ struct TransformMatrixApply : std::false_type {
 template <>
 struct TransformMatrixApply<Point> : std::true_type {
     constexpr void operator()(Point &point, const Matrix3f &transform) const {
+        if (transform == Matrix3f::identity()) {
+            return;
+        }
         const auto p = transform * Vector2f(point.x, point.y).xy1();
         point.x = static_cast<int>(p.x);
         point.y = static_cast<int>(p.y);
