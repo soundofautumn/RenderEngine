@@ -35,6 +35,12 @@ struct Vector {
         }
     }
 
+    constexpr inline Vector(Vector<N, T> &&v) noexcept {
+        for (size_t i = 0; i < N; i++) {
+            m[i] = std::move(v.m[i]);
+        }
+    }
+
     constexpr inline Vector(const std::initializer_list<T> &list) {
         assert(list.size() == N);
         size_t i = 0;
@@ -46,6 +52,13 @@ struct Vector {
     constexpr inline Vector &operator=(const Vector<N, T> &v) {
         for (size_t i = 0; i < N; i++) {
             m[i] = v.m[i];
+        }
+        return *this;
+    }
+
+    constexpr inline Vector &operator=(Vector<N, T> &&v) noexcept {
+        for (size_t i = 0; i < N; i++) {
+            m[i] = std::move(v.m[i]);
         }
         return *this;
     }
@@ -92,9 +105,25 @@ struct Vector<2, T> {
 
     constexpr inline Vector(const Vector<2, T> &v) : x(v.x), y(v.y) {}
 
+    constexpr inline Vector(Vector<2, T> &&v) noexcept : x(std::move(v.x)), y(std::move(v.y)) {}
+
+    constexpr inline Vector(std::initializer_list<T> list) {
+        assert(list.size() == 2);
+        size_t i = 0;
+        for (const T &v : list) {
+            m[i++] = v;
+        }
+    }
+
     constexpr inline Vector &operator=(const Vector<2, T> &v) {
         x = v.x;
         y = v.y;
+        return *this;
+    }
+
+    constexpr inline Vector &operator=(Vector<2, T> &&v) noexcept {
+        x = std::move(v.x);
+        y = std::move(v.y);
         return *this;
     }
 
@@ -144,10 +173,28 @@ struct Vector<3, T> {
 
     constexpr inline Vector(const Vector<3, T> &v) : x(v.x), y(v.y), z(v.z) {}
 
+    constexpr inline Vector(Vector<3, T> &&v) noexcept
+        : x(std::move(v.x)), y(std::move(v.y)), z(std::move(v.z)) {}
+
+    constexpr inline Vector(std::initializer_list<T> list) {
+        assert(list.size() == 3);
+        size_t i = 0;
+        for (const T &v : list) {
+            m[i++] = v;
+        }
+    }
+
     constexpr inline Vector &operator=(const Vector<3, T> &v) {
         x = v.x;
         y = v.y;
         z = v.z;
+        return *this;
+    }
+
+    constexpr inline Vector &operator=(Vector<3, T> &&v) noexcept {
+        x = std::move(v.x);
+        y = std::move(v.y);
+        z = std::move(v.z);
         return *this;
     }
 
@@ -199,11 +246,30 @@ struct Vector<4, T> {
 
     constexpr inline Vector(const Vector<4, T> &v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
+    constexpr inline Vector(Vector<4, T> &&v) noexcept
+        : x(std::move(v.x)), y(std::move(v.y)), z(std::move(v.z)), w(std::move(v.w)) {}
+
+    constexpr inline Vector(std::initializer_list<T> list) {
+        assert(list.size() == 4);
+        size_t i = 0;
+        for (const T &v : list) {
+            m[i++] = v;
+        }
+    }
+
     constexpr inline Vector &operator=(const Vector<4, T> &v) {
         x = v.x;
         y = v.y;
         z = v.z;
         w = v.w;
+        return *this;
+    }
+
+    constexpr inline Vector &operator=(Vector<4, T> &&v) noexcept {
+        x = std::move(v.x);
+        y = std::move(v.y);
+        z = std::move(v.z);
+        w = std::move(v.w);
         return *this;
     }
 

@@ -32,6 +32,14 @@ struct Matrix {
 
     constexpr inline Matrix(const Matrix &other) { memcpy(m, other.m, sizeof(m)); }
 
+    constexpr inline Matrix(Matrix &&other) noexcept {
+        for (size_t i = 0; i < ROW; i++) {
+            for (size_t j = 0; j < COL; j++) {
+                m[i][j] = std::move(other.m[i][j]);
+            }
+        }
+    }
+
     constexpr inline Matrix(std::initializer_list<std::initializer_list<T>> list) {
         size_t i = 0;
         for (auto &row : list) {
@@ -46,6 +54,17 @@ struct Matrix {
 
     constexpr inline Matrix &operator=(const Matrix &other) {
         if (this != &other) memcpy(m, other.m, sizeof(m));
+        return *this;
+    }
+
+    constexpr inline Matrix &operator=(Matrix &&other) noexcept {
+        if (this != &other) {
+            for (size_t i = 0; i < ROW; i++) {
+                for (size_t j = 0; j < COL; j++) {
+                    m[i][j] = std::move(other.m[i][j]);
+                }
+            }
+        }
         return *this;
     }
 
