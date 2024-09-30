@@ -47,16 +47,16 @@ inline boost::json::object serialize_rotate(const RenderCore::Rotate &rotate) {
 
 inline RenderCore::Scale deserialize_scale(const boost::json::object &obj) {
     RenderCore::Scale scale;
-    scale.scale_x = static_cast<float>(obj.at("scale_x").as_double());
-    scale.scale_y = static_cast<float>(obj.at("scale_y").as_double());
+    scale.scale.x = static_cast<float>(obj.at("scale_x").as_double());
+    scale.scale.y = static_cast<float>(obj.at("scale_y").as_double());
     scale.center = deserialize_point(obj.at("center").as_object());
     return scale;
 }
 
 inline boost::json::object serialize_scale(const RenderCore::Scale &scale) {
     return {
-        {"scale_x", scale.scale_x},
-        {"scale_y", scale.scale_y},
+        {"scale_x", scale.scale.x},
+        {"scale_y", scale.scale.y},
         {"center", serialize_point(scale.center)},
     };
 }

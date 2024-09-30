@@ -46,8 +46,8 @@ void RenderEngine::make_transform(const Transform &transform) {
                             make_translate_matrix(-center.x, -center.y) * transform_matrix_;
     } else if (std::holds_alternative<Scale>(transform)) {
         const auto &scale = std::get<Scale>(transform);
-        const auto scale_x = scale.scale_x;
-        const auto scale_y = scale.scale_y;
+        const auto scale_x = scale.scale.x;
+        const auto scale_y = scale.scale.y;
         const auto center = scale.center;
         transform_matrix_ = make_translate_matrix(center.x, center.y) *
                             make_scale_matrix(scale_x, scale_y) *
