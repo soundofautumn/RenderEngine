@@ -42,12 +42,11 @@
         }),
     });
 
-    // 创建 WebSocket 连接 设置请求头
+    // 创建 WebSocket 连接
     const ws = new WebSocket(`ws://${backend_endpoint}/engine/${engine_name}`);
 
     const fps = 30;
     // 发送消息
-
     ws.onopen = function () {
         ws.send(`set_fps ${fps}`);
     };
