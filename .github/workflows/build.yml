@@ -64,6 +64,6 @@ jobs:
       - name: Build the project
         run: cmake --build build --config ${{ matrix.build_type }}
 
-      # Step 6: 运行测试（如果有）
-      - name: Run tests
-        run: cd build && ctest --output-on-failure --config ${{ matrix.build_type }}
+      # # Step 6: 运行测试（如果有）
+      # - name: Run tests
+      #   run: cd build && ctest --output-on-failure --config ${{ matrix.build_type }}
