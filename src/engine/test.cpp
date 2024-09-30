@@ -6,6 +6,7 @@
 
 #include "color.hpp"
 #include "engine.hpp"
+#include "rectangle.hpp"
 
 using namespace RenderCore;
 
@@ -39,18 +40,24 @@ int main() {
 }
 
 void lab_1() {
+    // 红色虚线
     engine.set_pen_options({.color = Colors::Red, .type = PenOptions::LineType::DASH});
     engine.add_primitive(make_line({0, 0}, {799, 599}));
+    // 绿色点划线
     engine.set_pen_options({.color = Colors::Green, .type = PenOptions::LineType::DASH_DOT});
     engine.add_primitive(make_line({0, 599}, {799, 0}));
+    // 蓝色粗线
     engine.set_pen_options({.color = Colors::Blue, .width = 30});
     engine.add_primitive(make_line({400, 0}, {400, 599}));
+    // 黄色点线
     engine.set_pen_options({.color = Colors::Yellow, .type = PenOptions::LineType::DOT});
     engine.add_primitive(make_line({0, 300}, {799, 300}));
+    // 白色整圆
     engine.set_pen_options({.color = Colors::White});
     engine.add_primitive(make_circle_center_radius({400, 300}, 200));
+    // 青色圆弧
     engine.set_pen_options({.color = Colors::Cyan});
-    engine.add_primitive(make_arc_center_radius_angle({400, 300}, 200, 0, std::numbers::pi / 2));
+    engine.add_primitive(make_arc_center_radius_angle({400, 300}, 300, 0, std::numbers::pi / 2));
 }
 
 void lab_2() {
@@ -64,9 +71,8 @@ void lab_2() {
     // 区域填充
     engine.set_pen_options({.color = Colors::Red, .fill_color = Colors::Cyan});
     engine.add_primitive(make_fill({350, 150}));
-    // engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}}));
     // 矩形裁剪
-    //engine.add_primitive(make_rectangle({100, 300}, {200, 400}));
+    engine.set_global_options({.clip = {true, make_rectangle({50, 50}, {750, 550})}});
 }
 
 void lab_3() {
