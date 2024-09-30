@@ -5,9 +5,9 @@
 #ifndef RENDERENGINE_ENGINEWEBSOCKETSESSION_H
 #define RENDERENGINE_ENGINEWEBSOCKETSESSION_H
 
+#include "EngineManager.h"
 #include "Server.h"
 #include "engine.hpp"
-#include "engine_manger.h"
 
 using RenderCore::RenderEngine;
 namespace websocket = boost::beast::websocket;

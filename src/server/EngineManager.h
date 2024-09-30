@@ -37,7 +37,8 @@ class EngineManager {
     std::unordered_map<std::string, boost::asio::steady_timer> timers_;
     std::mutex map_mutex_;
 
-    const int timer_thread_count = 4;
+    static constexpr int timer_thread_count = 4;
+
     std::vector<std::thread> threads_;
     boost::asio::io_context ioc_{timer_thread_count};
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard_{
