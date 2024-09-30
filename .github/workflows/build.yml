@@ -1,0 +1,60 @@
+name: CMake Build
+
+on:
+  workflow_dispatch
+  # push:
+  #   branches:
+  #     - main
+  # pull_request:
+  #   branches:
+  #     - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Release, Debug]
+
+    steps:
+      # Step 1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: 设置 CMake 缓存
+      - name: Cache CMake files
+        uses: actions/cache@v3
+        with:
+          path: |
+            build
+            ~/.cmake/packages
+          key: ${{ runner.os }}-cmake-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-${{ matrix.build_type }}-
+
+      # Step 3: 安装依赖（不同平台分别处理）
+      - name: Install dependencies (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: |
+          sudo apt-get update || brew update
+          sudo apt-get install -y cmake g++ libboost-all-dev libspdlog-dev || brew install cmake boost spdlog
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          choco install boost-msvc-14.2 spdlog
+
+      # Step 4: 创建构建目录并运行 CMake 配置
+      - name: Configure CMake project
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      # Step 5: 编译项目
+      - name: Build the project
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      # Step 6: 运行测试（如果有）
+      - name: Run tests
+        run: cd build && ctest --output-on-failure --config ${{ matrix.build_type }}
