@@ -13,6 +13,7 @@ static RenderEngine engine;
 
 void lab_1();
 void lab_2();
+void lab_3();
 
 int main() {
     engine.init(800, 600);
@@ -20,6 +21,7 @@ int main() {
 
     lab_1();
     lab_2();
+    lab_3();
 
     // 计时
     auto start = std::chrono::high_resolution_clock::now();
@@ -63,4 +65,12 @@ void lab_2() {
     // engine.add_primitive(make_polygon({{500, 100}, {600, 100}, {550, 200}}));
     // 矩形裁剪
     //engine.add_primitive(make_rectangle({100, 300}, {200, 400}));
+}
+
+void lab_3() {
+    engine.set_pen_options({.color = Colors::Red});
+    // 平移变换
+    engine.add_primitive(make_translate(100, 0));
+    // 三角形绘制
+    engine.add_primitive(make_polygon({{100, 400}, {200, 400}, {150, 500}}));
 }
