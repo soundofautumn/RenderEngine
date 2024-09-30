@@ -5,7 +5,7 @@
 #ifndef RENDERENGINE_ENGINE_HPP
 #define RENDERENGINE_ENGINE_HPP
 
-#include <deque>
+#include <vector>
 #include <functional>
 #include <list>
 #include <memory>
@@ -23,7 +23,7 @@ class RenderEngine;
 class RenderCore::RenderEngine {
     std::unique_ptr<Bitmap> frame_buffer_;
 
-    std::deque<Primitive> primitives_;
+    std::vector<Primitive> primitives_;
 
     // 存储需要渲染的图元
     std::list<Primitive> render_primitives_;
@@ -117,6 +117,41 @@ class RenderCore::RenderEngine {
         primitives_.push_back(primitive);
     }
 
+    // 插入图元
+    void insert_primitive(const Primitive &primitive, size_t index) {
+        if (!frame_buffer_) {
+            return;
+        }
+        need_render_ = true;
+        if (index < primitives_.size()) {
+            primitives_.insert(primitives_.begin() + index, primitive);
+        } else {
+            primitives_.push_back(primitive);
+        }
+    }
+
+    // 移除图元
+    void remove_primitive(size_t index) {
+        if (!frame_buffer_) {
+            return;
+        }
+        need_render_ = true;
+        if (index < primitives_.size()) {
+            primitives_.erase(primitives_.begin() + index);
+        }
+    }
+
+    // 修改图元
+    void modify_primitive(size_t index, const Primitive &primitive) {
+        if (!frame_buffer_) {
+            return;
+        }
+        need_render_ = true;
+        if (index < primitives_.size()) {
+            primitives_[index] = primitive;
+        }
+    }
+
     // 获取图元
     [[nodiscard]] std::vector<std::reference_wrapper<const Primitive>> get_primitives() const {
         return {primitives_.begin(), primitives_.end()};
@@ -124,9 +159,6 @@ class RenderCore::RenderEngine {
 
     // 设置画笔选项
     void set_pen_options(const PenOptions &options) { add_primitive(options); }
-
-    // 获取画笔选项
-    [[nodiscard]] const PenOptions &get_pen_options() const { return pen_options_; }
 
     // 渲染
     bool render() {

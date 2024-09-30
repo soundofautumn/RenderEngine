@@ -1,6 +1,8 @@
 //
 // Created by Autumn Sound on 2024/9/20.
 //
+#include <deque>
+
 #include "engine.hpp"
 
 using namespace RenderCore;
@@ -30,16 +32,16 @@ void RenderEngine::fill_polygon_seedfill(const Fill &fill) {
 
         frame_buffer_->set_pixel(point.x, point.y, fill_color);
 
-        if(point.x > 0) {
+        if (point.x > 0) {
             queue.push_back({point.x - 1, point.y});
         }
-        if(point.x < width_ - 1) {
+        if (point.x < width_ - 1) {
             queue.push_back({point.x + 1, point.y});
         }
-        if(point.y > 0) {
+        if (point.y > 0) {
             queue.push_back({point.x, point.y - 1});
         }
-        if(point.y < height_ - 1) {
+        if (point.y < height_ - 1) {
             queue.push_back({point.x, point.y + 1});
         }
     }

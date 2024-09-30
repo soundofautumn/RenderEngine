@@ -142,6 +142,70 @@ void handle_engine_set_global_options(const request &req, response &res) {
     success_response(res, "Global options set.");
 }
 
+void handle_engine_insert_primitive(const request &req, response &res) {
+    auto j = get_request_body(req, res);
+    if (j.is_null()) {
+        return;
+    }
+    auto engine = get_engine_with_mutex(req, res);
+    if (!engine) {
+        return;
+    }
+    if (!j.as_object().contains("Primitive")) {
+        error_response(res, http::status::bad_request, "Primitive not found.");
+        return;
+    }
+    auto primitive = deserialize_primitive(j.at("Primitive").as_object());
+    auto index = static_cast<size_t>(j.at("Index").as_int64());
+    logger::trace("Insert primitive at {}: {}", index, boost::json::serialize(j));
+    {
+        std::lock_guard<std::mutex> lock(engine->mutex);
+        engine->engine.insert_primitive(primitive, index);
+    }
+    success_response(res, "Primitive inserted.");
+}
+
+void handle_engine_remove_primitive(const request &req, response &res) {
+    auto j = get_request_body(req, res);
+    if (j.is_null()) {
+        return;
+    }
+    auto engine = get_engine_with_mutex(req, res);
+    if (!engine) {
+        return;
+    }
+    auto index = static_cast<size_t>(j.at("Index").as_int64());
+    logger::trace("Remove primitive at {}: {}", index, boost::json::serialize(j));
+    {
+        std::lock_guard<std::mutex> lock(engine->mutex);
+        engine->engine.remove_primitive(index);
+    }
+    success_response(res, "Primitive removed.");
+}
+
+void handle_engine_modify_primitive(const request &req, response &res) {
+    auto j = get_request_body(req, res);
+    if (j.is_null()) {
+        return;
+    }
+    auto engine = get_engine_with_mutex(req, res);
+    if (!engine) {
+        return;
+    }
+    if (!j.as_object().contains("Primitive")) {
+        error_response(res, http::status::bad_request, "Primitive not found.");
+        return;
+    }
+    auto primitive = deserialize_primitive(j.at("Primitive").as_object());
+    auto index = static_cast<size_t>(j.at("Index").as_int64());
+    logger::trace("Modify primitive at {}: {}", index, boost::json::serialize(j));
+    {
+        std::lock_guard<std::mutex> lock(engine->mutex);
+        engine->engine.modify_primitive(index, primitive);
+    }
+    success_response(res, "Primitive modified.");
+}
+
 void handle_request(const request &req, response &res) {
     res.version(req.version());
     res.set(http::field::server, SERVER_NAME);
@@ -165,6 +229,12 @@ void handle_request(const request &req, response &res) {
                 handle_engine_remove(req, res);
             } else if (req.target().starts_with("/engine/draw")) {
                 handle_engine_draw(req, res);
+            } else if (req.target().starts_with("/engine/insert_primitive")) {
+                handle_engine_insert_primitive(req, res);
+            } else if (req.target().starts_with("/engine/remove_primitive")) {
+                handle_engine_remove_primitive(req, res);
+            } else if (req.target().starts_with("/engine/modify_primitive")) {
+                handle_engine_modify_primitive(req, res);
             } else if (req.target().starts_with("/engine/get_primitives")) {
                 handle_engine_get_primitives(req, res);
             } else if (req.target().starts_with("/engine/set_global_options")) {
