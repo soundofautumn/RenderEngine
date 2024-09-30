@@ -7,6 +7,7 @@
 
 #include <variant>
 
+#include "bezier.hpp"
 #include "circle.hpp"
 #include "fill.hpp"
 #include "line.hpp"
@@ -16,7 +17,8 @@
 #include "transform.hpp"
 namespace RenderCore {
 
-using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform>;
+using Primitive =
+    std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform, BezierCurve>;
 
 }
 

@@ -220,6 +220,9 @@ class RenderCore::RenderEngine {
                 const auto &transform = std::get<Transform>(primitive);
                 make_transform(transform);
                 continue;
+            } else if (std::holds_alternative<BezierCurve>(primitive)) {
+                const auto &curve = std::get<BezierCurve>(primitive);
+                draw_bezier_curve(curve);
             }
             transform_matrix_ = Matrix3f::identity();
         }
@@ -254,6 +257,9 @@ class RenderCore::RenderEngine {
 
     // 变换
     void make_transform(const Transform &transform);
+
+    // 贝塞尔曲线
+    void draw_bezier_curve(const BezierCurve &curve);
 
    private:
     // DDA 算法绘制线段
