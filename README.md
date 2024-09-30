@@ -4,6 +4,15 @@ School of Computer Engineering and Science, Shanghai University, Computer Graphi
 
 [中文文档](README.zh.md)
 
+## Introduction
+
+The core code is written in pure C++, using the stdc++20 standard, without relying on any third-party libraries, and can be built directly on any platform to render bmp images directly.
+The server is written in C++, depends on the boost and spdlog libraries, provides rendering interfaces, and uses websocket to pass rendering results.
+
+All modules are built using CMake, and the server module build will be canceled if no dependencies are found.
+
+The frontend is written in React, using TypeScript, and built using vite.
+
 ## Project Structure
 
 ```plaintext
@@ -26,7 +35,7 @@ git clone https://github.com/soundofautumn/RenderEngine
 2. Install dependencies (optional)
 
 The engine core has no dependencies, you can build it directly.
-But if you want a real-time visualization, you need to install the dependencies for the server to run.
+But if you want a real-time GUI, you need to install the dependencies for the server to run.
 
 Server dependencies:
 
