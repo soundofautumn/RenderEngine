@@ -5,7 +5,6 @@
 #ifndef RENDERENGINE_COLOR_HPP
 #define RENDERENGINE_COLOR_HPP
 
-#include "utils.hpp"
 #include "vector.hpp"
 
 namespace RenderCore {
@@ -13,24 +12,26 @@ namespace RenderCore {
 using Color = Vector4f;
 
 // 矢量转整数颜色
-inline static uint32_t vector_to_color(const Vector4f &v) {
-    const auto r = (uint32_t)(saturate(v.r) * 255);
-    const auto g = (uint32_t)(saturate(v.g) * 255);
-    const auto b = (uint32_t)(saturate(v.b) * 255);
-    const auto a = (uint32_t)(saturate(v.a) * 255);
+constexpr inline static uint32_t vector_to_color(const Vector4f &v) {
+    // 截断到[0, 1]范围
+    const auto &color = vector_clamp(v, 0.0f, 1.0f) * 255.0f;
+    const auto r = static_cast<uint32_t>(color.r);
+    const auto g = static_cast<uint32_t>(color.g);
+    const auto b = static_cast<uint32_t>(color.b);
+    const auto a = static_cast<uint32_t>(color.a);
     return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-inline static uint32_t vector_to_color(const Vector3f &v) {
+constexpr inline static uint32_t vector_to_color(const Vector3f &v) {
     return vector_to_color(v.xyz1());
 }
 
 // 整数颜色转矢量
-inline static Vector4f color_to_vector(uint32_t color) {
-    const auto r = (float)(color & 0xFF);
-    const auto g = (float)((color >> 8) & 0xFF);
-    const auto b = (float)((color >> 16) & 0xFF);
-    const auto a = (float)((color >> 24) & 0xFF);
+constexpr inline static Vector4f color_to_vector(uint32_t color) {
+    const auto r = static_cast<float>(color & 0xFF);
+    const auto g = static_cast<float>((color >> 8) & 0xFF);
+    const auto b = static_cast<float>((color >> 16) & 0xFF);
+    const auto a = static_cast<float>((color >> 24) & 0xFF);
     return {r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f};
 }
 

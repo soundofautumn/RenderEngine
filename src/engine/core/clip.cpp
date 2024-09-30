@@ -6,6 +6,7 @@
 #include "engine.hpp"
 #include "polygon.hpp"
 #include "rectangle.hpp"
+#include "utils.hpp"
 
 using namespace RenderCore;
 
@@ -82,7 +83,7 @@ const uint8_t RIGHT = 2;   // 0010
 const uint8_t BOTTOM = 4;  // 0100
 const uint8_t TOP = 8;     // 1000
 
-auto encode_f = [](const Rectangle &window) {
+const auto encode_f = [](const Rectangle &window) {
     return [&](float x, float y) -> uint8_t {
         uint8_t code = INSIDE;
         if (x < window.min_x()) {
@@ -100,7 +101,7 @@ auto encode_f = [](const Rectangle &window) {
 };
 
 bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end) {
-    auto encode = encode_f(window);
+    const auto encode = encode_f(window);
 
     float x1 = start.x, y1 = start.y, x2 = end.x, y2 = end.y;
 
@@ -151,7 +152,7 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 }
 
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
-    auto encode = encode_f(window);
+    const auto encode = encode_f(window);
 
     std::function<Point(float, float, float, float)> nearest_point = [&](float x1, float y1,
                                                                          float x2, float y2) {
