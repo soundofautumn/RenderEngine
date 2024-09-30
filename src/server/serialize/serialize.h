@@ -12,7 +12,9 @@
 #include "serialize_fill.h"
 #include "serialize_line.h"
 #include "serialize_options.h"
+#include "serialize_polygon.h"
 #include "serialize_rectangle.h"
+#include "serialize_transform.h"
 
 inline RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive) {
     if (primitive.contains("Line")) {
@@ -29,6 +31,8 @@ inline RenderCore::Primitive deserialize_primitive(const boost::json::object &pr
         return deserialize_rectangle(primitive.at("Rectangle").as_object());
     } else if (primitive.contains("Fill")) {
         return deserialize_fill(primitive.at("Fill").as_object());
+    } else if (primitive.contains("Transform")) {
+        return deserialize_transform(primitive.at("Transform").as_object());
     }
     return {};
 }
@@ -48,6 +52,8 @@ inline boost::json::object serialize_primitive(const RenderCore::Primitive &prim
         return {{"Rectangle", serialize_rectangle(std::get<RenderCore::Rectangle>(primitive))}};
     } else if (std::holds_alternative<RenderCore::Fill>(primitive)) {
         return {{"Fill", serialize_fill(std::get<RenderCore::Fill>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Transform>(primitive)) {
+        return {{"Transform", serialize_transform(std::get<RenderCore::Transform>(primitive))}};
     }
     return {};
 }
