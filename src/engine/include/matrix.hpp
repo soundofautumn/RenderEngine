@@ -42,9 +42,9 @@ struct Matrix {
 
     constexpr inline Matrix(std::initializer_list<std::initializer_list<T>> list) {
         size_t i = 0;
-        for (auto &row : list) {
+        for (const auto &row : list) {
             size_t j = 0;
-            for (auto &col : row) {
+            for (const auto &col : row) {
                 m[i][j] = col;
                 j++;
             }
@@ -110,6 +110,17 @@ struct Matrix {
         }
     }
 
+    // 获取子矩阵
+    constexpr inline Matrix<ROW - 1, COL - 1, T> get_minor(size_t row, size_t col) const {
+        Matrix<ROW - 1, COL - 1, T> ret;
+        for (size_t i = 0; i < ROW - 1; i++) {
+            for (size_t j = 0; j < COL - 1; j++) {
+                ret[i][j] = m[i < row ? i : i + 1][j < col ? j : j + 1];
+            }
+        }
+        return ret;
+    }
+
     // 转置矩阵
     constexpr inline Matrix<ROW, COL, T> transpose() const {
         Matrix<COL, ROW, T> res;
@@ -122,18 +133,18 @@ struct Matrix {
     };
 
     // 单位矩阵
-    inline static Matrix<ROW, COL, T> identity() {
+    constexpr inline static Matrix<ROW, COL, T> identity() {
         Matrix<ROW, COL, T> res;
         for (size_t i = 0; i < ROW; i++) {
             for (size_t j = 0; j < COL; j++) {
-                res.m[i][j] = i == j ? 1 : 0;
+                res.m[i][j] = (i == j) ? 1 : 0;
             }
         }
         return res;
     }
 
     // 零矩阵
-    inline static Matrix<ROW, COL, T> zero() {
+    constexpr inline static Matrix<ROW, COL, T> zero() {
         Matrix<ROW, COL, T> res;
         for (size_t i = 0; i < ROW; i++) {
             for (size_t j = 0; j < COL; j++) {
@@ -317,7 +328,7 @@ constexpr inline T matrix_cofactor(const Matrix<1, 1, T> &, size_t, size_t) {
 // 多阶余子式：即删除特定行列的子式的行列式值
 template <size_t N, typename T>
 constexpr inline T matrix_cofactor(const Matrix<N, N, T> &m, size_t row, size_t col) {
-    return matrix_det(m.GetMinor(row, col)) * (((row + col) % 2) ? -1 : 1);
+    return matrix_det(m.get_minor(row, col)) * (((row + col) % 2) ? -1 : 1);
 }
 
 // 伴随矩阵：即余子式矩阵的转置
