@@ -180,6 +180,14 @@ class RenderCore::RenderEngine {
     // 设置画笔选项
     void set_pen_options(const PenOptions &options) { add_primitive(options); }
 
+    template <typename T>
+    void apply_transform(T &t) {
+        if (can_apply_transform_matrix<T>::value) {
+            apply_transform_matrix(t, transform_matrix_);
+            transform_matrix_ = Matrix3f::identity();
+        }
+    }
+
     // 渲染
     bool render() {
         if (!frame_buffer_) {
@@ -195,36 +203,31 @@ class RenderCore::RenderEngine {
         pen_options_ = {};
         // 遍历绘制图元
         for (const auto &primitive : render_primitives_) {
-            if (std::holds_alternative<Line>(primitive)) {
-                const auto &line = std::get<Line>(primitive);
-                draw_line(line);
-            } else if (std::holds_alternative<Circle>(primitive)) {
-                const auto &circle = std::get<Circle>(primitive);
-                draw_circle(circle);
-            } else if (std::holds_alternative<Arc>(primitive)) {
-                const auto &arc = std::get<Arc>(primitive);
-                draw_arc(arc);
-            } else if (std::holds_alternative<Rectangle>(primitive)) {
-                const auto &rectangle = std::get<Rectangle>(primitive);
-                draw_rectangle(rectangle);
-            } else if (std::holds_alternative<Polygon>(primitive)) {
-                const auto &polygon = std::get<Polygon>(primitive);
-                draw_polygon(polygon);
-            } else if (std::holds_alternative<Fill>(primitive)) {
-                const auto &fill = std::get<Fill>(primitive);
-                draw_fill(fill);
-            } else if (std::holds_alternative<PenOptions>(primitive)) {
-                const auto &options = std::get<PenOptions>(primitive);
-                pen_options_ = options;
-            } else if (std::holds_alternative<Transform>(primitive)) {
-                const auto &transform = std::get<Transform>(primitive);
-                make_transform(transform);
-                continue;
-            } else if (std::holds_alternative<BezierCurve>(primitive)) {
-                const auto &curve = std::get<BezierCurve>(primitive);
-                draw_bezier_curve(curve);
-            }
-            transform_matrix_ = Matrix3f::identity();
+            std::visit(
+                [this](const auto &prim) {
+                    using T = std::decay_t<decltype(prim)>;
+                    apply_transform(prim);
+                    if constexpr (std::is_same_v<T, Line>) {
+                        draw_line(prim);
+                    } else if constexpr (std::is_same_v<T, Circle>) {
+                        draw_circle(prim);
+                    } else if constexpr (std::is_same_v<T, Arc>) {
+                        draw_arc(prim);
+                    } else if constexpr (std::is_same_v<T, Rectangle>) {
+                        draw_rectangle(prim);
+                    } else if constexpr (std::is_same_v<T, Polygon>) {
+                        draw_polygon(prim);
+                    } else if constexpr (std::is_same_v<T, Fill>) {
+                        draw_fill(prim);
+                    } else if constexpr (std::is_same_v<T, PenOptions>) {
+                        pen_options_ = prim;
+                    } else if constexpr (std::is_same_v<T, Transform>) {
+                        make_transform(prim);
+                    } else if constexpr (std::is_same_v<T, BezierCurve>) {
+                        draw_bezier_curve(prim);
+                    }
+                },
+                primitive);
         }
         need_render_ = false;
         return true;
