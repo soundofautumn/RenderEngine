@@ -22,6 +22,16 @@ file(GLOB HEADERS "${source_dir}/include/*.h" "${source_dir}/include/*.hpp")
 
 add_library(RenderEngineCore STATIC ${SOURCES})
 
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(RenderEngineCore PRIVATE -O3 -flto -fno-exceptions -fno-rtti -march=native)
+        target_link_options(RenderEngineCore PRIVATE -flto -Wl,--as-needed -Wl,-O3)
+    elseif (MSVC)
+        target_compile_options(RenderEngineCore PRIVATE /O2 /GL /DNDEBUG)
+        target_link_options(RenderEngineCore PRIVATE /LTCG)
+    endif ()
+endif ()
+
 target_include_directories(RenderEngineCore PUBLIC "${source_dir}/include")
 
 add_executable(RenderEngineCoreTest "${source_dir}/test.cpp")

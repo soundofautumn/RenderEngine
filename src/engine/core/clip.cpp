@@ -32,6 +32,12 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
             Line new_line = line;
             bool should_draw = true;
             switch (global_options_.clip.algorithm) {
+                default:
+#ifdef RENDERENGINE_DEBUG
+                    throw std::runtime_error("Unknown clip algorithm");
+#else
+// 默认使用 Cohen-Sutherland 裁剪算法
+#endif
                 case Clip::Algorithm::CohenSutherland:
                     // Cohen-Sutherland 裁剪算法
                     should_draw = clip_line_cohen_sutherland(window, new_line.p1, new_line.p2);
@@ -39,9 +45,6 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
                 case Clip::Algorithm::Midpoint:
                     // Midpoint 裁剪算法
                     should_draw = clip_line_midpoint(window, new_line.p1, new_line.p2);
-                    break;
-                default:
-                    throw std::runtime_error("Unknown clip algorithm");
                     break;
             }
             if (should_draw) {
