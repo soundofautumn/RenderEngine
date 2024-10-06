@@ -6,7 +6,9 @@
 
 #include "color.hpp"
 #include "engine.hpp"
+#include "line.hpp"
 #include "rectangle.hpp"
+#include "transform.hpp"
 
 using namespace RenderCore;
 
@@ -17,14 +19,18 @@ void lab_2();
 void lab_3();
 void lab_4();
 
+void ex_3();
+
 int main() {
     engine.init(800, 600);
     engine.clear();
 
-    lab_1();
-    lab_2();
-    lab_3();
-    lab_4();
+    // lab_1();
+    // lab_2();
+    // lab_3();
+    // lab_4();
+
+    ex_3();
 
     // 计时
     auto start = std::chrono::high_resolution_clock::now();
@@ -87,4 +93,37 @@ void lab_4() {
     engine.set_pen_options({.color = Colors::Yellow});
     // 贝塞尔曲线绘制
     engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
+}
+
+void ex_3() {
+    engine.set_pen_options({.color = Colors::Red});
+
+    engine.add_primitive(make_line({0, 0}, {100, 100}));
+    // 先经过平移（平移量为（1，0）
+    // 后经过旋转（旋转角度为+30度）
+    // 平移变换
+    engine.add_primitive(make_translate(100, 0));
+    // 旋转变换
+    engine.add_primitive(make_rotate(30.0 / 180.0 * std::numbers::pi, {0, 0}));
+    // 三角形绘制
+    engine.add_primitive(make_polygon({{100, 100}, {200, 100}, {150, 200}}));
+
+    extern Matrix3f make_transform_matrix(const Transform &transform);
+
+    auto t1 = make_transform_matrix(make_translate(1, 0));
+    auto t2 = make_transform_matrix(make_rotate(30.0 / 180.0 * std::numbers::pi, {0, 0}));
+    auto t3 = t2 * t1;
+    std::cout << t3 << std::endl;
+    //P（2，1）经过平移（1，0）和旋转（30度）后的坐标
+    auto p1 = t3 * Vector2f(2, 1).xy1();
+    std::cout << p1.xy() << std::endl;
+
+    std::cout << "----------------" << std::endl;
+
+    // 先经过旋转（旋转角度为+30度）后经过平移（平移量为（1，0）
+    auto t4 = t1 * t2;
+    std::cout << t4 << std::endl;
+    //P（2，1）经过旋转（30度）和平移（1，0）后的坐标
+    auto p2 = t4 * Vector2f(2, 1).xy1();
+    std::cout << p2.xy() << std::endl;
 }
