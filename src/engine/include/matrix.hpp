@@ -15,7 +15,6 @@
 #include <cstring>
 #include <initializer_list>
 #include <iostream>
-#include <memory>
 
 #include "vector.hpp"
 
@@ -345,7 +344,7 @@ constexpr inline Matrix<N, N, T> matrix_adjoint(const Matrix<N, N, T> &m) {
 template <size_t N, typename T>
 constexpr inline Matrix<N, N, T> matrix_invert(const Matrix<N, N, T> &m) {
     Matrix<N, N, T> ret = matrix_adjoint(m);
-    T det = vector_dot(m.Row(0), ret.Col(0));
+    T det = vector_dot(m.row(0), ret.col(0));
     return ret / det;
 }
 
@@ -353,7 +352,7 @@ constexpr inline Matrix<N, N, T> matrix_invert(const Matrix<N, N, T> &m) {
 template <size_t ROW, size_t COL, typename T>
 inline std::ostream &operator<<(std::ostream &os, const Matrix<ROW, COL, T> &m) {
     for (size_t r = 0; r < ROW; r++) {
-        Vector<COL, T> row = m.Row(r);
+        Vector<COL, T> row = m.row(r);
         os << row << std::endl;
     }
     return os;
