@@ -33,24 +33,24 @@ constexpr Matrix3f make_scale_matrix(float x, float y) {
     return {{{x, 0, 0}, {0, y, 0}, {0, 0, 1}}};
 }
 
-void RenderEngine::make_transform(const Transform &transform) {
+constexpr Matrix3f make_transform_matrix(const Transform &transform) {
     if (std::holds_alternative<Translate>(transform)) {
         const auto &translate = std::get<Translate>(transform);
-        const auto offset = translate.offset;
-        transform_matrix_ = make_translate_matrix(offset.x, offset.y) * transform_matrix_;
+        return make_translate_matrix(translate.offset.x, translate.offset.y);
     } else if (std::holds_alternative<Rotate>(transform)) {
         const auto &rotate = std::get<Rotate>(transform);
-        const auto angle = rotate.angle;
-        const auto center = rotate.center;
-        transform_matrix_ = make_translate_matrix(center.x, center.y) * make_rotate_matrix(angle) *
-                            make_translate_matrix(-center.x, -center.y) * transform_matrix_;
+        return make_translate_matrix(rotate.center.x, rotate.center.y) *
+               make_rotate_matrix(rotate.angle) *
+               make_translate_matrix(-rotate.center.x, -rotate.center.y);
     } else if (std::holds_alternative<Scale>(transform)) {
         const auto &scale = std::get<Scale>(transform);
-        const auto scale_x = scale.scale.x;
-        const auto scale_y = scale.scale.y;
-        const auto center = scale.center;
-        transform_matrix_ = make_translate_matrix(center.x, center.y) *
-                            make_scale_matrix(scale_x, scale_y) *
-                            make_translate_matrix(-center.x, -center.y) * transform_matrix_;
+        return make_translate_matrix(scale.center.x, scale.center.y) *
+               make_scale_matrix(scale.scale.x, scale.scale.y) *
+               make_translate_matrix(-scale.center.x, -scale.center.y);
     }
+    return Matrix3f::identity();
+}
+
+void RenderEngine::make_transform(const Transform &transform) {
+    transform_matrix_ = make_transform_matrix(transform) * transform_matrix_;
 }
