@@ -88,8 +88,21 @@ void lab_2() {
     // 区域填充
     engine.set_pen_options({.color = Colors::Red, .fill_color = Colors::Cyan});
     engine.add_primitive(make_fill({350, 150}));
+    // 画点线展示裁剪效果
+    // 红色虚线
+    engine.set_pen_options({.color = Colors::Red, .type = PenOptions::LineType::DASH});
+    engine.add_primitive(make_line({0, 0}, {799, 599}));
+    // 绿色点划线
+    engine.set_pen_options({.color = Colors::Green, .type = PenOptions::LineType::DASH_DOT});
+    engine.add_primitive(make_line({0, 599}, {799, 0}));
+    // 蓝色粗线
+    engine.set_pen_options({.color = Colors::Blue, .width = 30});
+    engine.add_primitive(make_line({400, 0}, {400, 599}));
+    // 黄色点线
+    engine.set_pen_options({.color = Colors::Yellow, .type = PenOptions::LineType::DOT});
+    engine.add_primitive(make_line({0, 300}, {799, 300}));
     // 矩形裁剪
-    engine.set_global_options({.clip = {true, make_rectangle({50, 50}, {750, 550})}});
+    engine.set_global_options({.clip = {true, make_rectangle({100, 100}, {700, 500})}});
 }
 
 void lab_3() {
