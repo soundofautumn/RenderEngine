@@ -76,6 +76,7 @@ class RenderCore::RenderEngine {
 
     void clear() {
         primitives_.clear();
+        global_options_ = {};
     }
 
     void set_global_options(const GlobalOptions &options) {
