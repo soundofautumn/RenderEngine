@@ -36,6 +36,8 @@ inline RenderCore::Primitive deserialize_primitive(const boost::json::object &pr
         return deserialize_transform(primitive.at("Transform").as_object());
     } else if (primitive.contains("BezierCurve")) {
         return deserialize_bezier_curve(primitive.at("BezierCurve").as_object());
+    } else if (primitive.contains("BsplineCurve")) {
+        return deserialize_bspline_curve(primitive.at("BsplineCurve").as_object());
     }
     return {};
 }
@@ -60,6 +62,8 @@ inline boost::json::object serialize_primitive(const RenderCore::Primitive &prim
         return {{"Transform", serialize_transform(std::get<Transform>(primitive))}};
     } else if (std::holds_alternative<BezierCurve>(primitive)) {
         return {{"BezierCurve", serialize_bezier_curve(std::get<BezierCurve>(primitive))}};
+    } else if (std::holds_alternative<BsplineCurve>(primitive)) {
+        return {{"BsplineCurve", serialize_bspline_curve(std::get<BsplineCurve>(primitive))}};
     }
     return {};
 }

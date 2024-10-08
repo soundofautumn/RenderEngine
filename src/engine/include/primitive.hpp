@@ -17,8 +17,8 @@
 #include "transform.hpp"
 namespace RenderCore {
 
-using Primitive =
-    std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform, BezierCurve>;
+using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform,
+    BezierCurve, BsplineCurve>;
 
 }
 
