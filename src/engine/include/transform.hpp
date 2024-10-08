@@ -5,7 +5,6 @@
 #ifndef RENDERENGINE_TRANSFORM_HPP
 #define RENDERENGINE_TRANSFORM_HPP
 
-#include <algorithm>
 #include <type_traits>
 #include <variant>
 
@@ -93,8 +92,9 @@ struct TransformMatrixApply<Line> : std::true_type {
 template <>
 struct TransformMatrixApply<Polygon> : std::true_type {
     constexpr void operator()(Polygon &polygon, const Matrix3f &transform) const {
-        std::for_each(polygon.begin(), polygon.end(),
-            [&transform](Point &point) { apply_transform_matrix(point, transform); });
+        for (const auto &point : polygon) {
+            apply_transform_matrix(point, transform);
+        }
     }
 };
 
@@ -108,8 +108,9 @@ struct TransformMatrixApply<Fill> : std::true_type {
 template <>
 struct TransformMatrixApply<BezierCurve> : std::true_type {
     constexpr void operator()(BezierCurve &curve, const Matrix3f &transform) const {
-        std::for_each(curve.begin(), curve.end(),
-            [&transform](Point &point) { apply_transform_matrix(point, transform); });
+        for (const auto &point : curve) {
+            apply_transform_matrix(point, transform);
+        }
     }
 };
 
