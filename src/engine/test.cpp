@@ -97,8 +97,6 @@ void lab_4() {
 
 void ex_3() {
     engine.set_pen_options({.color = Colors::Red});
-
-    engine.add_primitive(make_line({0, 0}, {100, 100}));
     // 先经过平移（平移量为（1，0）
     // 后经过旋转（旋转角度为+30度）
     // 平移变换
@@ -107,6 +105,8 @@ void ex_3() {
     engine.add_primitive(make_rotate(30.0 / 180.0 * std::numbers::pi, {0, 0}));
     // 三角形绘制
     engine.add_primitive(make_polygon({{100, 100}, {200, 100}, {150, 200}}));
+
+    engine.add_primitive(make_line({0, 0}, {100, 100}));
 
     extern Matrix3f make_transform_matrix(const Transform &transform);
 

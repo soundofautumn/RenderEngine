@@ -228,6 +228,7 @@ class RenderCore::RenderEngine {
                     }
                 },
                 primitive);
+            transform_matrix_ = Matrix3f::identity();
         }
         need_render_ = false;
         return true;
