@@ -41,7 +41,6 @@ void test(std::function<void()> func, const std::string &filename) {
 
 int main() {
     engine.init(800, 600);
-    engine.clear();
 
     TEST(lab_1);
     TEST(lab_2);

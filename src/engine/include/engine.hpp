@@ -63,15 +63,19 @@ class RenderCore::RenderEngine {
         width_ = width;
         height_ = height;
         frame_buffer_ = std::make_unique<Bitmap>(width, height);
-        clear();
+        fill_with_background_color();
     }
 
     // 清空画布，以背景色填充
-    void clear() {
+    void fill_with_background_color() {
         const auto color = vector_to_color(global_options_.background_color);
         if (frame_buffer_) {
             frame_buffer_->fill(color);
         }
+    }
+
+    void clear() {
+        primitives_.clear();
     }
 
     void set_global_options(const GlobalOptions &options) {
@@ -196,7 +200,7 @@ class RenderCore::RenderEngine {
         if (!need_render_) {
             return true;
         }
-        clear();
+        fill_with_background_color();
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         clip();
