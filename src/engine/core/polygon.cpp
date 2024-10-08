@@ -33,13 +33,13 @@ void RenderEngine::draw_polygon(const Polygon &polygon) {
     }
 }
 
-struct Edge {
-    int y_max;
-    float x, dx;
-    Edge *next;
-};
-
 void RenderEngine::draw_polygon_scanline(const Polygon &polygon) {
+    struct Edge {
+        int y_max;
+        float x, dx;
+        Edge *next;
+    };
+
     // 1. 初始化边表
     std::vector<Edge *> edge_table(height_);
     for (int i = 0; i < height_; i++) {

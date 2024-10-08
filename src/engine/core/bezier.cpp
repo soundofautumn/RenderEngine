@@ -24,7 +24,7 @@ void RenderEngine::draw_bezier_curve(const BezierCurve &curve) {
 
     std::vector<Vector2f> points;
     for (const auto &point : curve) {
-        points.push_back(Vector2f{static_cast<float>(point.x), static_cast<float>(point.y)});
+        points.emplace_back(static_cast<float>(point.x), static_cast<float>(point.y));
     }
     for (float t = 0; t <= 1; t += 0.001) {
         auto point = de_casteljau(points, t);
