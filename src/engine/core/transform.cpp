@@ -3,6 +3,7 @@
 //
 #include "transform.hpp"
 
+#include <cmath>
 #include <variant>
 
 #include "engine.hpp"
@@ -18,8 +19,8 @@ constexpr Matrix3f make_translate_matrix(float x, float y) {
 }
 
 constexpr Matrix3f make_rotate_matrix(float radian) {
-    const auto c = static_cast<float>(cos(radian));
-    const auto s = static_cast<float>(sin(radian));
+    const auto c = static_cast<float>(std::cos(radian));
+    const auto s = static_cast<float>(std::sin(radian));
     // c -s  0
     // s  c  0
     // 0  0  1

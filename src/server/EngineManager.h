@@ -31,12 +31,11 @@ class EngineManager {
     };
 
    private:
-    const std::chrono::seconds engine_timeout = std::chrono::seconds(30);
-
     std::unordered_map<std::string, std::shared_ptr<EngineMutex>> engines_;
     std::unordered_map<std::string, boost::asio::steady_timer> timers_;
     std::mutex map_mutex_;
 
+    static constexpr std::chrono::seconds engine_timeout = std::chrono::seconds(30);
     static constexpr int timer_thread_count = 4;
 
     std::vector<std::thread> threads_;
