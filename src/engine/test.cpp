@@ -21,24 +21,36 @@ void lab_4();
 
 void ex_3();
 
-int main() {
-    engine.init(800, 600);
-    engine.clear();
-
-    // lab_1();
-    // lab_2();
-    // lab_3();
-    // lab_4();
-
-    ex_3();
-
+void render_and_save(const std::string &filename) {
     // 计时
     auto start = std::chrono::high_resolution_clock::now();
     engine.render();
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     std::cout << "Elapsed time: " << elapsed.count() << " s" << std::endl;
-    engine.save("output.bmp");
+    engine.save(filename);
+}
+
+void test(std::function<void()> func, const std::string &filename) {
+    engine.clear();
+    func();
+    render_and_save(filename);
+}
+
+#define TEST(func) test(func, #func ".bmp")
+
+int main() {
+    engine.init(800, 600);
+    engine.clear();
+
+    TEST(lab_1);
+    TEST(lab_2);
+    TEST(lab_3);
+    TEST(lab_4);
+
+    TEST(ex_3);
+
+    render_and_save("output.bmp");
 #ifdef _WIN32
     system("mspaint output.bmp");
 #endif
