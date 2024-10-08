@@ -32,6 +32,16 @@ inline BezierCurve make_bezier_curve(const std::vector<Point> &control_points) {
     return BezierCurve{control_points};
 }
 
+struct BsplineCurve {
+    std::vector<Point> control_points;
+    std::vector<float> knots;
+};
+
+inline BsplineCurve make_bspline_curve(
+    const std::vector<Point> &control_points, const std::vector<float> &knots) {
+    return BsplineCurve{control_points, knots};
+}
+
 }  // namespace RenderCore
 
 #endif

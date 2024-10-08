@@ -264,6 +264,9 @@ class RenderCore::RenderEngine {
     // 贝塞尔曲线
     void draw_bezier_curve(const BezierCurve &curve);
 
+    // B样条曲线
+    void draw_bspline_curve(const BsplineCurve &curve);
+
    private:
     // DDA 算法绘制线段
     void draw_line_dda(const Point &start, const Point &end);
