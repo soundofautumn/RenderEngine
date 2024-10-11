@@ -30,6 +30,7 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
     while (it != render_primitives_.end()) {
         const auto &primitive = *it;
         if (std::holds_alternative<Line>(primitive)) {
+            // 裁剪线段
             auto &line = std::get<Line>(primitive);
             Line new_line = line;
             bool should_draw = true;
@@ -56,9 +57,11 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
                 continue;
             }
         } else if (std::holds_alternative<Rectangle>(primitive)) {
+            // 裁剪矩形
             auto &rectangle = std::get<Rectangle>(primitive);
             Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
             bool should_draw = true;
+            // 使用 Sutherland-Hodgman 算法裁剪多边形
             should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
             if (should_draw) {
                 *it = new_polygon;
@@ -67,9 +70,11 @@ void RenderEngine::rectangle_clip(const Rectangle &window) {
                 continue;
             }
         } else if (std::holds_alternative<Polygon>(primitive)) {
+            // 裁剪多边形
             auto &polygon = std::get<Polygon>(primitive);
             Polygon new_polygon = polygon;
             bool should_draw = true;
+            // 使用 Sutherland-Hodgman 算法裁剪多边形
             should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
             if (should_draw) {
                 *it = new_polygon;
@@ -159,6 +164,7 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
 bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
     const auto encode = encode_f(window);
 
+    // 计算最近点
     std::function<Point(float, float, float, float)> nearest_point = [&](float x1, float y1,
                                                                          float x2, float y2) {
         if (near_equal(x1, x2, 0.01f) && near_equal(y1, y2, 0.01f)) {
@@ -186,6 +192,7 @@ bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Poi
 bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polygon) {
     const auto isInside = [&](const Vector2f &point, const Vector2f &edge_start,
                               const Vector2f &edge_end) {
+        // 使用叉积判断点是否在边的左侧
         return vector_cross(edge_end - edge_start, point - edge_start) >= 0;
     };
 
@@ -212,6 +219,7 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
         return Vector2f{p1.x + t * poly_vec.x, p1.y + t * poly_vec.y};
     };
 
+    // 将点转换为浮点数
     std::vector<Vector2f> window_f(window.size());
     for (size_t i = 0; i < window.size(); i++) {
         window_f[i] = Vector2f{static_cast<float>(window[i].x), static_cast<float>(window[i].y)};
@@ -221,10 +229,12 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
         polygon_f[i] = Vector2f{static_cast<float>(polygon[i].x), static_cast<float>(polygon[i].y)};
     }
 
+    // 遍历窗口边界
     for (size_t i = 0; i < window.size(); i++) {
         const Vector2f &edge_start = window_f[i];
         const Vector2f &edge_end = window_f[(i + 1) % window.size()];
 
+        // 对于窗口的每条边，计算裁剪后的多边形
         std::vector<Vector2f> new_polygon;
         for (size_t j = 0; j < polygon_f.size(); j++) {
             const Vector2f &p1 = polygon_f[j];
@@ -234,10 +244,13 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
             bool p2_inside = isInside(p2, edge_start, edge_end);
 
             if (p1_inside && p2_inside) {
+                // 两个点都在窗口内
                 new_polygon.push_back(p2);
             } else if (p1_inside && !p2_inside) {
+                // p1 在内部，p2 在外部
                 new_polygon.push_back(computeIntersection(p1, p2, edge_start, edge_end));
             } else if (!p1_inside && p2_inside) {
+                // p1 在外部，p2 在内部
                 new_polygon.push_back(computeIntersection(p1, p2, edge_start, edge_end));
                 new_polygon.push_back(p2);
             }
@@ -245,6 +258,7 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
         polygon_f = new_polygon;
     }
 
+    // 将浮点数转换为整数
     polygon.clear();
     polygon.reserve(polygon_f.size());
     for (const auto &point : polygon_f) {
@@ -293,5 +307,4 @@ void RenderEngine::polygon_clip(const Polygon &window) {
             }
         }
     }
-    return;
 }
