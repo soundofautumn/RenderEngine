@@ -2,11 +2,13 @@
 // Created by Autumn Sound on 2024/9/20.
 //
 #include <variant>
+#include <vector>
 
 #include "engine.hpp"
 #include "polygon.hpp"
 #include "rectangle.hpp"
 #include "utils.hpp"
+#include "vector.hpp"
 
 using namespace RenderCore;
 
@@ -182,60 +184,73 @@ bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Poi
 }
 
 bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polygon) {
-    const auto isInside = [&](const Point &point, const Point &edge_start, const Point &edge_end) {
+    const auto isInside = [&](const Vector2f &point, const Vector2f &edge_start,
+                              const Vector2f &edge_end) {
         return vector_cross(edge_end - edge_start, point - edge_start) >= 0;
     };
 
-    const auto computeIntersection = [&](const Point &p1, const Point &p2, const Point &edge_start,
-                                         const Point &edge_end) {
-        Point edge_vec = edge_end - edge_start;
-        Point poly_vec = p2 - p1;
+    const auto computeIntersection = [&](const Vector2f &p1, const Vector2f &p2,
+                                         const Vector2f &edge_start, const Vector2f &edge_end) {
+        // 计算交点
+        Vector2f edge_vec = edge_end - edge_start;
+        Vector2f poly_vec = p2 - p1;
 
-        int cross_product = vector_cross(poly_vec, edge_vec);
+        // 计算叉积
+        float denom = vector_cross(edge_vec, poly_vec);
 
-        if (cross_product == 0) {
-            // 线段平行或重合，返回第一个点作为退化处理
-            return p1;
+        // 检查是否平行
+        if (near_equal(denom, 0.0f)) {
+            // 平行或重合的情况
+            return p1;  // 退化处理，返回 p1
         }
 
-        Point start_to_p1 = p1 - edge_start;
-        float t = float(vector_cross(start_to_p1, edge_vec)) / cross_product;
-        return Point{int(p1.x + t * poly_vec.x), int(p1.y + t * poly_vec.y)};
+        // 计算 t 参数
+        Vector2f start_to_p1 = p1 - edge_start;
+        float t = vector_cross(start_to_p1, edge_vec) / denom;
+
+        // 计算交点坐标
+        return Vector2f{p1.x + t * poly_vec.x, p1.y + t * poly_vec.y};
     };
 
-    Polygon output_polygon = polygon;
-
-    // 对裁剪窗口的每条边依次进行裁剪
-    for (size_t i = 0; i < window.size(); ++i) {
-        Point edge_start = window[i];
-        Point edge_end = window[(i + 1) % window.size()];  // 裁剪窗口边
-        Polygon input_polygon = output_polygon;
-        output_polygon.clear();  // 清空输出多边形
-
-        // 对被裁剪多边形的每条边进行裁剪
-        for (size_t j = 0; j < input_polygon.size(); ++j) {
-            Point current_point = input_polygon[j];
-            Point previous_point =
-                input_polygon[(j + input_polygon.size() - 1) % input_polygon.size()];
-
-            // 判断前一个点和当前点是否在裁剪边的内部
-            if (isInside(current_point, edge_start, edge_end)) {
-                if (!isInside(previous_point, edge_start, edge_end)) {
-                    // 如果前一个点在外部，当前点在内部，计算交点并保留
-                    output_polygon.push_back(
-                        computeIntersection(previous_point, current_point, edge_start, edge_end));
-                }
-                output_polygon.push_back(current_point);  // 当前点保留
-            } else if (isInside(previous_point, edge_start, edge_end)) {
-                // 如果前一个点在内部，当前点在外部，保留交点
-                output_polygon.push_back(
-                    computeIntersection(previous_point, current_point, edge_start, edge_end));
-            }
-        }
+    std::vector<Vector2f> window_f(window.size());
+    for (size_t i = 0; i < window.size(); i++) {
+        window_f[i] = Vector2f{static_cast<float>(window[i].x), static_cast<float>(window[i].y)};
+    }
+    std::vector<Vector2f> polygon_f(polygon.size());
+    for (size_t i = 0; i < polygon.size(); i++) {
+        polygon_f[i] = Vector2f{static_cast<float>(polygon[i].x), static_cast<float>(polygon[i].y)};
     }
 
-    // 将裁剪后的多边形赋给输入多边形
-    polygon = output_polygon;
+    for (size_t i = 0; i < window.size(); i++) {
+        const Vector2f &edge_start = window_f[i];
+        const Vector2f &edge_end = window_f[(i + 1) % window.size()];
+
+        std::vector<Vector2f> new_polygon;
+        for (size_t j = 0; j < polygon_f.size(); j++) {
+            const Vector2f &p1 = polygon_f[j];
+            const Vector2f &p2 = polygon_f[(j + 1) % polygon_f.size()];
+
+            bool p1_inside = isInside(p1, edge_start, edge_end);
+            bool p2_inside = isInside(p2, edge_start, edge_end);
+
+            if (p1_inside && p2_inside) {
+                new_polygon.push_back(p2);
+            } else if (p1_inside && !p2_inside) {
+                new_polygon.push_back(computeIntersection(p1, p2, edge_start, edge_end));
+            } else if (!p1_inside && p2_inside) {
+                new_polygon.push_back(computeIntersection(p1, p2, edge_start, edge_end));
+                new_polygon.push_back(p2);
+            }
+        }
+        polygon_f = new_polygon;
+    }
+
+    polygon.clear();
+    polygon.reserve(polygon_f.size());
+    for (const auto &point : polygon_f) {
+        polygon.push_back(Point{static_cast<int>(point.x), static_cast<int>(point.y)});
+    }
+
     return !polygon.empty();  // 如果裁剪后多边形非空，返回 true
 }
 
