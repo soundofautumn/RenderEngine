@@ -13,7 +13,6 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast.hpp>
-#include <memory>
 
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 

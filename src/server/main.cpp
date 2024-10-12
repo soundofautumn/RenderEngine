@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
         spdlog::info("Received signal {}, shutting down...", signal_number);
         EngineManager::get_instance().shutdown();
         ioc.stop();  // 停止 io_context
+        spdlog::shutdown();
     });
 
     // Run the I/O service on the requested number of threads
