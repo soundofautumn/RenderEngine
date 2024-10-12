@@ -33,16 +33,16 @@ void RenderEngine::fill_polygon_seedfill(const Fill &fill) {
         frame_buffer_->set_pixel(point.x, point.y, fill_color);
 
         if (point.x > 0) {
-            queue.push_back({point.x - 1, point.y});
+            queue.emplace_back(point.x - 1, point.y);
         }
         if (point.x < width_ - 1) {
-            queue.push_back({point.x + 1, point.y});
+            queue.emplace_back(point.x + 1, point.y);
         }
         if (point.y > 0) {
-            queue.push_back({point.x, point.y - 1});
+            queue.emplace_back(point.x, point.y - 1);
         }
         if (point.y < height_ - 1) {
-            queue.push_back({point.x, point.y + 1});
+            queue.emplace_back(point.x, point.y + 1);
         }
     }
 }
