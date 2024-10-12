@@ -6,6 +6,7 @@
 #include <cmath>
 #include <limits>
 #include <numbers>
+#include <utility>
 
 #include "engine.hpp"
 
@@ -44,9 +45,12 @@ void RenderEngine::draw_circle_midpoint(const Point &center, int radius) {
 
 void RenderEngine::draw_arc_midpoint(
     const Point &center, int radius, float start_angle, float end_angle) {
+    if (start_angle >= end_angle) {
+        std::swap(start_angle, end_angle);
+    }
     auto draw_arc_points = [&](int x, int y) {
         // 判断点是否在圆弧内
-        auto angle = atan2(y - center.y, x - center.x);
+        auto angle = std::atan2(y - center.y, x - center.x);
         if (angle >= start_angle && angle <= end_angle) {
             draw_point(x, y);
         }
@@ -144,12 +148,12 @@ void RenderEngine::draw_arc(const Arc &arc) {
         auto [center, radius] =
             circle_center_radius(three_points.p1, three_points.p2, three_points.p3);
         // 计算起始角度和终止角度
-        auto start_angle = atan2(three_points.p1.y - center.y, three_points.p1.x - center.x);
-        auto end_angle = atan2(three_points.p3.y - center.y, three_points.p3.x - center.x);
-        auto p2place = atan2(three_points.p2.y - center.y, three_points.p2.x - center.x);
-        if (start_angle >= end_angle) {
+        auto start_angle = std::atan2(three_points.p1.y - center.y, three_points.p1.x - center.x);
+        auto end_angle = std::atan2(three_points.p3.y - center.y, three_points.p3.x - center.x);
+        if (start_angle > end_angle) {
             std::swap(start_angle, end_angle);
         }
+        auto p2place = std::atan2(three_points.p2.y - center.y, three_points.p2.x - center.x);
         if (p2place >= start_angle && p2place <= end_angle) {
             draw_arc_midpoint(center, radius, start_angle, end_angle);
         } else {
