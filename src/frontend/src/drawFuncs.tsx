@@ -255,6 +255,22 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
+  name: '贝塞尔曲线',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'multi_points',
+        name: 'control_points',
+      }
+    ],
+    requiredPointers: 3,
+    apiEndpoint: 'BezierCurve',
+    drawingMethod: 'click',
+    multiplePoints: true,
+  }),
+})
+
+drawFuncs.push({
   name: '种子填充',
   drawFunc: new DrawFunc({
     params: [
