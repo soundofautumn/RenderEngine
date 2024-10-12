@@ -25,23 +25,43 @@ class RenderEngine;
 }
 
 class RenderCore::RenderEngine {
+    // 帧缓冲区
+    // 调用 render() 时，将绘制到此缓冲区
     std::unique_ptr<Bitmap> frame_buffer_;
 
+    // 存储所有图元
+    // Primitive 是一个变体类型，可以存储多种图元
+    // PenOptions 类型的图元会使接下来的图元使用指定的画笔选项，直到下一个 PenOptions 类型的图元
+    // Transform 类型的图元会使接下来的可绘制图元使用指定的变换矩阵，仅对接下来的一个图元有效
+    // 多个 Transform 类型的图元会叠加变换矩阵
+    // 如：[..., T1, T2, L1, ...] 代表先对 L1 进行 T1 变换，再对结果进行 T2 变换
     std::vector<Primitive> primitives_;
 
     // 存储需要渲染的图元
+    // 渲染时，会先将 primitives_ 中的图元复制到 render_primitives_ 中
+    // 然后遍历 render_primitives_ 进行渲染
+    // 因为可能对图元进行裁剪等操作，所以需要复制一份
     std::list<Primitive> render_primitives_;
 
+    // 画布宽高
     int32_t width_;
     int32_t height_;
 
+    // 画笔选项
+    // 在渲染过程自动更新
+    // 方便在渲染过程中获取画笔选项
     PenOptions pen_options_;
+
+    // 全局选项
+    // 指定背景色、裁剪窗口等
     GlobalOptions global_options_;
 
     // 变换矩阵
+    // 用于对图元进行变换
     Matrix3f transform_matrix_ = Matrix3f::identity();
 
     // 需要重新渲染
+    // 在添加、修改图元时设置为 true
     bool need_render_{true};
 
    public:
@@ -74,6 +94,7 @@ class RenderCore::RenderEngine {
         }
     }
 
+    // 初始化画布
     void clear() {
         primitives_.clear();
         global_options_ = {};
@@ -97,12 +118,13 @@ class RenderCore::RenderEngine {
         }
 
         // 变换
+        // 变换矩阵不是单位矩阵时，对点进行变换
         if (transform_matrix_ != Matrix3f::identity()) {
             const auto point = transform_matrix_ * Vector2f(x, y).xy1();
             x = static_cast<int>(point.x);
             y = static_cast<int>(point.y);
 
-            // 重新检查
+            // 重新检查，防止变换后超出范围
             if (x < 0 || x >= width_ || y < 0 || y >= height_) {
                 return;
             }
@@ -113,6 +135,7 @@ class RenderCore::RenderEngine {
         const auto alpha = color.a;
         const auto new_color = color * alpha + bg_color * (1 - alpha);
 
+        // 将新颜色写入帧缓冲区
         frame_buffer_->set_pixel(x, y, vector_to_color(new_color));
     }
 
@@ -185,6 +208,8 @@ class RenderCore::RenderEngine {
     // 设置画笔选项
     void set_pen_options(const PenOptions &options) { add_primitive(options); }
 
+    // 应用变换矩阵
+    // 对于能在栅格化前应用变换矩阵的图元，直接应用变换矩阵
     template <typename T>
     void apply_transform(T &t) {
         if (can_apply_transform_matrix_v<T>) {
@@ -205,6 +230,7 @@ class RenderCore::RenderEngine {
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
         // 裁剪
         clip();
+        // 重置画笔选项
         pen_options_ = {};
         // 遍历绘制图元
         for (const auto &primitive : render_primitives_) {
