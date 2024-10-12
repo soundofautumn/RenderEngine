@@ -264,7 +264,7 @@ export default function App() {
     width: 1,
     type: 0,
     dash: 1,
-    fill_color: { r: 0, g: 0, b: 0, a: 0 },
+    fill_color: { r: 0, g: 0, b: 0, a: 255 },
   });
 
   const changePenOptionsTimeout = React.useRef<number | null>(null);
