@@ -29,6 +29,16 @@ endif ()
 find_package(spdlog CONFIG)
 
 if (NOT spdlog_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG v1.14.1  # You can set the version you want
+    )
+    FetchContent_MakeAvailable(spdlog)
+endif()
+
+if (NOT spdlog_FOUND AND NOT TARGET spdlog)
     set(BUILD_SERVER_MODULE OFF)
     message(WARNING "spdlog not found")
 endif ()
