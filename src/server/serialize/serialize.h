@@ -5,7 +5,7 @@
 #ifndef RENDERENGINE_SERIALIZE_H
 #define RENDERENGINE_SERIALIZE_H
 
-#include <boost/json.hpp>
+#include <boost/json/src.hpp>
 
 #include "primitive.hpp"
 #include "serialize_bezier.h"
