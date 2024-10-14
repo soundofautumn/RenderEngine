@@ -7,7 +7,14 @@
 
 #include <boost/json.hpp>
 
+#include "bezier.hpp"
+#include "circle.hpp"
+#include "fill.hpp"
+#include "line.hpp"
+#include "options.hpp"
+#include "polygon.hpp"
 #include "primitive.hpp"
+#include "rectangle.hpp"
 #include "serialize_bezier.h"
 #include "serialize_circle.h"
 #include "serialize_fill.h"
@@ -16,6 +23,7 @@
 #include "serialize_polygon.h"
 #include "serialize_rectangle.h"
 #include "serialize_transform.h"
+#include "transform.hpp"
 
 inline RenderCore::Primitive deserialize_primitive(const boost::json::object &primitive) {
     if (primitive.contains("Line")) {
