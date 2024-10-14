@@ -7,6 +7,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
 #include <string>
