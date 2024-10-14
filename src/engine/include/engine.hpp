@@ -212,7 +212,7 @@ class RenderCore::RenderEngine {
     // 对于能在栅格化前应用变换矩阵的图元，直接应用变换矩阵
     template <typename T>
     void apply_transform(T &t) {
-        if (can_apply_transform_matrix_v<T>) {
+        if constexpr (can_apply_transform_matrix_v<T>) {
             apply_transform_matrix(t, transform_matrix_);
             transform_matrix_ = Matrix3f::identity();
         }
