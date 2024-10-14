@@ -14,10 +14,10 @@ file(GLOB_RECURSE SOURCES "*.cpp" "*.h")
 set(BUILD_SERVER_MODULE ON)
 
 # Boost
-find_package(Boost COMPONENTS beast json program_options CONFIG)
+find_package(Boost COMPONENTS beast json program_options)
 
 if (NOT Boost_FOUND)
-    find_package(Boost COMPONENTS program_options)
+    find_package(Boost COMPONENTS beast json program_options CONFIG)
 endif()
 
 if (NOT Boost_FOUND)
