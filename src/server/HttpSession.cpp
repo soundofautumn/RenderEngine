@@ -4,6 +4,8 @@
 
 #include "HttpSession.h"
 
+#include <string_view>
+
 #include "EngineWebSocketSession.h"
 #include "WebSocketSession.h"
 #include "handle_request.h"
@@ -42,7 +44,7 @@ void HttpSession::on_read(boost::system::error_code ec) {
     }
 
     logger::debug("HTTP request from {}:{} {}", socket_.remote_endpoint().address().to_string(),
-        socket_.remote_endpoint().port(), req_.target());
+        socket_.remote_endpoint().port(), std::string_view(req_.target()));
 
     handle_request(req_, res_);
 
