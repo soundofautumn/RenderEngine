@@ -12,7 +12,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-gnu-anonymous-struct -Wno-nested-anon-types)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     add_compile_options(-Wall -Wextra -pedantic)
-    add_compile_options(-Wno-gnu-anonymous-struct -Wno-nested-anon-types -Wpedantic)
+    add_compile_options(-Wpedantic)
 endif ()
 
 add_subdirectory(src/engine)
