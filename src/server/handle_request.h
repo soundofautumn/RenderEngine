@@ -6,7 +6,6 @@
 #define RENDERENGINE_HANDLE_REQUEST_H
 
 #include <boost/beast.hpp>
-#include <string>
 
 namespace http = boost::beast::http;
 
