@@ -11,14 +11,14 @@
 
 using namespace RenderCore;
 
-constexpr Matrix3f make_translate_matrix(float x, float y) {
+Matrix3f make_translate_matrix(float x, float y) {
     // 1  0  x
     // 0  1  y
     // 0  0  1
     return {{{1, 0, x}, {0, 1, y}, {0, 0, 1}}};
 }
 
-constexpr Matrix3f make_rotate_matrix(float radian) {
+Matrix3f make_rotate_matrix(float radian) {
     const auto c = static_cast<float>(std::cos(radian));
     const auto s = static_cast<float>(std::sin(radian));
     // c -s  0
@@ -27,14 +27,14 @@ constexpr Matrix3f make_rotate_matrix(float radian) {
     return {{{c, -s, 0}, {s, c, 0}, {0, 0, 1}}};
 }
 
-constexpr Matrix3f make_scale_matrix(float x, float y) {
+Matrix3f make_scale_matrix(float x, float y) {
     // x  0  0
     // 0  y  0
     // 0  0  1
     return {{{x, 0, 0}, {0, y, 0}, {0, 0, 1}}};
 }
 
-constexpr Matrix3f make_transform_matrix(const Transform &transform) {
+Matrix3f make_transform_matrix(const Transform &transform) {
     if (std::holds_alternative<Translate>(transform)) {
         const auto &translate = std::get<Translate>(transform);
         return make_translate_matrix(translate.offset.x, translate.offset.y);
