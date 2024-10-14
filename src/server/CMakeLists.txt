@@ -45,7 +45,7 @@ endif ()
 
 if (BUILD_SERVER_MODULE)
     add_executable(${PROJECT_NAME} ${SOURCES})
-    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::beast Boost::json Boost::program_options spdlog::spdlog RenderEngineCore)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::program_options spdlog::spdlog RenderEngineCore)
 else ()
     message(WARNING "Server module will not be built")
 endif ()
