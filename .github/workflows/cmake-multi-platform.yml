@@ -26,12 +26,12 @@ jobs:
             c_compiler: cl
             cpp_compiler: cl
             toolset: msvc
-            arch: x64
+            arch: x86
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
             toolset: gcc
-            arch: x64
+            arch: x86
           - os: macos-latest
             c_compiler: clang
             cpp_compiler: clang++
