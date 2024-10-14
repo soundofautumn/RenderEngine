@@ -4,6 +4,8 @@
 
 #include "EngineWebSocketSession.h"
 
+#include <string>
+
 extern void fail(boost::system::error_code ec, char const *what);
 
 EngineWebSocketSession::EngineWebSocketSession(tcp::socket socket)
@@ -13,7 +15,7 @@ void EngineWebSocketSession::run(const http::request<http::string_body> &req) {
     // find the engine name
     auto pos = req.target().find_last_of('/');
     if (pos == std::string::npos) {
-        logger::error("Invalid request target: {}", req.target());
+        logger::error("Invalid request target: {}", std::string(req.target()));
         return;
     }
     engine_name_ = req.target().substr(pos + 1);
