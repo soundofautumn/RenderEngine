@@ -17,7 +17,7 @@ set(BUILD_SERVER_MODULE ON)
 find_package(Boost COMPONENTS beast json program_options CONFIG)
 
 if (NOT Boost_FOUND)
-    find_package(Boost COMPONENTS program_options)
+    find_package(Boost COMPONENTS beast json program_options)
 endif()
 
 if (NOT Boost_FOUND)
