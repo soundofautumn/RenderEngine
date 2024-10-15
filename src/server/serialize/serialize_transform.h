@@ -11,8 +11,18 @@
 #include "vector.hpp"
 
 inline RenderCore::Vector2f deserialize_vector(const boost::json::object &obj) {
-    return {
-        static_cast<float>(obj.at("x").as_double()), static_cast<float>(obj.at("y").as_double())};
+    float x, y;
+    if (obj.at("x").is_double()) {
+        x = static_cast<float>(obj.at("x").as_double());
+    } else {
+        x = static_cast<float>(obj.at("x").as_int64());
+    }
+    if (obj.at("y").is_double()) {
+        y = static_cast<float>(obj.at("y").as_double());
+    } else {
+        y = static_cast<float>(obj.at("y").as_int64());
+    }
+    return {x, y};
 }
 
 inline boost::json::object serialize_vector(const RenderCore::Vector2f &vector) {
