@@ -546,8 +546,8 @@ export default function App() {
           type: 'rotate',
         },
         {
-          x: (left_bounder + right_bounder) / 2,
-          y: (top_bounder + bottom_bounder) / 2,
+          x: Math.floor((left_bounder + right_bounder) / 2),
+          y: Math.floor((top_bounder + bottom_bounder) / 2),
           type: 'center',
         }
       ])
