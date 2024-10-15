@@ -130,7 +130,17 @@ export default function App() {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
 
-    if (translatingPrimitive && originShadowBounder && originShadowVertex) {
+    if (movingRotatePoint && rotateStartPoint) {
+      const deltaX = coordinate.x - rotateStartPoint.x;
+      const deltaY = coordinate.y - rotateStartPoint.y;
+      const angleInRadians = Math.atan2(deltaY, deltaX);
+      setAngle(angleInRadians);
+    } else if (showingPrimitive && movingCenterPoint && shadowVertex) {
+      const csv = [...shadowVertex];
+      csv.find(point => point.type === 'center')!.x = coordinate.x;
+      csv.find(point => point.type === 'center')!.y = coordinate.y;
+      setShadowVertex(csv);
+    } else if (translatingPrimitive && originShadowBounder && originShadowVertex) {
       const offsetX = coordinate.x - translateStartPoint!.x;
       const offsetY = coordinate.y - translateStartPoint!.y;
       const currentShadowBounder = { ...originShadowBounder };
@@ -234,6 +244,7 @@ export default function App() {
     }
   }
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleRotateMouseUp();
     if (draggingRef.current) {
       draggingRef.current = false;
       setDragging(false);
@@ -558,6 +569,7 @@ export default function App() {
     setOriginShadowVertex(shadowVertex);
   }
   const handleTranslateMouseUp = () => {
+    handleRotateMouseUp();
     if (!translateStartPoint || !originShadowBounder || !originShadowVertex) return;
     const offsetX = coordinate.x - translateStartPoint!.x;
     const offsetY = coordinate.y - translateStartPoint!.y;
@@ -579,6 +591,48 @@ export default function App() {
         Index: showingPrimitive?.index,
       }
     }).then(fetchPrimitives);
+  }
+
+  const [movingCenterPoint, setMovingCenterPoint] = React.useState<boolean>(false);
+  const handleCenterMouseDown = () => {
+    if (!showingPrimitive) return;
+    setMovingCenterPoint(true);
+  }
+  const handleCenterMouseUp = () => {
+    if (!movingCenterPoint) return;
+    setMovingCenterPoint(false);
+  }
+
+  const [movingRotatePoint, setMovingRotatePoint] = React.useState<boolean>(false);
+  const [angle, setAngle] = React.useState(0);
+  const [rotateStartPoint, setRotateStartPoint] = React.useState<IPoint | null>(null);
+  const handleRotateMouseDown = (point: IPoint) => {
+    setMovingRotatePoint(true);
+    setRotateStartPoint(point);
+  }
+  const handleRotateMouseUp = () => {
+    if (movingRotatePoint && rotateStartPoint) {
+      const center_point = shadowVertex?.find(point => point.type === 'center');
+      if (!center_point) return;
+      client('/engine/primitive/insert', {
+        data: {
+          Primitive: {
+            Transform: {
+              Rotate: {
+                angle,
+                center: {
+                  x: center_point.x,
+                  y: center_point.y,
+                }
+              }
+            }
+          },
+          Index: showingPrimitive?.index,
+        }
+      }).then(fetchPrimitives);
+    }
+    setRotateStartPoint(null);
+    setMovingRotatePoint(false);
   }
 
   return (<>
@@ -993,7 +1047,7 @@ export default function App() {
         }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })),
         ...shadowVertex ? shadowVertex : [],
         {
-          ...movingPrimitivePoint ? [] : { ...coordinate, type: 'view' }
+          ...(movingPrimitivePoint || movingCenterPoint) ? [] : { ...coordinate, type: 'view' }
         }].filter(point => point.x && point.y) as IPoint[]
       ).map((point, index) => {
         return (
@@ -1010,9 +1064,9 @@ export default function App() {
                 style={{
                   backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
                 }}
-                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : undefined}
-                onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : undefined}
-                onMouseMove={point.type === 'dragable' ? handleMouseMove : undefined}
+                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : undefined}
+                onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : point.type === 'center' ? handleCenterMouseUp : point.type === 'rotate' ? handleRotateMouseUp : handleRotateMouseUp}
+                onMouseMove={handleMouseMove}
               />
               <p className='point-text top'>
                 {
@@ -1021,7 +1075,11 @@ export default function App() {
                 }
               </p>
               <p className='point-text'>
-                {(point.type === 'view' || point.type === 'bounder' || point.type === 'center' || point.type === 'rotate') ? '' : `(${point.x}, ${point.y})`}
+                {
+                  (point.type === 'view') ? movingRotatePoint ? `${(angle * (-180 / Math.PI)).toFixed(2)}°` : '' :
+                    (point.type === 'bounder' || point.type === 'center' || point.type === 'rotate')
+                      ? '' : `(${point.x}, ${point.y})`
+                }
               </p>
             </div>
           </div>
