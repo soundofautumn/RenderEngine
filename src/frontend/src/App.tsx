@@ -475,6 +475,62 @@ export default function App() {
     })
   }
 
+  const [shadowBounder, setShadowBounder] = React.useState<{
+    left_bounder: number;
+    right_bounder: number;
+    top_bounder: number;
+    bottom_bounder: number;
+  } | null>(null);
+  const [shadowVertex, setShadowVertex] = React.useState<IPoint[] | null>([]);
+  React.useEffect(() => {
+    if (!showingPrimitive) {
+      setShadowBounder(null);
+      setShadowVertex(null);
+      return;
+    }
+    const all_pointers: IPoint[] = showingPrimitive.params.map(param => (param.type === 'point' && param.value) ? ({ ...param.value, type: 'bounder' }) : undefined).filter(p => !!p) as IPoint[];
+    const param_multi_points = showingPrimitive.params.find(param => param.type === 'multi_points');
+    if (param_multi_points)
+      all_pointers.push(...(param_multi_points.value as IPoint[]).map(point => ({ ...point, type: 'bounder' }) as IPoint));
+    console.log('all_pointers', all_pointers);
+
+    const left_bounder: number = Math.min(...all_pointers.map(p => p.x));
+    const right_bounder: number = Math.max(...all_pointers.map(p => p.x));
+    const top_bounder: number = Math.min(...all_pointers.map(p => p.y));
+    const bottom_bounder: number = Math.max(...all_pointers.map(p => p.y));
+    console.log('bounder', left_bounder, right_bounder, top_bounder, bottom_bounder);
+
+    if (showingPrimitive.apiEndpoint !== 'Circle') {
+      setShadowBounder({
+        left_bounder,
+        right_bounder,
+        top_bounder,
+        bottom_bounder,
+      })
+      const offset = 10;
+      setShadowVertex([
+        { x: left_bounder - offset, y: top_bounder - offset, type: 'bounder' },
+        { x: right_bounder + offset, y: top_bounder - offset, type: 'bounder' },
+        { x: right_bounder + offset, y: bottom_bounder + offset, type: 'bounder' },
+        { x: left_bounder - offset, y: bottom_bounder + offset, type: 'bounder' },
+        {
+          x: (left_bounder + right_bounder) / 2,
+          y: top_bounder - 2 * offset,
+          type: 'rotate',
+        },
+        {
+          x: (left_bounder + right_bounder) / 2,
+          y: (top_bounder + bottom_bounder) / 2,
+          type: 'center',
+        }
+      ])
+    }
+    else {
+      setShadowBounder(null);
+      setShadowVertex(null);
+    }
+  }, [showingPrimitive])
+
   return (<>
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
       <div>{errorMessage}</div>
@@ -623,6 +679,20 @@ export default function App() {
         height: slidingWindow.bottom_right.y - slidingWindow.top_left.y,
         display: enableSlidingWindow ? 'block' : 'none',
       }} />
+      {
+        shadowBounder && (
+          <div
+            id="shadowBounder"
+            style={{
+              left: shadowBounder.left_bounder,
+              top: shadowBounder.top_bounder,
+              width: shadowBounder.right_bounder - shadowBounder.left_bounder,
+              height: shadowBounder.bottom_bounder - shadowBounder.top_bounder,
+            }}
+            onMouseMove={handleMouseMove}
+          />
+        )
+      }
     </div>
     <div id="drawFuncs-wrapper">
       <div id="drawFuncs"
@@ -855,9 +925,11 @@ export default function App() {
           if (param.type === 'multi_points') return param.value;
           if (param.type !== 'point') return [];
           return [param.value];
-        }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })), {
+        }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })),
+        ...shadowVertex ? shadowVertex : [],
+        {
           ...movingPrimitivePoint ? [] : { ...coordinate, type: 'view' }
-        }].filter(point => point.x && point.y)
+        }].filter(point => point.x && point.y) as IPoint[]
       ).map((point, index) => {
         return (
           <div
@@ -871,7 +943,7 @@ export default function App() {
             <div className='point-item'>
               <div className='point-circle'
                 style={{
-                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
+                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
                 }}
                 onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : undefined}
                 onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : undefined}
@@ -879,12 +951,12 @@ export default function App() {
               />
               <p className='point-text top'>
                 {
-                  (point.type === 'view' || point.type === 'dragable') ? '' : clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
+                  (point.type === 'view' || point.type === 'dragable' || point.type === 'bounder' || point.type === "center" || point.type === "rotate") ? '' : clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
                     point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
                 }
               </p>
               <p className='point-text'>
-                {point.type === 'view' ? '' : `(${point.x}, ${point.y})`}
+                {(point.type === 'view' || point.type === 'bounder' || point.type === 'center' || point.type === 'rotate') ? '' : `(${point.x}, ${point.y})`}
               </p>
             </div>
           </div>

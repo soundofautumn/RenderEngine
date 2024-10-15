@@ -57,20 +57,51 @@ canvas {
     background-color: transparent;
 }
 
-#slidingWindow .point .point-item .point-circle {
+#slidingWindow .point .point-item .point-circle,
+.point.bounder .point-item .point-circle,
+.point.dragable .point-item .point-circle,
+.point.rotate .point-item .point-circle,
+.point.center .point-item .point-circle {
     cursor: all-scroll;
     pointer-events: all;
 }
 
-.point.dragable .point-item .point-circle {
-    cursor: all-scroll;
-    pointer-events: all;
+.point.bounder .point-item .point-circle {
+    border: blue 1px solid;
+    border-radius: 0;
+    cursor: nesw-resize;
 }
 
-#slidingWindowBorder {
+.point.rotate .point-item .point-circle,
+.point.center .point-item .point-circle {
+    border: yellow 1px solid;
+    border-radius: 10px;
+}
+
+.point.rotate .point-item .point-circle {
+    top: -10px;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    cursor: alias;
+    box-shadow: none;
+    background-color: transparent !important;
+    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxNiIgaWQ9InN2ZzIiIHZlcnNpb249IjEuMSIgd2lkdGg9IjE2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6aW5rc2NhcGU9Imh0dHA6Ly93d3cuaW5rc2NhcGUub3JnL25hbWVzcGFjZXMvaW5rc2NhcGUiIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIgeG1sbnM6c29kaXBvZGk9Imh0dHA6Ly9zb2RpcG9kaS5zb3VyY2Vmb3JnZS5uZXQvRFREL3NvZGlwb2RpLTAuZHRkIiB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcyBpZD0iZGVmczQiLz48ZyBpZD0ibGF5ZXIxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwLC0xMDM2LjM2MjIpIj48cGF0aCBkPSJNIDEwLjU0MTU5LDEwLjAyNTIyOSBBIDMuODQ0NzkyNCwzLjc3MjU4OTcgMCAxIDEgNi42OTY3OTc5LDYuMjUyNjM5OCIgaWQ9InBhdGgzNzU1IiBzdHlsZT0iZmlsbDojODAwMDAwO2ZpbGwtb3BhY2l0eTowO3N0cm9rZTojMDAwMDAwO3N0cm9rZS13aWR0aDoxLjI2OTgxMDkxO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLW9wYWNpdHk6MTtzdHJva2UtZGFzaGFycmF5Om5vbmUiIHRyYW5zZm9ybT0ibWF0cml4KDEuMTAzNDM5NCwxLjEwMzQzOTQsLTEuMTI0NTU3OSwxLjEyNDU1NzksMTEuNjE5Mjg0LDEwMjUuNTg4OSkiLz48cGF0aCBkPSJtIDExLjk3NzQ2NiwxMDQwLjAwOTcgMC44ODM4ODQsLTAuODgzOSAwLjUzMDMzLDIuMjk4MSAtMi4yOTgwOTcsLTAuNTMwMyB6IiBpZD0icGF0aDM3NTciIHN0eWxlPSJmaWxsOiMwMDAwMDA7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjFweDtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2Utb3BhY2l0eToxIi8+PC9nPjwvc3ZnPg==);
+    background-size: cover;
+    filter: invert(1);
+    border: transparent;
+}
+
+#slidingWindowBorder,
+#shadowBounder {
     position: absolute;
     border: 1px dashed rgba(255, 255, 255, 0.3);
     pointer-events: none;
+}
+
+#shadowBounder {
+    pointer-events: all;
+    cursor: grab;
 }
 
 .point {
@@ -224,6 +255,7 @@ select {
     background: rgba(255, 255, 255, 0.3);
     padding: 5px;
     border-radius: 5px;
+    user-select: none;
 
     .title {
         width: 100%;
@@ -259,6 +291,8 @@ select {
     border-radius: 5px;
     min-width: 100px;
     transition: 1s;
+    user-select: none;
+
     .endpoint {
         width: 100%;
         text-align: center;

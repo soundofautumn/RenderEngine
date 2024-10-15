@@ -1,7 +1,17 @@
 export interface IPoint {
     x: number;
     y: number;
-    type?: "click" | "current" | "drag" | "sliding" | "ending";
+    type?:
+        | "click"
+        | "current"
+        | "drag"
+        | "sliding"
+        | "ending"
+        | "dragable"
+        | "view"
+        | "bounder"
+        | "center"
+        | "rotate";
 }
 
 export interface IDrawFuncParams {
