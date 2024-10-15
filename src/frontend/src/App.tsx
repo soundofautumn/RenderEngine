@@ -800,6 +800,8 @@ export default function App() {
               top: shadowBounder.top_bounder,
               width: shadowBounder.right_bounder - shadowBounder.left_bounder,
               height: shadowBounder.bottom_bounder - shadowBounder.top_bounder,
+              transform: movingRotatePoint ? `rotate(${angle}rad)` : undefined,
+              transformOrigin: `${shadowVertex!.find(point => point.type === 'center')!.x - shadowBounder.left_bounder}px ${shadowVertex!.find(point => point.type === 'center')!.y - shadowBounder.top_bounder}px`,
             }}
             onMouseMove={handleMouseMove}
             onMouseDown={handleTranslateMouseDown}
