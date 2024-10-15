@@ -387,7 +387,7 @@ export default function App() {
 
   const [primitives, setPrimitives] = React.useState<IPrimitive[]>([]);
   const [showingPrimitive, setShowingPrimitive] = React.useState<IPrimitive | null>(null);
-  const fetchPrimitives = () => {
+  const fetchPrimitives = (update_index?: number) => {
     client("/engine/primitive/get_all").then(r => {
       const raw_primitives = r.data as { [apiEndpoint: string]: { [param: string]: object } }[];
       console.log(raw_primitives);
@@ -439,6 +439,10 @@ export default function App() {
       });
       console.log(primitives);
       setPrimitives(primitives);
+      if (showingPrimitive && update_index) {
+        const newShowingPrimitive = primitives.find(p => p.index === update_index);
+        if (newShowingPrimitive) setShowingPrimitive(newShowingPrimitive);
+      }
     })
   }
   React.useEffect(() => {
@@ -590,7 +594,9 @@ export default function App() {
         },
         Index: showingPrimitive?.index,
       }
-    }).then(fetchPrimitives);
+    }).then(() => {
+      fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+    });
   }
 
   const [movingCenterPoint, setMovingCenterPoint] = React.useState<boolean>(false);
@@ -629,7 +635,9 @@ export default function App() {
           },
           Index: showingPrimitive?.index,
         }
-      }).then(fetchPrimitives);
+      }).then(() => {
+        fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+      });
     }
     setRotateStartPoint(null);
     setMovingRotatePoint(false);
