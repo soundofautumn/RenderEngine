@@ -81,7 +81,10 @@ class EngineManager {
         reset_timer(name);
     }
 
-    bool check_engine(const std::string &name) { return engines_.find(name) != engines_.end(); }
+    bool check_engine(const std::string &name) {
+        std::lock_guard<std::mutex> lock(map_mutex_);
+        return engines_.find(name) != engines_.end();
+    }
 
     std::shared_ptr<EngineMutex> get_engine_with_mutex(const std::string &name) {
         std::lock_guard<std::mutex> lock(map_mutex_);
