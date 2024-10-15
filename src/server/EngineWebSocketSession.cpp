@@ -86,6 +86,11 @@ void EngineWebSocketSession::on_timer(boost::system::error_code ec) {
 
 void EngineWebSocketSession::send_frame() {
     auto engine_with_mutex = EngineManager::get_instance().get_engine_with_mutex(engine_name_);
+    if (engine_with_mutex == nullptr) {
+        logger::error("Engine not found: {}, stop sending frame", engine_name_);
+        timer_.cancel();
+        return;
+    }
     std::lock_guard lock(engine_with_mutex->mutex);
     // 发送帧
     if (write_in_progress_) {
