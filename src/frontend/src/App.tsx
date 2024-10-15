@@ -281,13 +281,13 @@ export default function App() {
     width: 1,
     type: 0,
     dash: 1,
-    fill_color: { r: 0, g: 0, b: 0, a: 255 },
+    fill_color: { r: 0, g: 0, b: 0, a: 0 },
   });
 
   const changePenOptionsTimeout = React.useRef<number | null>(null);
   React.useEffect(() => {
     if (changePenOptionsTimeout.current) clearTimeout(changePenOptionsTimeout.current);
-    changePenOptionsTimeout.current = setTimeout(() => client('/engine/draw', {
+    changePenOptionsTimeout.current = setTimeout(() => client('/engine/primitive/push_back', {
       data: {
         PenOptions: penOptions,
       }
