@@ -229,15 +229,15 @@ void handle_request(const request &req, response &res) {
                 handle_engine_create(req, res);
             } else if (req.target().starts_with("/engine/remove")) {
                 handle_engine_remove(req, res);
-            } else if (req.target().starts_with("/engine/draw")) {
+            } else if (req.target().starts_with("/engine/primitive/push_back")) {
                 handle_engine_draw(req, res);
-            } else if (req.target().starts_with("/engine/insert_primitive")) {
+            } else if (req.target().starts_with("/engine/primitive/insert")) {
                 handle_engine_insert_primitive(req, res);
-            } else if (req.target().starts_with("/engine/remove_primitive")) {
+            } else if (req.target().starts_with("/engine/primitive/remove")) {
                 handle_engine_remove_primitive(req, res);
-            } else if (req.target().starts_with("/engine/modify_primitive")) {
+            } else if (req.target().starts_with("/engine/primitive/modify")) {
                 handle_engine_modify_primitive(req, res);
-            } else if (req.target().starts_with("/engine/get_primitives")) {
+            } else if (req.target().starts_with("/engine/primitive/get_all")) {
                 handle_engine_get_primitives(req, res);
             } else if (req.target().starts_with("/engine/set_global_options")) {
                 handle_engine_set_global_options(req, res);
