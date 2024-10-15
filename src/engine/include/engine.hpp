@@ -257,7 +257,7 @@ class RenderCore::RenderEngine {
                     } else if constexpr (std::is_same_v<T, BezierCurve>) {
                         draw_bezier_curve(prim);
                     }
-                    if constexpr (!std::is_same_v<T, Transform> || !std::is_same_v<T, PenOptions>) {
+                    if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
                         transform_matrix_ = Matrix3f::identity();
                     }
                 },
