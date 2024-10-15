@@ -419,11 +419,15 @@ export default function App() {
               name,
               value: raw_primitive[apiEndpoint][name],
             }
-          }) || []
-        return { apiEndpoint, params, ignore: matchedDrawFunc ? false : true, index, type: matchedDrawFunc?.type || 'unknown' };
+          }) || Object.keys(raw_primitive[apiEndpoint]).map((name) => ({
+            type: 'unknown',
+            name,
+            value: raw_primitive[apiEndpoint][name],
+          }))
+        return { apiEndpoint, params, index, type: matchedDrawFunc?.type || 'unknown', editable: matchedDrawFunc ? true : false };
       });
-      console.log(primitives.filter(p => !p.ignore));
-      setPrimitives(primitives.filter(p => !p.ignore));
+      console.log(primitives);
+      setPrimitives(primitives);
     })
   }
   React.useEffect(() => {
@@ -924,7 +928,7 @@ export default function App() {
           </div>
           {
             showingPrimitive.params.map((param, index) => {
-              if (param.type === 'unknown') return null;
+              // if (param.type === 'unknown') return null;
               if (param.value === undefined) return null;
               return (
                 <div className='param' key={index}>
@@ -937,8 +941,24 @@ export default function App() {
                             {`(${point.x}, ${point.y})`}
                           </div>
                         )) :
-                          param.type === 'func' ? JSON.stringify(param.value) :
-                            JSON.stringify(param.value)
+                          (typeof param.value === 'object') ? Object.entries(param.value).map(([key, value]) => (typeof value === 'object' && value !== null) ? (
+                            <div className='param' key={key}>
+                              <div className='name'>{key}</div>
+                              <div className='value'>
+                                {
+                                  Object.entries(value).map(([k, v]) => (
+                                    <div key={k}>
+                                      {`${k}: ${v}`}
+                                    </div>
+                                  ))
+                                }
+                              </div>
+                            </div>
+                          ) : (
+                            <div key={key}>
+                              {`${key}: ${JSON.stringify(value)}`}
+                            </div>
+                          )) : JSON.stringify(param.value)
                     }
                   </div>
                 </div>

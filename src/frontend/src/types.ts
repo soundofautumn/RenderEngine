@@ -34,6 +34,7 @@ export interface IPrimitive {
         value: any;
     })[];
     index: number;
+    editable: boolean;
     type?: string;
 }
 
