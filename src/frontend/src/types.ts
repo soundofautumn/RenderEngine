@@ -36,3 +36,10 @@ export interface IPrimitive {
     index: number;
     type?: string;
 }
+
+export interface IShadowBounder {
+    left_bounder: number;
+    right_bounder: number;
+    top_bounder: number;
+    bottom_bounder: number;
+}

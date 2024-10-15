@@ -3,7 +3,7 @@ import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } fr
 import drawFuncs from './drawFuncs';
 
 import './App.css';
-import { IDrawApiParam, IPoint, IPrimitive } from './types';
+import { IDrawApiParam, IPoint, IPrimitive, IShadowBounder } from './types';
 import { randomEngineName } from './utils';
 
 function getHeightUnfold(dom: HTMLElement) {
@@ -130,7 +130,24 @@ export default function App() {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
 
-    if (currentEditingPoint === null) return;
+    if (translatingPrimitive && originShadowBounder && originShadowVertex) {
+      const offsetX = coordinate.x - translateStartPoint!.x;
+      const offsetY = coordinate.y - translateStartPoint!.y;
+      const currentShadowBounder = { ...originShadowBounder };
+      currentShadowBounder.left_bounder += offsetX;
+      currentShadowBounder.right_bounder += offsetX;
+      currentShadowBounder.top_bounder += offsetY;
+      currentShadowBounder.bottom_bounder += offsetY;
+      const currentShadowVertex = originShadowVertex.map(point => {
+        return {
+          x: point.x + offsetX,
+          y: point.y + offsetY,
+          type: point.type,
+        }
+      })
+      setShadowBounder(currentShadowBounder);
+      setShadowVertex(currentShadowVertex);
+    } else if (currentEditingPoint === null) return;
     else if (!showingPrimitive) return;
     else if (currentEditingPoint.multiPoints) {
       const currentPrimitive = { ...showingPrimitive };
@@ -475,12 +492,7 @@ export default function App() {
     })
   }
 
-  const [shadowBounder, setShadowBounder] = React.useState<{
-    left_bounder: number;
-    right_bounder: number;
-    top_bounder: number;
-    bottom_bounder: number;
-  } | null>(null);
+  const [shadowBounder, setShadowBounder] = React.useState<IShadowBounder | null>(null);
   const [shadowVertex, setShadowVertex] = React.useState<IPoint[] | null>([]);
   React.useEffect(() => {
     if (!showingPrimitive) {
@@ -530,6 +542,40 @@ export default function App() {
       setShadowVertex(null);
     }
   }, [showingPrimitive])
+
+  const [translatingPrimitive, setTranslatingPrimitive] = React.useState<boolean>(false);
+  const [originShadowBounder, setOriginShadowBounder] = React.useState<IShadowBounder | null>(null)
+  const [originShadowVertex, setOriginShadowVertex] = React.useState<IPoint[] | null>(null);
+  const [translateStartPoint, setTranslateStartPoint] = React.useState<IPoint | null>(null);
+  const handleTranslateMouseDown = () => {
+    setTranslatingPrimitive(true);
+    setTranslateStartPoint(coordinate);
+    setOriginShadowBounder(shadowBounder);
+    setOriginShadowVertex(shadowVertex);
+  }
+  const handleTranslateMouseUp = () => {
+    if (!translateStartPoint || !originShadowBounder || !originShadowVertex) return;
+    const offsetX = coordinate.x - translateStartPoint!.x;
+    const offsetY = coordinate.y - translateStartPoint!.y;
+    setTranslatingPrimitive(false);
+    setOriginShadowBounder(null);
+    setOriginShadowVertex(null);
+    client('/engine/primitive/insert', {
+      data: {
+        Primitive: {
+          Transform: {
+            Translate: {
+              offset: {
+                x: offsetX,
+                y: offsetY,
+              }
+            }
+          }
+        },
+        Index: showingPrimitive?.index,
+      }
+    })
+  }
 
   return (<>
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
@@ -690,6 +736,8 @@ export default function App() {
               height: shadowBounder.bottom_bounder - shadowBounder.top_bounder,
             }}
             onMouseMove={handleMouseMove}
+            onMouseDown={handleTranslateMouseDown}
+            onMouseUp={handleTranslateMouseUp}
           />
         )
       }
