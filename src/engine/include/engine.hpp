@@ -257,9 +257,11 @@ class RenderCore::RenderEngine {
                     } else if constexpr (std::is_same_v<T, BezierCurve>) {
                         draw_bezier_curve(prim);
                     }
+                    if constexpr (!std::is_same_v<T, Transform>) {
+                        transform_matrix_ = Matrix3f::identity();
+                    }
                 },
                 primitive);
-            transform_matrix_ = Matrix3f::identity();
         }
         need_render_ = false;
         return true;
