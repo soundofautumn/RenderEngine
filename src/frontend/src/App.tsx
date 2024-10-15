@@ -500,7 +500,7 @@ export default function App() {
     const bottom_bounder: number = Math.max(...all_pointers.map(p => p.y));
     console.log('bounder', left_bounder, right_bounder, top_bounder, bottom_bounder);
 
-    if (showingPrimitive.apiEndpoint !== 'Circle') {
+    if (showingPrimitive.apiEndpoint !== 'Circle' && showingPrimitive.apiEndpoint !== 'Fill') {
       setShadowBounder({
         left_bounder,
         right_bounder,
@@ -898,9 +898,6 @@ export default function App() {
             })
           }
           <div className='actions'>
-            <button>平移</button>
-            <button>旋转</button>
-            <button>缩放</button>
             <button onClick={() => {
               client("/engine/primitive/remove", {
                 data: {
