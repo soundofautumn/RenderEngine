@@ -232,9 +232,9 @@ export default function App() {
     if (clickingSlidingWindowPoints) return;
     if (currentDrawFunc.current.drawingMethod === 'drag') return;
     if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
-      const shadowPoint = { ...clickedPointsRef.current[0] };
-      clickedPointsRef.current.push(shadowPoint);
-      setClickedPoints(clickedPointsRef.current);
+      // const shadowPoint = { ...clickedPointsRef.current[0] };
+      // clickedPointsRef.current.push(shadowPoint);
+      // setClickedPoints(clickedPointsRef.current);
       handleDraw();
     } else {
       clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
