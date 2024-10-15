@@ -20,6 +20,9 @@ export interface IDrawApiParam {
 
 export interface IPrimitive {
     apiEndpoint: string;
-    params: (IDrawApiParam & { value: object })[];
+    params: (IDrawApiParam & {
+        value: any;
+    })[];
     index: number;
+    type?: string;
 }

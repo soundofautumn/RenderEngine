@@ -8,8 +8,7 @@ class DrawFunc {
   public readonly drawingMethod: 'click' | 'drag';
   public readonly multiplePoints: boolean = false;
   public readonly params: IDrawApiParam[];
-
-  private readonly type: string | undefined;
+  public readonly type: string | undefined;
 
   constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string, multiplePoints?: boolean }) {
     this.params = props.params.sort((a) => a.type === 'point' ? -1 : 1);

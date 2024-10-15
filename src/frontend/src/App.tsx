@@ -126,9 +126,23 @@ export default function App() {
     });
   }, [])
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement> | React.MouseEvent<HTMLDivElement>) => {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
+
+    if (currentEditingPoint === null) return;
+    else if (!showingPrimitive) return;
+    else if (currentEditingPoint.multiPoints) {
+      const currentPrimitive = { ...showingPrimitive };
+      // @ts-expect-error undefined
+      currentPrimitive.params.find(p => p.type === "multi_points").value[currentEditingPoint.index] = { x: e.clientX, y: e.clientY };
+      setShowingPrimitive(currentPrimitive);
+    }
+    else {
+      const currentPrimitive = { ...showingPrimitive };
+      currentPrimitive.params[currentEditingPoint.index].value = { x: e.clientX, y: e.clientY };
+      setShowingPrimitive(currentPrimitive);
+    }
   }
 
   const clickedPointsRef = React.useRef<IPoint[]>([]);
@@ -185,7 +199,9 @@ export default function App() {
         setClickedPoints(clickedPointsRef.current);
       }
     }
-    if (clickingSlidingWindowPoints) {
+    if (showingPrimitive) {
+      return;
+    } else if (clickingSlidingWindowPoints) {
       // 处理圈画裁剪框的点击
       if (clickedPointsRef.current.length === 2) {
         handleDraw();
@@ -211,7 +227,8 @@ export default function App() {
   }
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    // handleClick 仅处理 click 类型的绘制方法，drag 类型的绘制方法和圈画裁剪框在 handleMouseDown 中处理
+    // handleClick 仅处理 click 类型的绘制方法，drag 类型的绘制方法、圈画裁剪框和修改图元的已有点在 handleMouseDown 中处理
+    if (showingPrimitive) return;
     if (clickingSlidingWindowPoints) return;
     if (currentDrawFunc.current.drawingMethod === 'drag') return;
     if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
@@ -228,12 +245,14 @@ export default function App() {
 
   const handleRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    if (showingPrimitive) return;
     clickedPointsRef.current.pop();
     setClickedPoints(clickedPointsRef.current);
     return;
   }
 
   const handleDoubleClick = () => {
+    if (showingPrimitive) return;
     if (!currentDrawFunc.current.multiplePoints) return;
     clickedPointsRef.current.pop();
     setClickedPoints(clickedPointsRef.current);
@@ -348,6 +367,7 @@ export default function App() {
         const apiEndpoint = Object.keys(raw_primitive)[0];
         const matchedDrawFuncs = drawFuncs.filter(df => df.drawFunc.apiEndpoint === apiEndpoint).map(df => ({
           params: df.drawFunc.params,
+          type: df.drawFunc.type,
           names: df.drawFunc.params.map((param, index) => {
             if (param.type === 'point')
               return param.name || `p${index + 1}`;
@@ -383,7 +403,7 @@ export default function App() {
               value: raw_primitive[apiEndpoint][name],
             }
           }) || []
-        return { apiEndpoint, params, ignore: matchedDrawFunc ? false : true, index };
+        return { apiEndpoint, params, ignore: matchedDrawFunc ? false : true, index, type: matchedDrawFunc?.type || 'unknown' };
       });
       console.log(primitives.filter(p => !p.ignore));
       setPrimitives(primitives.filter(p => !p.ignore));
@@ -395,13 +415,65 @@ export default function App() {
       behavior: 'smooth',
     });
   }, [primitives])
+  const [primitiveOpacity, setPrimitiveOpacity] = React.useState(0);
   React.useEffect(() => {
     if (showingPrimitive === null) {
       setDisableToolbar(false);
+      setPrimitiveOpacity(0);
     } else {
       setDisableToolbar(true);
+      setPrimitiveOpacity(1);
     }
   }, [showingPrimitive])
+  const [movingPrimitivePoint, setMovingPrimitivePoint] = React.useState<boolean>(false);
+  const [currentEditingPoint, setCurrentEditingPoint] = React.useState<{
+    index: number;
+    multiPoints?: boolean;
+  } | null>(null);
+  const handleEditPointMouseDown = (point: IPoint) => {
+    if (!showingPrimitive) return;
+    setMovingPrimitivePoint(true);
+    const index = showingPrimitive.params.findIndex(param => param.type === 'point' && param.value.x === point.x && param.value.y === point.y);
+    if (index === -1) {
+      const multi_param = showingPrimitive.params.find(param => param.type === 'multi_points');
+      if (!multi_param) {
+        console.log('Multi points not found', showingPrimitive.params);
+        setMovingPrimitivePoint(false);
+        return;
+      }
+      else {
+        const multiPoints = multi_param.value as IPoint[];
+        const multiIndex = multiPoints.findIndex(p => p.x === point.x && p.y === point.y);
+        if (multiIndex === -1) {
+          console.log('Point not found', multiPoints);
+          setMovingPrimitivePoint(false);
+          return;
+        } else {
+          setCurrentEditingPoint({ index: multiIndex, multiPoints: true });
+        }
+      }
+    } else {
+      setCurrentEditingPoint({ index });
+    }
+  }
+  const handleEditPointMouseUp = () => {
+    setMovingPrimitivePoint(false);
+    const currentPrimitive = { ...showingPrimitive };
+    setCurrentEditingPoint(null);
+    // 发一个请求
+    client("/engine/modify_primitive", {
+      data: {
+        Primitive: {
+          [currentPrimitive.apiEndpoint || "unknown"]: {
+            type: currentPrimitive.type,
+            ...Object.fromEntries((currentPrimitive.params || []).map((param) => [param.name || 'unknown', param.value])),
+            algorithm: 0,
+          }
+        },
+        Index: currentPrimitive.index,
+      }
+    })
+  }
 
   return (<>
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
@@ -716,44 +788,96 @@ export default function App() {
           )
         }
       </div>
-      <button id="toolbar-control" onClick={() => {
-        if (disableToolbar) return;
-        setHideToolbar(!hideToolbar);
-      }}>
-        {disableToolbar ? '已禁用' : hideToolbar ? '展开' : '收起'}工具栏
+      <button
+        style={{ display: disableToolbar ? 'none' : undefined }}
+        id="toolbar-control"
+        onClick={() => {
+          if (disableToolbar) return;
+          setHideToolbar(!hideToolbar);
+        }}>
+        {hideToolbar ? '展开' : '收起'}工具栏
       </button>
     </div>
     {
-      ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : (currentDrawFunc.current.multiplePoints && clickedPoints.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPoints[0]) < 10) ? 'ending' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
-        .map((point, index) => {
-          return (
-            <div
-              className={`point ${point.type}`}
-              key={index}
-              style={{
-                left: point.x,
-                top: point.y
-              }}
-            >
-              <div className='point-item'>
-                <div className='point-circle'
-                  style={{
-                    backgroundColor: (point.type === 'sliding' || point.type === 'ending') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
-                  }}
-                />
-                <p className='point-text top'>
-                  {
-                    clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
-                      point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
-                  }
-                </p>
-                <p className='point-text'>
-                  ({point.x}, {point.y})
-                </p>
-              </div>
+      showingPrimitive && (
+        <div id="show-primitive" style={{ opacity: primitiveOpacity }}>
+          <div className='endpoint'>
+            {showingPrimitive.apiEndpoint}
+          </div>
+          {
+            showingPrimitive.params.map((param, index) => {
+              if (param.type === 'unknown') return null;
+              if (param.value === undefined) return null;
+              return (
+                <div className='param' key={index}>
+                  <div className='name'>{param.name}</div>
+                  <div className='value'>
+                    {
+                      param.type === 'point' ? `(${param.value.x}, ${param.value.y})` :
+                        param.type === 'multi_points' ? param.value.map((point: IPoint, index: number) => (
+                          <div key={index}>
+                            {`(${point.x}, ${point.y})`}
+                          </div>
+                        )) :
+                          param.type === 'func' ? JSON.stringify(param.value) :
+                            JSON.stringify(param.value)
+                    }
+                  </div>
+                </div>
+              )
+            })
+          }
+          <button>平移</button>
+          <button>旋转</button>
+          <button>缩放</button>
+        </div>
+      )
+    }
+    {
+      (!showingPrimitive
+        ?
+        ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : (currentDrawFunc.current.multiplePoints && clickedPoints.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPoints[0]) < 10) ? 'ending' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
+        :
+        [...showingPrimitive.params.map(param => {
+          if (param.value === undefined) return [];
+          if (param.type === 'multi_points') return param.value;
+          if (param.type !== 'point') return [];
+          return [param.value];
+        }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })), {
+          ...movingPrimitivePoint ? [] : { ...coordinate, type: 'view' }
+        }].filter(point => point.x && point.y)
+      ).map((point, index) => {
+        return (
+          <div
+            className={`point ${point.type}`}
+            key={index}
+            style={{
+              left: point.x,
+              top: point.y
+            }}
+          >
+            <div className='point-item'>
+              <div className='point-circle'
+                style={{
+                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : 'red'
+                }}
+                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : undefined}
+                onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : undefined}
+                onMouseMove={point.type === 'dragable' ? handleMouseMove : undefined}
+              />
+              <p className='point-text top'>
+                {
+                  (point.type === 'view' || point.type === 'dragable') ? '' : clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
+                    point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
+                }
+              </p>
+              <p className='point-text'>
+                {point.type === 'view' ? '' : `(${point.x}, ${point.y})`}
+              </p>
             </div>
-          )
-        })
+          </div>
+        )
+      })
     }
     <canvas
       width={0}
