@@ -827,9 +827,21 @@ export default function App() {
               )
             })
           }
-          <button>平移</button>
-          <button>旋转</button>
-          <button>缩放</button>
+          <div className='actions'>
+            <button>平移</button>
+            <button>旋转</button>
+            <button>缩放</button>
+            <button onClick={() => {
+              client("/engine/remove_primitive", {
+                data: {
+                  Index: showingPrimitive.index,
+                }
+              }).then(() => {
+                setShowingPrimitive(null);
+                fetchPrimitives()
+              });
+            }}>删除</button>
+          </div>
         </div>
       )
     }

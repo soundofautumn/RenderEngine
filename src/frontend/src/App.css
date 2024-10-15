@@ -274,4 +274,8 @@ select {
             flex: 1;
         }
     }
+    .actions {
+        display: flex;
+        flex-direction: column;
+    }
 }
