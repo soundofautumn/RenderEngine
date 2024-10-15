@@ -574,7 +574,7 @@ export default function App() {
         },
         Index: showingPrimitive?.index,
       }
-    })
+    }).then(fetchPrimitives);
   }
 
   return (<>
