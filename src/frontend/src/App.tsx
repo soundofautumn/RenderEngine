@@ -3,7 +3,7 @@ import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } fr
 import drawFuncs from './drawFuncs';
 
 import './App.css';
-import { IPoint } from './types';
+import { IDrawApiParam, IPoint, IPrimitive } from './types';
 import { randomEngineName } from './utils';
 
 function getHeightUnfold(dom: HTMLElement) {
@@ -39,12 +39,6 @@ export default function App() {
     if (!first.current) return;
     first.current = false;
 
-    // setInterval(() => {
-    //   client('/engine/get_primitives').then(r => {
-    //     console.log(r.data);
-    //   })
-    // }, 1000)
-
     const width = document.body.clientWidth;
     const height = document.body.clientHeight;
     slidingWindowRef.current = {
@@ -73,7 +67,8 @@ export default function App() {
           if (fpsRef.current === 0) {
             window.location.reload();
           }
-        }, 500)
+        }, 500);
+        fetchPrimitives();
         resolve(1);
       }).catch(e => {
         console.error(e);
@@ -162,7 +157,10 @@ export default function App() {
     loadingRef.current = true;
     setLoading(true);
     currentDrawFunc.current.draw({ pointers })
-      .then(() => drawingRef.current = true)
+      .then(() => {
+        drawingRef.current = true;
+        fetchPrimitives();
+      })
       .catch((e: string) => {
         console.error(e);
         loadingRef.current = false;
@@ -331,13 +329,79 @@ export default function App() {
   }
 
   const [hideToolbar, setHideToolbar] = React.useState(false);
+  const [disableToolbar, setDisableToolbar] = React.useState(false);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
   React.useEffect(() => {
-    if (hideToolbar) return;
+    if (hideToolbar || disableToolbar) return;
     setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 8);
-  }, [hideToolbar, penOptions, enableSlidingWindow])
+  }, [hideToolbar, disableToolbar, penOptions, enableSlidingWindow])
 
   const previewSlidingWindowTimeout = React.useRef<number | null>(null);
+
+  const [primitives, setPrimitives] = React.useState<IPrimitive[]>([]);
+  const [showingPrimitive, setShowingPrimitive] = React.useState<IPrimitive | null>(null);
+  const fetchPrimitives = () => {
+    client("/engine/get_primitives").then(r => {
+      const raw_primitives = r.data as { [apiEndpoint: string]: { [param: string]: object } }[];
+      console.log(raw_primitives);
+      const primitives = raw_primitives.map((raw_primitive, index) => {
+        const apiEndpoint = Object.keys(raw_primitive)[0];
+        const matchedDrawFuncs = drawFuncs.filter(df => df.drawFunc.apiEndpoint === apiEndpoint).map(df => ({
+          params: df.drawFunc.params,
+          names: df.drawFunc.params.map((param, index) => {
+            if (param.type === 'point')
+              return param.name || `p${index + 1}`;
+            else if (param.type === 'func' && param.func)
+              return param.name || `f${index + 1}`;
+            else if (param.type === 'multi_points')
+              return param.name || `mp${index + 1}`;
+            else return param.name || `u${index + 1}`;
+          })
+        })).sort((a, b) => {
+          const matchTimes = (df: {
+            params: IDrawApiParam[];
+            names: string[];
+          }) => df.names.filter(name => Object.keys(raw_primitive[apiEndpoint]).includes(name)).length;
+          return matchTimes(b) - matchTimes(a);
+        });
+        const matchedDrawFunc = matchedDrawFuncs.length > 0 ? matchedDrawFuncs[0] : null;
+        const params:
+          (IDrawApiParam & { value: object })[]
+          = matchedDrawFunc?.params.map((param, index) => {
+            const name = (() => {
+              if (param.type === 'point')
+                return param.name || `p${index + 1}`;
+              else if (param.type === 'func' && param.func)
+                return param.name || `f${index + 1}`;
+              else if (param.type === 'multi_points')
+                return param.name || `mp${index + 1}`;
+              else return param.name || `u${index + 1}`;
+            })();
+            return {
+              type: param.type,
+              name,
+              value: raw_primitive[apiEndpoint][name],
+            }
+          }) || []
+        return { apiEndpoint, params, ignore: matchedDrawFunc ? false : true, index };
+      });
+      console.log(primitives.filter(p => !p.ignore));
+      setPrimitives(primitives.filter(p => !p.ignore));
+    })
+  }
+  React.useEffect(() => {
+    document.getElementById('primitives-list')?.scrollTo({
+      top: document.getElementById('primitives-list')?.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [primitives])
+  React.useEffect(() => {
+    if (showingPrimitive === null) {
+      setDisableToolbar(false);
+    } else {
+      setDisableToolbar(true);
+    }
+  }, [showingPrimitive])
 
   return (<>
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
@@ -349,6 +413,28 @@ export default function App() {
         window.location.reload();
       }}>换</button>;
       FPS: {fps}{/*; {loading ? 'Loading...' : 'Ready.'}*/}.</div>
+    <div id="primitives">
+      <div className='title'>历史记录</div>
+      <div className='primitives' id="primitives-list">
+        {
+          primitives.map((primitive, index) => {
+            return (
+              <button key={index}
+                className={`primitive${showingPrimitive?.index === primitive.index ? ' showing' : ''}`}
+                onClick={() => {
+                  if (showingPrimitive?.index === primitive.index)
+                    setShowingPrimitive(null)
+                  else
+                    setShowingPrimitive(primitive)
+                }}
+              >
+                {primitive.apiEndpoint}
+              </button>
+            )
+          })
+        }
+      </div>
+    </div>
     <div id="slidingWindow">
       {
         ((enableSlidingWindow ? [
@@ -469,8 +555,8 @@ export default function App() {
     <div id="drawFuncs-wrapper">
       <div id="drawFuncs"
         style={{
-          height: (hideToolbar && toolbarHeight) ? 0 : toolbarHeight,
-          padding: hideToolbar ? '0 4px' : undefined,
+          height: ((hideToolbar || disableToolbar) && toolbarHeight) ? 0 : toolbarHeight,
+          padding: (hideToolbar || disableToolbar) ? '0 4px' : undefined,
         }}>
         {
           drawFuncs.map((drawFunc, index) => {
@@ -630,8 +716,11 @@ export default function App() {
           )
         }
       </div>
-      <button id="toolbar-control" onClick={() => setHideToolbar(!hideToolbar)}>
-        {hideToolbar ? '展开' : '收起'}工具栏
+      <button id="toolbar-control" onClick={() => {
+        if (disableToolbar) return;
+        setHideToolbar(!hideToolbar);
+      }}>
+        {disableToolbar ? '已禁用' : hideToolbar ? '展开' : '收起'}工具栏
       </button>
     </div>
     {

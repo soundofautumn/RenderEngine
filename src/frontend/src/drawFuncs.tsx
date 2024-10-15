@@ -1,25 +1,14 @@
 import { client } from "./client";
-import { IPoint } from "./types";
+import { IDrawApiParam, IDrawFuncParams, IPoint } from "./types";
 
-interface IDrawFuncParams {
-  pointers: IPoint[];
-  color?: string;
-  algorithm?: number;
-}
-
-interface IDrawApiParam {
-  type: 'point' | 'func' | 'multi_points';
-  name?: string;
-  func?: (...pointers: IPoint[]) => number | object;
-}
 
 class DrawFunc {
   public readonly requiredPointers: number;
   public readonly apiEndpoint: string;
   public readonly drawingMethod: 'click' | 'drag';
   public readonly multiplePoints: boolean = false;
+  public readonly params: IDrawApiParam[];
 
-  private readonly params: IDrawApiParam[];
   private readonly type: string | undefined;
 
   constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string, multiplePoints?: boolean }) {

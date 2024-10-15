@@ -210,3 +210,33 @@ select {
         }
     }
 }
+
+#primitives {
+    position: absolute;
+    top: 52px;
+    left: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.3);
+    padding: 5px;
+    border-radius: 5px;
+
+    .title {
+        width: 100%;
+        text-align: center;
+    }
+    .primitives {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        max-height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        .primitive {
+            width: 100%;
+        }
+        .primitive.showing {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+}
