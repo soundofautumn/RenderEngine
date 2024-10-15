@@ -360,7 +360,7 @@ export default function App() {
   const [primitives, setPrimitives] = React.useState<IPrimitive[]>([]);
   const [showingPrimitive, setShowingPrimitive] = React.useState<IPrimitive | null>(null);
   const fetchPrimitives = () => {
-    client("/engine/get_primitives").then(r => {
+    client("/engine/primitive/get_all").then(r => {
       const raw_primitives = r.data as { [apiEndpoint: string]: { [param: string]: object } }[];
       console.log(raw_primitives);
       const primitives = raw_primitives.map((raw_primitive, index) => {
@@ -461,7 +461,7 @@ export default function App() {
     const currentPrimitive = { ...showingPrimitive };
     setCurrentEditingPoint(null);
     // 发一个请求
-    client("/engine/modify_primitive", {
+    client("/engine/primitive/modify", {
       data: {
         Primitive: {
           [currentPrimitive.apiEndpoint || "unknown"]: {
@@ -832,7 +832,7 @@ export default function App() {
             <button>旋转</button>
             <button>缩放</button>
             <button onClick={() => {
-              client("/engine/remove_primitive", {
+              client("/engine/primitive/remove", {
                 data: {
                   Index: showingPrimitive.index,
                 }

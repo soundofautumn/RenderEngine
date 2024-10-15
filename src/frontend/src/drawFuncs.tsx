@@ -34,7 +34,7 @@ class DrawFunc {
       if (pointers.length < this.requiredPointers) {
         reject("Not enough pointers");
       }
-      client("/engine/draw", {
+      client("/engine/primitive/push_back", {
         data: {
           [this.apiEndpoint]: {
             type: this.type,
