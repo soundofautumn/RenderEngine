@@ -44,3 +44,5 @@ export interface IShadowBounder {
     top_bounder: number;
     bottom_bounder: number;
 }
+
+export const BOUNDER_OFFSET = 10;

@@ -3,7 +3,7 @@ import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } fr
 import drawFuncs from './drawFuncs';
 
 import './App.css';
-import { IDrawApiParam, IPoint, IPrimitive, IShadowBounder } from './types';
+import { BOUNDER_OFFSET, IDrawApiParam, IPoint, IPrimitive, IShadowBounder } from './types';
 import { randomEngineName } from './utils';
 
 function getHeightUnfold(dom: HTMLElement) {
@@ -130,7 +130,58 @@ export default function App() {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
 
-    if (movingRotatePoint && rotateStartPoint) {
+    if (movingScalePoint && originScalePoint) {
+      const center_point = shadowVertex?.find(point => point.type === 'center');
+      if (!center_point) {
+        console.log('Center point not found');
+        return
+      };
+      let rawOffsetX = coordinate.x - center_point.x;
+      let rawOffsetY = coordinate.y - center_point.y;
+      const bounderPointType = getBounderPointType(originScalePoint);
+      if (bounderPointType === "unknown") {
+        console.log('Bounder point type unknown', originScalePoint);
+        return
+      };
+      if (bounderPointType === "top-left") {
+        // rawOffsetX = rawOffsetX;
+        // rawOffsetY = rawOffsetY;
+      } else if (bounderPointType === "top-right") {
+        rawOffsetX = -rawOffsetX;
+        // rawOffsetY = rawOffsetY;
+      } else if (bounderPointType === "bottom-right") {
+        rawOffsetX = -rawOffsetX;
+        rawOffsetY = -rawOffsetY;
+      } else if (bounderPointType === "bottom-left") {
+        // rawOffsetX = rawOffsetX;
+        rawOffsetY = -rawOffsetY;
+      }
+      const offsetX = rawOffsetX;
+      const offsetY = rawOffsetY;
+      // 以左上边界为参考点缩放
+      const new_bounder_points = {
+        top_left: {
+          x: center_point.x + offsetX,
+          y: center_point.y + offsetY,
+        },
+        bottom_right: {
+          x: center_point.x - offsetX,
+          y: center_point.y - offsetY,
+        },
+        bottom_left: {
+          x: center_point.x + offsetX,
+          y: center_point.y - offsetY,
+        },
+        top_right: {
+          x: center_point.x - offsetX,
+          y: center_point.y + offsetY,
+        },
+      }
+      setShadowVertex([
+        ...shadowVertex!.filter(point => point.type !== 'bounder'),
+        ...Object.values(new_bounder_points).map(point => ({ ...point, type: 'bounder' })) as IPoint[],
+      ])
+    } else if (movingRotatePoint && rotateStartPoint) {
       const deltaX = coordinate.x - rotateStartPoint.x;
       const deltaY = coordinate.y - rotateStartPoint.y;
       const angleInRadians = Math.atan2(deltaY, deltaX);
@@ -531,14 +582,14 @@ export default function App() {
     const bottom_bounder: number = Math.max(...all_pointers.map(p => p.y));
     console.log('bounder', left_bounder, right_bounder, top_bounder, bottom_bounder);
 
-    if (showingPrimitive.apiEndpoint !== 'Circle' && showingPrimitive.apiEndpoint !== 'Fill') {
+    if (showingPrimitive.apiEndpoint !== 'Circle' && showingPrimitive.apiEndpoint !== 'Fill' && showingPrimitive.apiEndpoint !== 'Transform') {
       setShadowBounder({
         left_bounder,
         right_bounder,
         top_bounder,
         bottom_bounder,
       })
-      const offset = 10;
+      const offset = BOUNDER_OFFSET;
       setShadowVertex([
         { x: left_bounder - offset, y: top_bounder - offset, type: 'bounder' },
         { x: right_bounder + offset, y: top_bounder - offset, type: 'bounder' },
@@ -605,6 +656,7 @@ export default function App() {
     setMovingCenterPoint(true);
   }
   const handleCenterMouseUp = () => {
+    handleRotateMouseUp();
     if (!movingCenterPoint) return;
     setMovingCenterPoint(false);
   }
@@ -641,6 +693,54 @@ export default function App() {
     }
     setRotateStartPoint(null);
     setMovingRotatePoint(false);
+  }
+
+  const [movingScalePoint, setMovingScalePoint] = React.useState<boolean>(false);
+  const [originScalePoint, setOriginScalePoint] = React.useState<IPoint | null>(null);
+  const getBounderPointType = (point: IPoint) => {
+    if (!shadowBounder) return 'unknown';
+    const offset = BOUNDER_OFFSET;
+    console.log(shadowBounder)
+    if (point.x + offset === shadowBounder.left_bounder && point.y + offset === shadowBounder.top_bounder) return 'top-left';
+    if (point.x - offset === shadowBounder.right_bounder && point.y + offset === shadowBounder.top_bounder) return 'top-right';
+    if (point.x - offset === shadowBounder.right_bounder && point.y - offset === shadowBounder.bottom_bounder) return 'bottom-right';
+    if (point.x + offset === shadowBounder.left_bounder && point.y - offset === shadowBounder.bottom_bounder) return 'bottom-left';
+    return 'unknown';
+  }
+  const handleScalePointMouseDown = (point: IPoint) => {
+    setMovingScalePoint(true);
+    setOriginScalePoint(point);
+  }
+  const handleScalePointMouseUp = () => {
+    handleRotateMouseUp();
+    if (!movingScalePoint || !originScalePoint) return;
+    const center_point = shadowVertex?.find(point => point.type === 'center');
+    if (!center_point) return;
+    const offsetX = coordinate.x - originScalePoint.x;
+    const offsetY = coordinate.y - originScalePoint.y;
+    setMovingScalePoint(false);
+    setOriginScalePoint(null);
+    client('/engine/primitive/insert', {
+      data: {
+        Primitive: {
+          Transform: {
+            Scale: {
+              scale: {
+                x: offsetX,
+                y: offsetY,
+              },
+              center: {
+                x: center_point.x,
+                y: center_point.y,
+              }
+            }
+          }
+        },
+        Index: showingPrimitive?.index,
+      }
+    }).then(() => {
+      fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+    })
   }
 
   return (<>
@@ -1074,8 +1174,8 @@ export default function App() {
                 style={{
                   backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
                 }}
-                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : undefined}
-                onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : point.type === 'center' ? handleCenterMouseUp : point.type === 'rotate' ? handleRotateMouseUp : handleRotateMouseUp}
+                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : point.type === 'bounder' ? () => handleScalePointMouseDown(point) : () => { }}
+                onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : point.type === 'center' ? handleCenterMouseUp : point.type === 'rotate' ? handleRotateMouseUp : point.type === 'bounder' ? handleScalePointMouseUp : handleRotateMouseUp}
                 onMouseMove={handleMouseMove}
               />
               <p className='point-text top'>
