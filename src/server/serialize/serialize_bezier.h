@@ -31,7 +31,11 @@ inline RenderCore::BsplineCurve deserialize_bspline_curve(const boost::json::obj
         curve.control_points.push_back(deserialize_point(point.as_object()));
     }
     for (const auto &knot : obj.at("knots").as_array()) {
-        curve.knots.push_back(knot.as_double());
+        if (knot.is_double())
+            curve.knots.push_back(knot.as_double());
+        else {
+            curve.knots.push_back(knot.as_int64());
+        }
     }
     return curve;
 }
