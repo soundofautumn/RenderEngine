@@ -45,9 +45,9 @@ void test(std::function<void()> func, const std::string &filename) {
     render_and_save(filename);
 }
 
-#define TEST(func) \
+#define TEST(func)                                                   \
     std::cout << "========= " << #func << " =========" << std::endl; \
-    test(func, #func ".bmp"); \
+    test(func, #func ".bmp");                                        \
     std::cout << std::endl;
 
 int main() {
