@@ -259,6 +259,29 @@ drawFuncs.push({
 })
 
 drawFuncs.push({
+  name: 'B样条曲线',
+  drawFunc: new DrawFunc({
+    params: [
+      {
+        type: 'multi_points',
+        name: 'control_points',
+      },
+      {
+        type: 'func',
+        name: 'knots',
+        func: (...control_points) => {
+          return control_points.map((_, i) => i);
+        }
+      }
+    ],
+    requiredPointers: 3,
+    apiEndpoint: 'BsplineCurve',
+    drawingMethod: 'click',
+    multiplePoints: true,
+  }),
+})
+
+drawFuncs.push({
   name: '种子填充',
   drawFunc: new DrawFunc({
     params: [
