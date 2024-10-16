@@ -43,27 +43,29 @@ inline RenderCore::Primitive deserialize_primitive(const boost::json::object &pr
 }
 
 inline boost::json::object serialize_primitive(const RenderCore::Primitive &primitive) {
-    using namespace RenderCore;
-    if (std::holds_alternative<Line>(primitive)) {
-        return {{"Line", serialize_line(std::get<Line>(primitive))}};
-    } else if (std::holds_alternative<Circle>(primitive)) {
-        return {{"Circle", serialize_circle(std::get<Circle>(primitive))}};
-    } else if (std::holds_alternative<Arc>(primitive)) {
-        return {{"Arc", serialize_arc(std::get<Arc>(primitive))}};
-    } else if (std::holds_alternative<PenOptions>(primitive)) {
-        return {{"PenOptions", serialize_pen_options(std::get<PenOptions>(primitive))}};
-    } else if (std::holds_alternative<Polygon>(primitive)) {
-        return {{"Polygon", serialize_polygon(std::get<Polygon>(primitive))}};
-    } else if (std::holds_alternative<Rectangle>(primitive)) {
-        return {{"Rectangle", serialize_rectangle(std::get<Rectangle>(primitive))}};
-    } else if (std::holds_alternative<Fill>(primitive)) {
-        return {{"Fill", serialize_fill(std::get<Fill>(primitive))}};
-    } else if (std::holds_alternative<Transform>(primitive)) {
-        return {{"Transform", serialize_transform(std::get<Transform>(primitive))}};
-    } else if (std::holds_alternative<BezierCurve>(primitive)) {
-        return {{"BezierCurve", serialize_bezier_curve(std::get<BezierCurve>(primitive))}};
-    } else if (std::holds_alternative<BsplineCurve>(primitive)) {
-        return {{"BsplineCurve", serialize_bspline_curve(std::get<BsplineCurve>(primitive))}};
+
+    if (std::holds_alternative<RenderCore::Line>(primitive)) {
+        return {{"Line", serialize_line(std::get<RenderCore::Line>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Circle>(primitive)) {
+        return {{"Circle", serialize_circle(std::get<RenderCore::Circle>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Arc>(primitive)) {
+        return {{"Arc", serialize_arc(std::get<RenderCore::Arc>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::PenOptions>(primitive)) {
+        return {{"PenOptions", serialize_pen_options(std::get<RenderCore::PenOptions>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Polygon>(primitive)) {
+        return {{"Polygon", serialize_polygon(std::get<RenderCore::Polygon>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Rectangle>(primitive)) {
+        return {{"Rectangle", serialize_rectangle(std::get<RenderCore::Rectangle>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Fill>(primitive)) {
+        return {{"Fill", serialize_fill(std::get<RenderCore::Fill>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::Transform>(primitive)) {
+        return {{"Transform", serialize_transform(std::get<RenderCore::Transform>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::BezierCurve>(primitive)) {
+        return {{"BezierCurve",
+            serialize_bezier_curve(std::get<RenderCore::BezierCurve>(primitive))}};
+    } else if (std::holds_alternative<RenderCore::BsplineCurve>(primitive)) {
+        return {{"BsplineCurve",
+            serialize_bspline_curve(std::get<RenderCore::BsplineCurve>(primitive))}};
     }
     return {};
 }
