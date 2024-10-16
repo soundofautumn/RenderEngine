@@ -190,10 +190,23 @@ export default function App() {
         bottom_bounder: Math.max(transformedBounder.top_bounder, transformedBounder.bottom_bounder) - BOUNDER_OFFSET,
       })
     } else if (movingRotatePoint && rotateStartPoint) {
-      const deltaX = coordinate.x - rotateStartPoint.x;
-      const deltaY = coordinate.y - rotateStartPoint.y;
-      const angleInRadians = Math.atan2(deltaY, deltaX);
-      setAngle(angleInRadians);
+      const calculateAngleBetweenPoints = (center: IPoint, p1: IPoint, p2: IPoint): number => {
+        const v1 = { x: p1.x - center.x, y: p1.y - center.y };
+        const v2 = { x: p2.x - center.x, y: p2.y - center.y };
+        const dotProduct = v1.x * v2.x + v1.y * v2.y;
+        const magnitudeV1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+        const magnitudeV2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+        const cosTheta = dotProduct / (magnitudeV1 * magnitudeV2);
+        let angleInRadians = Math.acos(cosTheta);
+        const crossProduct = v1.x * v2.y - v1.y * v2.x;
+        if (crossProduct < 0) {
+          angleInRadians = -angleInRadians;
+        }
+        return angleInRadians;
+      }
+      const center_point = shadowVertex?.find(point => point.type === 'center');
+      if (!center_point) return;
+      setAngle(calculateAngleBetweenPoints(center_point, rotateStartPoint, coordinate));
     } else if (showingPrimitive && movingCenterPoint && shadowVertex) {
       const csv = [...shadowVertex];
       csv.find(point => point.type === 'center')!.x = coordinate.x;
