@@ -731,23 +731,46 @@ export default function App() {
     setTranslatingPrimitive(false);
     setOriginShadowBounder(null);
     setOriginShadowVertex(null);
-    client('/engine/primitive/insert', {
-      data: {
-        Primitive: {
-          Transform: {
-            Translate: {
-              offset: {
-                x: offsetX,
-                y: offsetY,
+    if (showingPrimitive)
+      client('/engine/primitive/insert', {
+        data: {
+          Primitive: {
+            Transform: {
+              Translate: {
+                offset: {
+                  x: offsetX,
+                  y: offsetY,
+                }
               }
             }
+          },
+          Index: showingPrimitive?.index,
+        }
+      }).then(() => {
+        fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+      });
+    else if (showingPrimitives.length > 0) {
+      QueueDo(showingPrimitives.sort((a, b) => b.index - a.index).map(primitive => () => new Promise((resolve) => {
+        client('/engine/primitive/insert', {
+          data: {
+            Primitive: {
+              Transform: {
+                Translate: {
+                  offset: {
+                    x: offsetX,
+                    y: offsetY,
+                  }
+                }
+              }
+            },
+            Index: primitive.index,
           }
-        },
-        Index: showingPrimitive?.index,
-      }
-    }).then(() => {
-      fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
-    });
+        }).then(() => resolve());
+      }))).then(() => {
+        setShowingPrimitives([]);
+        fetchPrimitives();
+      });
+    }
   }
 
   const [movingCenterPoint, setMovingCenterPoint] = React.useState<boolean>(false);
@@ -771,24 +794,47 @@ export default function App() {
     if (movingRotatePoint && rotateStartPoint) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) return;
-      client('/engine/primitive/insert', {
-        data: {
-          Primitive: {
-            Transform: {
-              Rotate: {
-                angle,
-                center: {
-                  x: center_point.x,
-                  y: center_point.y,
+      if (showingPrimitive)
+        client('/engine/primitive/insert', {
+          data: {
+            Primitive: {
+              Transform: {
+                Rotate: {
+                  angle,
+                  center: {
+                    x: center_point.x,
+                    y: center_point.y,
+                  }
                 }
               }
+            },
+            Index: showingPrimitive?.index,
+          }
+        }).then(() => {
+          fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+        });
+      else if (showingPrimitives.length > 0)
+        QueueDo(showingPrimitives.sort((a, b) => b.index - a.index).map(primitive => () => new Promise((resolve) => {
+          client('/engine/primitive/insert', {
+            data: {
+              Primitive: {
+                Transform: {
+                  Rotate: {
+                    angle,
+                    center: {
+                      x: center_point.x,
+                      y: center_point.y,
+                    }
+                  }
+                }
+              },
+              Index: primitive.index,
             }
-          },
-          Index: showingPrimitive?.index,
-        }
-      }).then(() => {
-        fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
-      });
+          }).then(() => resolve());
+        }))).then(() => {
+          setShowingPrimitives([]);
+          fetchPrimitives();
+        })
     }
     setRotateStartPoint(null);
     setMovingRotatePoint(false);
@@ -825,27 +871,53 @@ export default function App() {
     setMovingScalePoint(false);
     setOriginScalePoint(null);
     setOriginShadowBounder(null);
-    client('/engine/primitive/insert', {
-      data: {
-        Primitive: {
-          Transform: {
-            Scale: {
-              scale: {
-                x: scalex,
-                y: scaleY,
-              },
-              center: {
-                x: center_point.x,
-                y: center_point.y,
+    if (showingPrimitive)
+      client('/engine/primitive/insert', {
+        data: {
+          Primitive: {
+            Transform: {
+              Scale: {
+                scale: {
+                  x: scalex,
+                  y: scaleY,
+                },
+                center: {
+                  x: center_point.x,
+                  y: center_point.y,
+                }
               }
             }
+          },
+          Index: showingPrimitive?.index,
+        }
+      }).then(() => {
+        fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
+      })
+    else if (showingPrimitives.length > 0)
+      QueueDo(showingPrimitives.sort((a, b) => b.index - a.index).map(primitive => () => new Promise((resolve) => {
+        client('/engine/primitive/insert', {
+          data: {
+            Primitive: {
+              Transform: {
+                Scale: {
+                  scale: {
+                    x: scalex,
+                    y: scaleY,
+                  },
+                  center: {
+                    x: center_point.x,
+                    y: center_point.y,
+                  }
+                }
+              }
+            },
+            Index: primitive.index,
           }
-        },
-        Index: showingPrimitive?.index,
-      }
-    }).then(() => {
-      fetchPrimitives(showingPrimitive?.index ? (showingPrimitive?.index + 1) : undefined);
-    })
+        }).then(() => resolve());
+      }))).then(() => {
+        setShowingPrimitives([]);
+        fetchPrimitives();
+      })
   }
 
   const [slidingWindowMode, setSlidingWindowMode] = React.useState<'Rectangle' | 'Polygon'>('Rectangle');
