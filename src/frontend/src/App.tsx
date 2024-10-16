@@ -19,6 +19,20 @@ function getHeightUnfold(dom: HTMLElement) {
   return height;
 }
 
+function QueueDo(funcs: Array<() => Promise<void>>): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    for (const func of funcs) {
+      try {
+        await func();
+      } catch (e) {
+        reject(e);
+        return;
+      }
+    }
+    resolve(void 0);
+  })
+}
+
 function getPointDistance(p1: IPoint, p2: IPoint) {
   return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
 }
@@ -207,7 +221,7 @@ export default function App() {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) return;
       setAngle(calculateAngleBetweenPoints(center_point, rotateStartPoint, coordinate));
-    } else if (showingPrimitive && movingCenterPoint && shadowVertex) {
+    } else if ((showingPrimitive || showingPrimitives.length > 0) && movingCenterPoint && shadowVertex) {
       const csv = [...shadowVertex];
       csv.find(point => point.type === 'center')!.x = coordinate.x;
       csv.find(point => point.type === 'center')!.y = coordinate.y;
@@ -472,6 +486,7 @@ export default function App() {
 
   const [primitives, setPrimitives] = React.useState<IPrimitive[]>([]);
   const [showingPrimitive, setShowingPrimitive] = React.useState<IPrimitive | null>(null);
+  const [showingPrimitives, setShowingPrimitives] = React.useState<IPrimitive[]>([]);
   const fetchPrimitives = (update_index?: number) => {
     client("/engine/primitive/get_all").then(r => {
       const raw_primitives = r.data as { [apiEndpoint: string]: { [param: string]: object } }[];
@@ -539,14 +554,14 @@ export default function App() {
   }, [primitives])
   const [primitiveOpacity, setPrimitiveOpacity] = React.useState(0);
   React.useEffect(() => {
-    if (showingPrimitive === null) {
+    if (showingPrimitive === null && showingPrimitives.length === 0) {
       setDisableToolbar(false);
       setPrimitiveOpacity(0);
     } else {
       setDisableToolbar(true);
       setPrimitiveOpacity(1);
     }
-  }, [showingPrimitive])
+  }, [showingPrimitive, showingPrimitives])
   const [movingPrimitivePoint, setMovingPrimitivePoint] = React.useState<boolean>(false);
   const [currentEditingPoint, setCurrentEditingPoint] = React.useState<{
     index: number;
@@ -600,6 +615,7 @@ export default function App() {
   const [shadowBounder, setShadowBounder] = React.useState<IShadowBounder | null>(null);
   const [shadowVertex, setShadowVertex] = React.useState<IPoint[] | null>([]);
   React.useEffect(() => {
+    if (showingPrimitives.length !== 0) return;
     if (!showingPrimitive) {
       setShadowBounder(null);
       setShadowVertex(null);
@@ -649,7 +665,53 @@ export default function App() {
       setShadowBounder(null);
       setShadowVertex(null);
     }
-  }, [showingPrimitive])
+  }, [showingPrimitive, showingPrimitives])
+  React.useEffect(() => {
+    if (showingPrimitive) return;
+    if (showingPrimitives.length === 0) {
+      setShadowBounder(null);
+      setShadowVertex(null);
+      return;
+    }
+    const all_pointers: IPoint[] = showingPrimitives.map(primitive => primitive.params.map(param => (param.type === 'point' && param.value) ? ({ ...param.value, type: 'bounder' }) : undefined).filter(p => !!p) as IPoint[]).flat();
+    const param_multi_points = showingPrimitives.map(primitive => primitive.params.find(param => param.type === 'multi_points')).filter(p => !!p);
+    if (param_multi_points.length > 0)
+      all_pointers.push(...param_multi_points.map(param => (param.value as IPoint[]).map(point => ({ ...point, type: 'bounder' }) as IPoint)).flat());
+    console.log('all_pointers', all_pointers);
+
+    const left_bounder: number = Math.min(...all_pointers.map(p => p.x));
+    const right_bounder: number = Math.max(...all_pointers.map(p => p.x));
+    const top_bounder: number = Math.min(...all_pointers.map(p => p.y));
+    const bottom_bounder: number = Math.max(...all_pointers.map(p => p.y));
+    console.log('bounder', left_bounder, right_bounder, top_bounder, bottom_bounder);
+
+    const average_x = Math.floor(all_pointers.reduce((sum, p) => sum + p.x, 0) / all_pointers.length);
+    const average_y = Math.floor(all_pointers.reduce((sum, p) => sum + p.y, 0) / all_pointers.length);
+
+    setShadowBounder({
+      left_bounder,
+      right_bounder,
+      top_bounder,
+      bottom_bounder,
+    })
+    const offset = BOUNDER_OFFSET;
+    setShadowVertex([
+      { x: left_bounder - offset, y: top_bounder - offset, type: 'bounder' },
+      { x: right_bounder + offset, y: top_bounder - offset, type: 'bounder' },
+      { x: right_bounder + offset, y: bottom_bounder + offset, type: 'bounder' },
+      { x: left_bounder - offset, y: bottom_bounder + offset, type: 'bounder' },
+      {
+        x: (left_bounder + right_bounder) / 2,
+        y: top_bounder - 2 * offset,
+        type: 'rotate',
+      },
+      {
+        x: average_x,
+        y: average_y,
+        type: 'center',
+      }
+    ])
+  }, [showingPrimitive, showingPrimitives])
 
   const [translatingPrimitive, setTranslatingPrimitive] = React.useState<boolean>(false);
   const [originShadowBounder, setOriginShadowBounder] = React.useState<IShadowBounder | null>(null)
@@ -690,7 +752,6 @@ export default function App() {
 
   const [movingCenterPoint, setMovingCenterPoint] = React.useState<boolean>(false);
   const handleCenterMouseDown = () => {
-    if (!showingPrimitive) return;
     setMovingCenterPoint(true);
   }
   const handleCenterMouseUp = () => {
@@ -846,12 +907,30 @@ export default function App() {
           primitives.map((primitive, index) => {
             return (
               <button key={index}
-                className={`primitive${showingPrimitive?.index === primitive.index ? ' showing' : ''}`}
-                onClick={() => {
-                  if (showingPrimitive?.index === primitive.index)
-                    setShowingPrimitive(null)
-                  else
-                    setShowingPrimitive(primitive)
+                className={`primitive${(showingPrimitive?.index === primitive.index || showingPrimitives.find(i => i.index === primitive.index)) ? ' showing' : ''}`}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  if (!e.metaKey && !e.ctrlKey) {
+                    setShowingPrimitives([]);
+                    if (showingPrimitive?.index === primitive.index)
+                      setShowingPrimitive(null)
+                    else
+                      setShowingPrimitive(primitive)
+                  }
+                  else {
+                    // 多选的逻辑
+                    console.log('Ctrl clicked');
+                    const oldShowingPrimitive = showingPrimitive;
+                    const currentPrimitives = [...showingPrimitives];
+                    if (oldShowingPrimitive) {
+                      setShowingPrimitive(null)
+                      currentPrimitives.push(oldShowingPrimitive);
+                    }
+                    if (showingPrimitives.find(p => p.index === primitive.index)) {
+                      setShowingPrimitives(currentPrimitives.filter(p => p.index !== primitive.index));
+                    } else {
+                      setShowingPrimitives([...currentPrimitives, primitive]);
+                    }
+                  }
                 }}
               >
                 {primitive.apiEndpoint}
@@ -1263,20 +1342,74 @@ export default function App() {
       )
     }
     {
-      (!showingPrimitive
-        ?
-        ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : (currentDrawFunc.current.multiplePoints && clickedPoints.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPoints[0]) < 10) ? 'ending' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
-        :
-        [...showingPrimitive.params.map(param => {
-          if (param.value === undefined) return [];
-          if (param.type === 'multi_points') return param.value;
-          if (param.type !== 'point') return [];
-          return [param.value];
-        }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })),
-        ...shadowVertex ? shadowVertex : [],
-        {
-          ...(movingPrimitivePoint || movingCenterPoint || movingScalePoint) ? [] : { ...coordinate, type: 'view' }
-        }].filter(point => point.x && point.y) as IPoint[]
+      (showingPrimitives.length > 0) && (
+        <div id="show-primitive" style={{ opacity: primitiveOpacity }}>
+          <div className='endpoint'>
+            多个选中的图元
+          </div>
+          {
+            showingPrimitives.map((primitive, index) => {
+              return (
+                <div key={index} className='param'>
+                  <div className='name'>{primitive.apiEndpoint}</div>
+                  <div className='value'>
+                    {
+                      primitive.params.map((param, index) => {
+                        if (param.value === undefined) return null;
+                        return (
+                          <div key={index}>
+                            {param.name}: {JSON.stringify(param.value)}
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              )
+            })
+          }
+
+          <div className='actions'>
+            <button onClick={() => {
+              QueueDo(showingPrimitives.sort((a, b) => b.index - a.index).map(primitive => () => {
+                return new Promise((resolve, reject) => {
+                  client("/engine/primitive/remove", {
+                    data: {
+                      Index: primitive.index,
+                    }
+                  }).then(() => {
+                    resolve();
+                  }).catch(reject);
+                })
+              })).then(() => {
+                setShowingPrimitives([]);
+                fetchPrimitives()
+              });
+            }}>删除全部</button>
+          </div>
+        </div>
+      )
+    }
+    {
+      (
+        showingPrimitives.length !== 0 ? [
+          ...shadowVertex ? shadowVertex : [],
+          ...(movingPrimitivePoint || movingCenterPoint || movingScalePoint) ? [] : [{ ...coordinate, type: 'view' }]
+        ].filter(point => point.x && point.y) as IPoint[] :
+          !showingPrimitive
+            ?
+            ([...clickedPoints, { ...slidingWindowMoving ? [] : coordinate, type: clickingSlidingWindowPoints ? 'sliding' : dragging ? 'drag' : (currentDrawFunc.current.multiplePoints && clickedPoints.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPoints[0]) < 10) ? 'ending' : 'current' }] as IPoint[]).filter(point => point.x && point.y)
+            :
+            [...showingPrimitive.params.map(param => {
+              if (param.value === undefined) return [];
+              if (param.type === 'multi_points') return param.value;
+              if (param.type !== 'point') return [];
+              return [param.value];
+            }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })),
+            ...shadowVertex ? shadowVertex : [],
+            {
+              ...(movingPrimitivePoint || movingCenterPoint || movingScalePoint) ? [] : { ...coordinate, type: 'view' }
+            }].filter(point => point.x && point.y) as IPoint[]
       ).map((point, index) => {
         return (
           <div
