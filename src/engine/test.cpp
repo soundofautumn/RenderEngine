@@ -128,7 +128,10 @@ void lab_3() {
 void lab_4() {
     engine.set_pen_options({.color = Colors::Yellow});
     // 贝塞尔曲线绘制
-    engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
+    // engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
+    // b样条曲线绘制
+    engine.add_primitive(make_bspline_curve({{100, 400}, {200, 500}, {300, 400}, {400, 500}},
+                                           {0, 0, 0, 1, 2, 3, 3, 3}));
 }
 
 void ex_3() {
