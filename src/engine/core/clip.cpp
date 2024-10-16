@@ -269,9 +269,9 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
 }
 
 enum class Orientation {
-    Clockwise,
-    CounterClockwise,
-    Collinear,
+    Clockwise,         // 顺时针
+    CounterClockwise,  // 逆时针
+    Collinear,         // 共线
 };
 
 Orientation polygon_orientation(const Polygon &polygon) {
