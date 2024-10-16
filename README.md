@@ -65,18 +65,14 @@ cp CMakePresets.default.json CMakePresets.json
 3. Build Core and Server
 
 ```bash
-# Create build directory
-mkdir build
-cd build
-
-# Configure CMake
-cmake --preset=default ..
+# Configure
+cmake -S . -B build --preset=default
 
 # Build target files
-cmake --build .
+cmake --build build
 
 # Run the server
-./RenderEngineServer
+cd build && ./RenderEngineServer
 ```
 
 4. Build Frontend

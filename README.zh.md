@@ -64,18 +64,14 @@ cp CMakePresets.default.json CMakePresets.json
 3. 构建核心和服务器
 
 ```bash
-# 创建构建目录
-mkdir build
-cd build
+# 配置
+cmake -S . -B build --preset=default
 
-# 配置 CMake
-cmake --preset=default ..
-
-# 构建
-cmake --build .
+# 构建目标文件
+cmake --build build
 
 # 运行服务器
-./RenderEngineServer
+cd build && ./RenderEngineServer
 ```
 
 4. 构建前端
