@@ -306,5 +306,6 @@ void RenderEngine::polygon_clip(const Polygon &window) {
                 continue;
             }
         }
+        ++it;
     }
 }

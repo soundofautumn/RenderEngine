@@ -115,6 +115,9 @@ void lab_2() {
     engine.add_primitive(make_line({0, 300}, {799, 300}));
     // 矩形裁剪
     engine.set_global_options({.clip = {true, make_rectangle({100, 100}, {700, 500})}});
+    // 多边形裁剪
+    // engine.set_global_options({.clip = {true, make_polygon({})}});
+    engine.set_global_options({.clip = {true, make_polygon({{300, 100}, {400, 100}, {350, 200}})}});
 }
 
 void lab_3() {
@@ -130,8 +133,8 @@ void lab_4() {
     // 贝塞尔曲线绘制
     engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
     // b样条曲线绘制
-    engine.add_primitive(make_bspline_curve({{100, 400}, {200, 500}, {300, 400}, {400, 500}},
-                                           {0, 0, 0, 1, 2, 3, 3, 3}));
+    engine.add_primitive(make_bspline_curve(
+        {{100, 400}, {200, 500}, {300, 400}, {400, 500}}, {0, 0, 0, 1, 2, 3, 3, 3}));
 }
 
 void ex_3() {
