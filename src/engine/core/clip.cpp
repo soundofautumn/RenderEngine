@@ -268,7 +268,37 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
     return !polygon.empty();  // 如果裁剪后多边形非空，返回 true
 }
 
+enum class Orientation {
+    Clockwise,
+    CounterClockwise,
+    Collinear,
+};
+
+Orientation polygon_orientation(const Polygon &polygon) {
+    if (polygon.size() < 3) {
+        return Orientation::Collinear;
+    }
+    float sum = 0;
+    for (size_t i = 0; i < polygon.size(); i++) {
+        const auto &p1 = polygon[i];
+        const auto &p2 = polygon[(i + 1) % polygon.size()];
+        sum += (p2.x - p1.x) * (p2.y + p1.y);
+    }
+    if (sum > 0) {
+        return Orientation::CounterClockwise;
+    } else if (sum < 0) {
+        return Orientation::Clockwise;
+    } else {
+        return Orientation::Collinear;
+    }
+}
+
 void RenderEngine::polygon_clip(const Polygon &window) {
+    // 要把裁剪窗口的多边形点的顺序改成顺时针
+    Polygon new_window = window;
+    if (polygon_orientation(window) == Orientation::CounterClockwise) {
+        std::reverse(new_window.begin(), new_window.end());
+    }
     auto it = render_primitives_.begin();
     while (it != render_primitives_.end()) {
         const auto &primitive = *it;
@@ -276,7 +306,7 @@ void RenderEngine::polygon_clip(const Polygon &window) {
             auto &line = std::get<Line>(primitive);
             Polygon new_line = {line.p1, line.p2};
             bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(window, new_line);
+            should_draw = clip_sutherland_hodgman(new_window, new_line);
             if (should_draw) {
                 *it = Line{new_line[0], new_line[1]};
             } else {
@@ -287,7 +317,7 @@ void RenderEngine::polygon_clip(const Polygon &window) {
             auto &rectangle = std::get<Rectangle>(primitive);
             Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
             bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(window, new_polygon);
+            should_draw = clip_sutherland_hodgman(new_window, new_polygon);
             if (should_draw) {
                 *it = new_polygon;
             } else {
@@ -298,7 +328,7 @@ void RenderEngine::polygon_clip(const Polygon &window) {
             auto &polygon = std::get<Polygon>(primitive);
             Polygon new_polygon = polygon;
             bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(window, new_polygon);
+            should_draw = clip_sutherland_hodgman(new_window, new_polygon);
             if (should_draw) {
                 *it = new_polygon;
             } else {
