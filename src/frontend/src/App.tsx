@@ -272,6 +272,7 @@ export default function App() {
       slidingWindowPolygonPointsRef.current = pointers;
       setSlidingWindowPolygonPoints(pointers);
       handleSlidingWindowChanged();
+      return;
     }
     loadingRef.current = true;
     setLoading(true);
