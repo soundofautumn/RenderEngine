@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <numbers>
+#include <ostream>
 #include <vector>
 
 #include "color.hpp"
@@ -161,6 +162,75 @@ void ex_3() {
     std::cout << p2.xy() << std::endl;
 }
 
+// 将float转换为分数
+void floatToFraction(float value, int &numerator, int &denominator) {
+    std::function<int(int, int)> gcd = [&](int a, int b) -> int {
+        return b == 0 ? a : gcd(b, a % b);
+    };
+
+    const float epsilon = 1e-6;  // 精度
+    int sign = (value < 0) ? -1 : 1;
+    value = fabs(value);
+
+    denominator = 1;
+    while (fabs(value * denominator - round(value * denominator)) > epsilon) {
+        denominator++;
+    }
+
+    numerator = static_cast<int>(round(value * denominator)) * sign;
+
+    // 简化分数
+    int gcdVal = gcd(abs(numerator), denominator);
+    numerator /= gcdVal;
+    denominator /= gcdVal;
+}
+
+struct Fraction {
+    int numerator;
+    int denominator;
+
+    Fraction() : numerator(0), denominator(1) {}
+
+    Fraction(int value) : numerator(value), denominator(1) {}
+
+    Fraction(float value) { floatToFraction(value, numerator, denominator); }
+
+    Fraction(int numerator, int denominator) : numerator(numerator), denominator(denominator) {}
+
+    friend std::ostream &operator<<(std::ostream &os, const Fraction &f) {
+        if (f.denominator == 1) {
+            os << f.numerator;
+            return os;
+        }
+        os << f.numerator << "/" << f.denominator;
+        return os;
+    }
+};
+
+Fraction as_fraction(float value) {
+    return Fraction(value);
+}
+
+template <size_t N>
+Vector<N, Fraction> as_fraction(const Vector<N, float> &v) {
+    Vector<N, Fraction> result;
+    for (size_t i = 0; i < N; i++) {
+        result[i] = Fraction(v[i]);
+    }
+    return result;
+}
+
+template <size_t M, size_t N>
+Matrix<M, N, Fraction> as_fraction(const Matrix<M, N, float> &m) {
+    Matrix<M, N, Fraction> result;
+    for (size_t i = 0; i < M; i++) {
+        for (size_t j = 0; j < N; j++) {
+            result[i][j] = Fraction(m[i][j]);
+        }
+    }
+    return result;
+}
+
 void ex_4() {
     std::cout << "-------ex 4-----" << std::endl;
 
@@ -174,11 +244,11 @@ void ex_4() {
     std::cout << "基函数矩阵M_BEZ:\n" << M << std::endl;
 
     auto q1 = [&](float t) {
-        std::cout << "t = " << t << ": ";
+        std::cout << "t = " << as_fraction(t) << ": ";
 
         Matrix<4, 1, float> T = Matrix<1, 4, float>({{1, t, t * t, t * t * t}}).transpose();
 
-        std::cout << (G * M * T).transpose() << std::endl;
+        std::cout << as_fraction((G * M * T).transpose()) << std::endl;
     };
     q1(0.25);
     q1(0.5);
@@ -194,7 +264,7 @@ void ex_4() {
             std::vector<Vector2f> new_points;
             for (size_t i = 0; i < points.size() - 1; i++) {
                 auto p = (1 - t) * points[i] + t * points[i + 1];
-                std::cout << "P^" << n << "_" << i << " = " << p << std::endl;
+                std::cout << "P^" << n << "_" << i << " = " << as_fraction(p) << std::endl;
                 new_points.push_back(p);
             }
             return de_casteljau(new_points, t, n + 1);
