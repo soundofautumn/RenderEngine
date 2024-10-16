@@ -121,7 +121,7 @@ struct Matrix {
     }
 
     // 转置矩阵
-    constexpr inline Matrix<ROW, COL, T> transpose() const {
+    constexpr inline Matrix<COL, ROW, T> transpose() const {
         Matrix<COL, ROW, T> res;
         for (size_t i = 0; i < ROW; i++) {
             for (size_t j = 0; j < COL; j++) {
