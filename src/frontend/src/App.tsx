@@ -3,7 +3,7 @@ import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } fr
 import drawFuncs from './drawFuncs';
 
 import './App.css';
-import { BOUNDER_OFFSET, IDrawApiParam, IPoint, IPrimitive, IShadowBounder } from './types';
+import { BOUNDER_OFFSET, IDrawApiParam, IGlobalOptions, IPoint, IPrimitive, IShadowBounder } from './types';
 import { randomEngineName } from './utils';
 
 function getHeightUnfold(dom: HTMLElement) {
@@ -251,7 +251,7 @@ export default function App() {
   const handleDraw = () => {
     const pointers = clickedPointsRef.current;
     clickedPointsRef.current = [];
-    if (clickingSlidingWindowPoints) {
+    if (clickingSlidingWindowPoints && slidingWindowMode === 'Rectangle') {
       setClickingSlidingWindowPoints(false);
       const top_left = {
         x: Math.min(pointers[0].x, pointers[1].x),
@@ -264,6 +264,13 @@ export default function App() {
       slidingWindowRef.current = { top_left, bottom_right };
       setSlidingWindow(slidingWindowRef.current);
       setClickedPoints([]);
+      handleSlidingWindowChanged();
+      return;
+    } else if (clickingSlidingWindowPoints && slidingWindowMode === 'Polygon') {
+      setClickingSlidingWindowPoints(false);
+      setClickedPoints([]);
+      slidingWindowPolygonPointsRef.current = pointers;
+      setSlidingWindowPolygonPoints(pointers);
       handleSlidingWindowChanged();
       return;
     }
@@ -293,6 +300,7 @@ export default function App() {
       // 'handleClick' handles clicking add points
       if (!clickingSlidingWindowPoints && currentDrawFunc.current.drawingMethod === 'click') return;
       // handle dragging add points & clicking sliding window points
+      else if (clickingSlidingWindowPoints && slidingWindowMode === 'Polygon') return;
       else {
         clickedPointsRef.current.push({ x: e.clientX, y: e.clientY });
         setClickedPoints(clickedPointsRef.current);
@@ -302,8 +310,10 @@ export default function App() {
       return;
     } else if (clickingSlidingWindowPoints) {
       // 处理圈画裁剪框的点击
-      if (clickedPointsRef.current.length === 2) {
+      if (slidingWindowMode === 'Rectangle' && clickedPointsRef.current.length === 2) {
         handleDraw();
+      } else {
+        // 多边形裁剪框的点击在 handleClick 中处理
       }
     } else if (currentDrawFunc.current.drawingMethod === 'drag') {
       // drag 的绘制在 handleMouseUp 中处理
@@ -327,11 +337,11 @@ export default function App() {
   }
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    // handleClick 仅处理 click 类型的绘制方法，drag 类型的绘制方法、圈画裁剪框和修改图元的已有点在 handleMouseDown 中处理
+    // handleClick 仅处理 click 类型的绘制方法，drag 类型的绘制方法、圈画矩形裁剪框和修改图元的已有点在 handleMouseDown 中处理
     if (showingPrimitive) return;
-    if (clickingSlidingWindowPoints) return;
+    if (clickingSlidingWindowPoints && slidingWindowMode === 'Rectangle') return;
     if (currentDrawFunc.current.drawingMethod === 'drag') return;
-    if (currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
+    if ((currentDrawFunc.current.multiplePoints && clickedPointsRef.current.length >= currentDrawFunc.current.requiredPointers || clickingSlidingWindowPoints && slidingWindowMode === 'Polygon' && clickedPointsRef.current.length >= 3) && getPointDistance(coordinate, clickedPointsRef.current[0]) < 10) {
       // const shadowPoint = { ...clickedPointsRef.current[0] };
       // clickedPointsRef.current.push(shadowPoint);
       // setClickedPoints(clickedPointsRef.current);
@@ -415,45 +425,48 @@ export default function App() {
   const [enableSlidingWindow, setEnableSlidingWindow] = React.useState(false);
   const handleSlidingWindowChanged = (enable?: boolean) => {
     const enabledSliding = enable === undefined ? enableSlidingWindow : enable;
-    const currentSlidingWindow = slidingWindowRef.current;
-    if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
-      const temp = currentSlidingWindow.top_left.x;
-      currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
-      currentSlidingWindow.bottom_right.x = temp;
-    }
-    if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
-      const temp = currentSlidingWindow.top_left.y;
-      currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
-      currentSlidingWindow.bottom_right.y = temp;
-    }
-    client('/engine/set_global_options', {
-      data: {
-        GlobalOptions: {
-          background_color: {
-            r: 0,
-            g: 0,
-            b: 0,
-            a: 255,
+    console.log('Sliding window changed', enabledSliding, slidingWindowMode, slidingWindowAlgorithm);
+    if (slidingWindowMode === 'Rectangle') {
+      const currentSlidingWindow = slidingWindowRef.current;
+      if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
+        const temp = currentSlidingWindow.top_left.x;
+        currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
+        currentSlidingWindow.bottom_right.x = temp;
+      }
+      if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
+        const temp = currentSlidingWindow.top_left.y;
+        currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
+        currentSlidingWindow.bottom_right.y = temp;
+      }
+      setGlobalOptions({
+        ...globalOptions,
+        clip: {
+          enable: enabledSliding,
+          window: {
+            Rectangle: currentSlidingWindow,
           },
-          clip: {
-            enable: enabledSliding,
-            window: {
-              Rectangle: currentSlidingWindow,
-            },
-            algorithm: 1,
-          },
+          algorithm: slidingWindowAlgorithm,
         },
-      },
-    });
+      })
+    } else if (slidingWindowMode === 'Polygon') {
+      setGlobalOptions({
+        ...globalOptions,
+        clip: {
+          enable: enabledSliding,
+          window: {
+            Polygon: {
+              points: slidingWindowPolygonPointsRef.current,
+            }
+          },
+          algorithm: slidingWindowAlgorithm,
+        },
+      })
+    }
   }
 
   const [hideToolbar, setHideToolbar] = React.useState(false);
   const [disableToolbar, setDisableToolbar] = React.useState(false);
   const [toolbarHeight, setToolbarHeight] = React.useState(0);
-  React.useEffect(() => {
-    if (hideToolbar || disableToolbar) return;
-    setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 8);
-  }, [hideToolbar, disableToolbar, penOptions, enableSlidingWindow])
 
   const previewSlidingWindowTimeout = React.useRef<number | null>(null);
 
@@ -774,6 +787,48 @@ export default function App() {
     })
   }
 
+  const [slidingWindowMode, setSlidingWindowMode] = React.useState<'Rectangle' | 'Polygon'>('Rectangle');
+  const [slidingWindowAlgorithm, setSlidingWindowAlgorithm] = React.useState<0 | 1>(0);
+  const slidingWindowPolygonPointsRef = React.useRef<IPoint[]>([]);
+  const [slidingWindowPolygonPoints, setSlidingWindowPolygonPoints] = React.useState<IPoint[]>([]);
+  const [globalOptions, setGlobalOptions] = React.useState<IGlobalOptions>({
+    background_color: {
+      r: 0,
+      g: 0,
+      b: 0,
+      a: 255,
+    },
+    clip: {
+      enable: false,
+      window: {
+        Rectangle: {
+          top_left: { x: 0, y: 0 },
+          bottom_right: { x: 0, y: 0 },
+        },
+      },
+      algorithm: 0,
+    },
+  });
+  React.useEffect(() => {
+    if ('Rectangle' in globalOptions.clip.window) {
+      // 长方形裁剪框
+      setSlidingWindow(globalOptions.clip.window.Rectangle);
+    } else {
+      // 多边形裁剪框
+    }
+    setEnableSlidingWindow(globalOptions.clip.enable);
+    client('/engine/set_global_options', {
+      data: {
+        GlobalOptions: globalOptions,
+      }
+    })
+  }, [globalOptions])
+
+  React.useEffect(() => {
+    if (hideToolbar || disableToolbar) return;
+    setToolbarHeight(getHeightUnfold((document.getElementById('drawFuncs')!)) - 8);
+  }, [hideToolbar, disableToolbar, penOptions, enableSlidingWindow, slidingWindowMode])
+
   return (<>
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
       <div>{errorMessage}</div>
@@ -808,7 +863,7 @@ export default function App() {
     </div>
     <div id="slidingWindow">
       {
-        ((enableSlidingWindow ? [
+        (((enableSlidingWindow && slidingWindowMode === 'Rectangle') ? [
           {
             name: 'top-left',
             x: slidingWindow.top_left.x,
@@ -829,7 +884,7 @@ export default function App() {
             x: slidingWindow.bottom_right.x,
             y: slidingWindow.bottom_right.y,
           }
-        ] : []) as (IPoint & { name: string })[]).map((point, index) => {
+        ] : (enableSlidingWindow && slidingWindowMode === 'Polygon') ? slidingWindowPolygonPoints : []) as (IPoint & { name: string })[]).map((point, index) => {
           return (
             <div
               key={index}
@@ -845,41 +900,47 @@ export default function App() {
                     e.preventDefault();
                     setSlidingWindowMoving(true);
                     const handleMouseMove = (e: MouseEvent) => {
-                      const currentSlidingWindow = { ...slidingWindowRef.current };
-                      const target = point.name.split('-');
-                      if (target[0] === 'top') {
-                        currentSlidingWindow.top_left.y = e.clientY;
+                      if (slidingWindowMode === 'Rectangle') {
+                        const currentSlidingWindow = { ...slidingWindowRef.current };
+                        const target = point.name.split('-');
+                        if (target[0] === 'top') {
+                          currentSlidingWindow.top_left.y = e.clientY;
+                        } else {
+                          currentSlidingWindow.bottom_right.y = e.clientY;
+                        }
+                        if (target[1] === 'left') {
+                          currentSlidingWindow.top_left.x = e.clientX;
+                        } else {
+                          currentSlidingWindow.bottom_right.x = e.clientX;
+                        }
+                        if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
+                          const temp = currentSlidingWindow.top_left.x;
+                          currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
+                          currentSlidingWindow.bottom_right.x = temp;
+                        }
+                        if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
+                          const temp = currentSlidingWindow.top_left.y;
+                          currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
+                          currentSlidingWindow.bottom_right.y = temp;
+                        }
+                        if (currentSlidingWindow.top_left.x < 0) {
+                          currentSlidingWindow.top_left.x = 0;
+                        }
+                        if (currentSlidingWindow.top_left.y < 0) {
+                          currentSlidingWindow.top_left.y = 0;
+                        }
+                        if (currentSlidingWindow.bottom_right.x > document.body.clientWidth) {
+                          currentSlidingWindow.bottom_right.x = document.body.clientWidth;
+                        }
+                        if (currentSlidingWindow.bottom_right.y > document.body.clientHeight) {
+                          currentSlidingWindow.bottom_right.y = document.body.clientHeight;
+                        }
+                        setSlidingWindow(currentSlidingWindow);
                       } else {
-                        currentSlidingWindow.bottom_right.y = e.clientY;
+                        const currentSlidingWindow = slidingWindowPolygonPointsRef.current;
+                        currentSlidingWindow[index] = { x: e.clientX, y: e.clientY };
+                        setSlidingWindowPolygonPoints(currentSlidingWindow);
                       }
-                      if (target[1] === 'left') {
-                        currentSlidingWindow.top_left.x = e.clientX;
-                      } else {
-                        currentSlidingWindow.bottom_right.x = e.clientX;
-                      }
-                      if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
-                        const temp = currentSlidingWindow.top_left.x;
-                        currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
-                        currentSlidingWindow.bottom_right.x = temp;
-                      }
-                      if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
-                        const temp = currentSlidingWindow.top_left.y;
-                        currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
-                        currentSlidingWindow.bottom_right.y = temp;
-                      }
-                      if (currentSlidingWindow.top_left.x < 0) {
-                        currentSlidingWindow.top_left.x = 0;
-                      }
-                      if (currentSlidingWindow.top_left.y < 0) {
-                        currentSlidingWindow.top_left.y = 0;
-                      }
-                      if (currentSlidingWindow.bottom_right.x > document.body.clientWidth) {
-                        currentSlidingWindow.bottom_right.x = document.body.clientWidth;
-                      }
-                      if (currentSlidingWindow.bottom_right.y > document.body.clientHeight) {
-                        currentSlidingWindow.bottom_right.y = document.body.clientHeight;
-                      }
-                      setSlidingWindow(currentSlidingWindow);
                       if (previewSlidingWindowTimeout.current) clearTimeout(previewSlidingWindowTimeout.current);
                       previewSlidingWindowTimeout.current = setTimeout(() => {
                         handleSlidingWindowChanged();
@@ -896,12 +957,6 @@ export default function App() {
                     }
                     document.addEventListener('mousemove', handleMouseMove);
                     document.addEventListener('mouseup', handleMouseUp);
-                  }}
-                  onDoubleClick={() => {
-                    setSlidingWindow({
-                      top_left: { x: 0, y: 0 },
-                      bottom_right: { x: document.body.clientWidth, y: document.body.clientHeight },
-                    })
                   }}
                 />
                 <p className='point-text top'>
@@ -920,7 +975,7 @@ export default function App() {
         top: slidingWindow.top_left.y,
         width: slidingWindow.bottom_right.x - slidingWindow.top_left.x,
         height: slidingWindow.bottom_right.y - slidingWindow.top_left.y,
-        display: enableSlidingWindow ? 'block' : 'none',
+        display: (enableSlidingWindow && slidingWindowMode === 'Rectangle') ? 'block' : 'none',
       }} />
       {
         shadowBounder && (
@@ -1098,10 +1153,42 @@ export default function App() {
             <button onClick={() => {
               setClickedPoints([]);
               clickedPointsRef.current = [];
+              setSlidingWindowMode('Rectangle');
               setClickingSlidingWindowPoints(true)
             }}>
-              圈画裁剪框
+              圈画矩形裁剪框
             </button>
+          )
+        }
+        {
+          enableSlidingWindow && (
+            <button onClick={() => {
+              setClickedPoints([]);
+              clickedPointsRef.current = [];
+              setSlidingWindowMode('Polygon');
+              setClickingSlidingWindowPoints(true)
+            }}>
+              圈画多边形裁剪框
+            </button>
+          )
+        }
+        {
+          enableSlidingWindow && slidingWindowMode === 'Rectangle' && (
+            <div className="option">
+              裁剪算法
+              <select
+                value={globalOptions.clip.algorithm}
+                onChange={e => {
+                  setSlidingWindowAlgorithm(parseInt(e.target.value) as 0 | 1);
+                  const currentGlobalOptions = { ...globalOptions };
+                  currentGlobalOptions.clip.algorithm = parseInt(e.target.value) as 0 | 1;
+                  setGlobalOptions(currentGlobalOptions);
+                }
+                }>
+                <option value={0}>CS</option>
+                <option value={1}>Midpoint</option>
+              </select>
+            </div>
           )
         }
       </div>
@@ -1211,7 +1298,7 @@ export default function App() {
               />
               <p className='point-text top'>
                 {
-                  (point.type === 'view' || point.type === 'dragable' || point.type === 'bounder' || point.type === "center" || point.type === "rotate") ? '' : clickingSlidingWindowPoints ? (index === 0 ? 'top-left' : 'bottom-right') :
+                  (point.type === 'view' || point.type === 'dragable' || point.type === 'bounder' || point.type === "center" || point.type === "rotate") ? '' : clickingSlidingWindowPoints ? slidingWindowMode === 'Rectangle' ? (index === 0 ? 'top-left' : 'bottom-right') : (index + 1) :
                     point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
                 }
               </p>

@@ -47,3 +47,28 @@ export interface IShadowBounder {
 }
 
 export const BOUNDER_OFFSET = 10;
+
+export interface IGlobalOptions {
+    background_color: {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+    };
+    clip: {
+        enable: boolean;
+        window:
+            | {
+                  Rectangle: {
+                      top_left: IPoint;
+                      bottom_right: IPoint;
+                  };
+              }
+            | {
+                  Polygon: {
+                      points: IPoint[];
+                  };
+              };
+        algorithm: 0 | 1;
+    };
+}
