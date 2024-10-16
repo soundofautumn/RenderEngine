@@ -69,6 +69,16 @@ canvas {
 .point.bounder .point-item .point-circle {
     border: blue 1px solid;
     border-radius: 0;
+    cursor: all-scroll;
+}
+
+.point.bounder .point-item .point-circle.top-left,
+.point.bounder .point-item .point-circle.bottom-right {
+    cursor: nwse-resize;
+}
+
+.point.bounder .point-item .point-circle.top-right,
+.point.bounder .point-item .point-circle.bottom-left {
     cursor: nesw-resize;
 }
 

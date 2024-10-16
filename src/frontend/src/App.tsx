@@ -705,6 +705,16 @@ export default function App() {
 
   const [movingScalePoint, setMovingScalePoint] = React.useState<boolean>(false);
   const [originScalePoint, setOriginScalePoint] = React.useState<IPoint | null>(null);
+  const getBounderPointType = (point: IPoint) => {
+    if (!shadowBounder || !originShadowBounder) return 'unknown';
+    const referenceBounder = originShadowBounder || shadowBounder;
+    const offset = BOUNDER_OFFSET;
+    if (point.x + offset === referenceBounder.left_bounder && point.y + offset === referenceBounder.top_bounder) return 'top-left';
+    if (point.x - offset === referenceBounder.right_bounder && point.y + offset === referenceBounder.top_bounder) return 'top-right';
+    if (point.x - offset === referenceBounder.right_bounder && point.y - offset === referenceBounder.bottom_bounder) return 'bottom-right';
+    if (point.x + offset === referenceBounder.left_bounder && point.y - offset === referenceBounder.bottom_bounder) return 'bottom-left';
+    return 'unknown';
+  }
   const handleScalePointMouseDown = (point: IPoint) => {
     setMovingScalePoint(true);
     setOriginScalePoint(point);
@@ -723,6 +733,7 @@ export default function App() {
     const scaleY = offsetY / rawOffsetY;
     setMovingScalePoint(false);
     setOriginScalePoint(null);
+    setOriginShadowBounder(null);
     client('/engine/primitive/insert', {
       data: {
         Primitive: {
@@ -1160,7 +1171,7 @@ export default function App() {
         }).filter(p => p.length > 0).flat().map(p => ({ ...p, type: 'dragable' })),
         ...shadowVertex ? shadowVertex : [],
         {
-          ...(movingPrimitivePoint || movingCenterPoint) ? [] : { ...coordinate, type: 'view' }
+          ...(movingPrimitivePoint || movingCenterPoint || movingScalePoint) ? [] : { ...coordinate, type: 'view' }
         }].filter(point => point.x && point.y) as IPoint[]
       ).map((point, index) => {
         return (
@@ -1173,7 +1184,7 @@ export default function App() {
             }}
           >
             <div className='point-item'>
-              <div className='point-circle'
+              <div className={`point-circle ${getBounderPointType(point)}`}
                 style={{
                   backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
                 }}
