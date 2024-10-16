@@ -130,57 +130,65 @@ export default function App() {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
 
-    if (movingScalePoint && originScalePoint) {
+    if (movingScalePoint && originScalePoint && originShadowBounder) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) {
         console.log('Center point not found');
         return
       };
-      let rawOffsetX = coordinate.x - center_point.x;
-      let rawOffsetY = coordinate.y - center_point.y;
-      const bounderPointType = getBounderPointType(originScalePoint);
-      if (bounderPointType === "unknown") {
-        console.log('Bounder point type unknown', originScalePoint);
-        return
-      };
-      if (bounderPointType === "top-left") {
-        // rawOffsetX = rawOffsetX;
-        // rawOffsetY = rawOffsetY;
-      } else if (bounderPointType === "top-right") {
-        rawOffsetX = -rawOffsetX;
-        // rawOffsetY = rawOffsetY;
-      } else if (bounderPointType === "bottom-right") {
-        rawOffsetX = -rawOffsetX;
-        rawOffsetY = -rawOffsetY;
-      } else if (bounderPointType === "bottom-left") {
-        // rawOffsetX = rawOffsetX;
-        rawOffsetY = -rawOffsetY;
+      // 以中心点为参考点计算缩放比例
+      const offsetX = coordinate.x - center_point.x;
+      const offsetY = coordinate.y - center_point.y;
+      const offsetXOrigin = originScalePoint.x - center_point.x;
+      const offsetYOrigin = originScalePoint.y - center_point.y;
+      const scaleX = offsetX / offsetXOrigin;
+      const scaleY = offsetY / offsetYOrigin;
+      // 求所有顶点的偏移
+      const computeOffset = (vertex: IPoint, xOffset: 1 | -1, yOffset: 1 | -1) => {
+        return [
+          vertex.x - center_point.x + xOffset * BOUNDER_OFFSET,
+          vertex.y - center_point.y + yOffset * BOUNDER_OFFSET,
+        ]
       }
-      const offsetX = rawOffsetX;
-      const offsetY = rawOffsetY;
-      // 以左上边界为参考点缩放
+      const [offsetXTopLeft, offsetYTopLeft] = computeOffset({ x: originShadowBounder!.left_bounder, y: originShadowBounder!.top_bounder }, -1, -1);
+      const [offsetXTopRight, offsetYTopRight] = computeOffset({ x: originShadowBounder!.right_bounder, y: originShadowBounder!.top_bounder }, 1, -1);
+      const [offsetXBottomRight, offsetYBottomRight] = computeOffset({ x: originShadowBounder!.right_bounder, y: originShadowBounder!.bottom_bounder }, 1, 1);
+      const [offsetXBottomLeft, offsetYBottomLeft] = computeOffset({ x: originShadowBounder!.left_bounder, y: originShadowBounder!.bottom_bounder }, -1, 1);
+      // 计算按照缩放比例后的顶点
       const new_bounder_points = {
         top_left: {
-          x: center_point.x + offsetX,
-          y: center_point.y + offsetY,
-        },
-        bottom_right: {
-          x: center_point.x - offsetX,
-          y: center_point.y - offsetY,
-        },
-        bottom_left: {
-          x: center_point.x + offsetX,
-          y: center_point.y - offsetY,
+          x: center_point.x + offsetXTopLeft * scaleX,
+          y: center_point.y + offsetYTopLeft * scaleY,
         },
         top_right: {
-          x: center_point.x - offsetX,
-          y: center_point.y + offsetY,
+          x: center_point.x + offsetXTopRight * scaleX,
+          y: center_point.y + offsetYTopRight * scaleY,
+        },
+        bottom_right: {
+          x: center_point.x + offsetXBottomRight * scaleX,
+          y: center_point.y + offsetYBottomRight * scaleY,
+        },
+        bottom_left: {
+          x: center_point.x + offsetXBottomLeft * scaleX,
+          y: center_point.y + offsetYBottomLeft * scaleY,
         },
       }
       setShadowVertex([
         ...shadowVertex!.filter(point => point.type !== 'bounder'),
         ...Object.values(new_bounder_points).map(point => ({ ...point, type: 'bounder' })) as IPoint[],
       ])
+      const transformedBounder = {
+        left_bounder: new_bounder_points.top_left.x,
+        right_bounder: new_bounder_points.top_right.x,
+        top_bounder: new_bounder_points.top_left.y,
+        bottom_bounder: new_bounder_points.bottom_right.y,
+      }
+      setShadowBounder({
+        left_bounder: Math.min(transformedBounder.left_bounder, transformedBounder.right_bounder) + BOUNDER_OFFSET,
+        right_bounder: Math.max(transformedBounder.left_bounder, transformedBounder.right_bounder) - BOUNDER_OFFSET,
+        top_bounder: Math.min(transformedBounder.top_bounder, transformedBounder.bottom_bounder) + BOUNDER_OFFSET,
+        bottom_bounder: Math.max(transformedBounder.top_bounder, transformedBounder.bottom_bounder) - BOUNDER_OFFSET,
+      })
     } else if (movingRotatePoint && rotateStartPoint) {
       const deltaX = coordinate.x - rotateStartPoint.x;
       const deltaY = coordinate.y - rotateStartPoint.y;
@@ -697,27 +705,22 @@ export default function App() {
 
   const [movingScalePoint, setMovingScalePoint] = React.useState<boolean>(false);
   const [originScalePoint, setOriginScalePoint] = React.useState<IPoint | null>(null);
-  const getBounderPointType = (point: IPoint) => {
-    if (!shadowBounder) return 'unknown';
-    const offset = BOUNDER_OFFSET;
-    console.log(shadowBounder)
-    if (point.x + offset === shadowBounder.left_bounder && point.y + offset === shadowBounder.top_bounder) return 'top-left';
-    if (point.x - offset === shadowBounder.right_bounder && point.y + offset === shadowBounder.top_bounder) return 'top-right';
-    if (point.x - offset === shadowBounder.right_bounder && point.y - offset === shadowBounder.bottom_bounder) return 'bottom-right';
-    if (point.x + offset === shadowBounder.left_bounder && point.y - offset === shadowBounder.bottom_bounder) return 'bottom-left';
-    return 'unknown';
-  }
   const handleScalePointMouseDown = (point: IPoint) => {
     setMovingScalePoint(true);
     setOriginScalePoint(point);
+    setOriginShadowBounder(shadowBounder);
   }
   const handleScalePointMouseUp = () => {
     handleRotateMouseUp();
     if (!movingScalePoint || !originScalePoint) return;
     const center_point = shadowVertex?.find(point => point.type === 'center');
     if (!center_point) return;
-    const offsetX = coordinate.x - originScalePoint.x;
-    const offsetY = coordinate.y - originScalePoint.y;
+    const offsetX = coordinate.x - center_point.x;
+    const offsetY = coordinate.y - center_point.y;
+    const rawOffsetX = originScalePoint.x - center_point.x;
+    const rawOffsetY = originScalePoint.y - center_point.y;
+    const scalex = offsetX / rawOffsetX;
+    const scaleY = offsetY / rawOffsetY;
     setMovingScalePoint(false);
     setOriginScalePoint(null);
     client('/engine/primitive/insert', {
@@ -726,8 +729,8 @@ export default function App() {
           Transform: {
             Scale: {
               scale: {
-                x: offsetX,
-                y: offsetY,
+                x: scalex,
+                y: scaleY,
               },
               center: {
                 x: center_point.x,
