@@ -151,3 +151,5 @@ src/package-lock.json
 compile_commands.json
 
 .cache
+
+*.bmp
