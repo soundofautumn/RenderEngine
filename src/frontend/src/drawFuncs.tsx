@@ -296,7 +296,7 @@ drawFuncs.push({
         type: 'func',
         name: 'knots',
         func: (...control_points) => {
-          return control_points.map((_, i) => i);
+          return Array.from({ length: control_points.length + 4 }, (_, i) => i + 0.01);
         }
       }
     ],
