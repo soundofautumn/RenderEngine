@@ -476,7 +476,8 @@ export default function App() {
             else if (param.type === 'multi_points')
               return param.name || `mp${index + 1}`;
             else return param.name || `u${index + 1}`;
-          })
+          }),
+          algorithm: df.drawFunc.algorithm,
         })).sort((a, b) => {
           const matchTimes = (df: {
             params: IDrawApiParam[];
@@ -507,7 +508,7 @@ export default function App() {
             name,
             value: raw_primitive[apiEndpoint][name],
           }))
-        return { apiEndpoint, params, index, type: matchedDrawFunc?.type || 'unknown', editable: matchedDrawFunc ? true : false };
+        return { apiEndpoint, params, index, type: matchedDrawFunc?.type || 'unknown', editable: matchedDrawFunc ? true : false, algorithm: matchedDrawFunc?.algorithm || 0 };
       });
       console.log(primitives);
       setPrimitives(primitives);

@@ -9,14 +9,16 @@ class DrawFunc {
   public readonly multiplePoints: boolean = false;
   public readonly params: IDrawApiParam[];
   public readonly type: string | undefined;
+  public readonly algorithm: number = 0;
 
-  constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string, multiplePoints?: boolean }) {
+  constructor(props: { params: IDrawApiParam[], requiredPointers: number, apiEndpoint: string, drawingMethod?: 'click' | 'drag', type?: string, multiplePoints?: boolean, algorithm?: number }) {
     this.params = props.params.sort((a) => a.type === 'point' ? -1 : 1);
     this.requiredPointers = props.requiredPointers;
     this.apiEndpoint = props.apiEndpoint;
     this.drawingMethod = props.drawingMethod || 'drag';
     this.type = props.type;
     this.multiplePoints = props.multiplePoints || false;
+    this.algorithm = props.algorithm || 0;
 
     if (this.requiredPointers < this.params.filter(param => param.type === 'point').length)
       throw new Error("Illegal number of required pointers");
@@ -29,7 +31,7 @@ class DrawFunc {
   }
 
   public draw(props: IDrawFuncParams): Promise<void> {
-    const { pointers, algorithm = 0 } = props;
+    const { pointers } = props;
     return new Promise((resolve, reject) => {
       if (pointers.length < this.requiredPointers) {
         reject("Not enough pointers");
@@ -47,7 +49,7 @@ class DrawFunc {
                 return [param.name || `mp${index + 1}`, pointers];
               else return [param.name || `u${index + 1}`, null];
             })),
-            algorithm,
+            algorithm: this.algorithm,
           }
         }
       }).then(() => {
@@ -68,7 +70,7 @@ interface IDrawFunc {
 const drawFuncs: IDrawFunc[] = []
 
 drawFuncs.push({
-  name: '点画线',
+  name: '点画线 DDA',
   drawFunc: new DrawFunc(
     {
       params: [
@@ -82,25 +84,49 @@ drawFuncs.push({
       requiredPointers: 2,
       apiEndpoint: 'Line',
       drawingMethod: 'click',
+      algorithm: 0,
     }
   ),
 })
 
 drawFuncs.push({
-  name: '拖画线',
-  drawFunc: new DrawFunc({
-    params: [
-      {
-        type: 'point',
-      },
-      {
-        type: 'point',
-      },
-    ],
-    requiredPointers: 2,
-    apiEndpoint: 'Line',
-    drawingMethod: 'drag',
-  }),
+  name: '点画线 MidP',
+  drawFunc: new DrawFunc(
+    {
+      params: [
+        {
+          type: 'point',
+        },
+        {
+          type: 'point',
+        },
+      ],
+      requiredPointers: 2,
+      apiEndpoint: 'Line',
+      drawingMethod: 'click',
+      algorithm: 1,
+    }
+  ),
+})
+
+drawFuncs.push({
+  name: '点画线 Bresenham',
+  drawFunc: new DrawFunc(
+    {
+      params: [
+        {
+          type: 'point',
+        },
+        {
+          type: 'point',
+        },
+      ],
+      requiredPointers: 2,
+      apiEndpoint: 'Line',
+      drawingMethod: 'click',
+      algorithm: 2,
+    }
+  ),
 })
 
 drawFuncs.push({

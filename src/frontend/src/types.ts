@@ -36,6 +36,7 @@ export interface IPrimitive {
     index: number;
     editable: boolean;
     type?: string;
+    algorithm: number;
 }
 
 export interface IShadowBounder {
