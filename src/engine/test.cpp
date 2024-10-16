@@ -45,7 +45,10 @@ void test(std::function<void()> func, const std::string &filename) {
     render_and_save(filename);
 }
 
-#define TEST(func) test(func, #func ".bmp")
+#define TEST(func) \
+    std::cout << "========= " << #func << " =========" << std::endl; \
+    test(func, #func ".bmp"); \
+    std::cout << std::endl;
 
 int main() {
     engine.init(800, 600);
@@ -146,7 +149,6 @@ void ex_3() {
     auto t1 = make_transform_matrix(make_translate(1, 0));
     auto t2 = make_transform_matrix(make_rotate(30.0 / 180.0 * std::numbers::pi, {0, 0}));
     auto t3 = t2 * t1;
-    std::cout << "-------ex 3-----" << std::endl;
     std::cout << t3 << std::endl;
     //P（2，1）经过平移（1，0）和旋转（30度）后的坐标
     auto p1 = t3 * Vector2f(2, 1).xy1();
@@ -232,8 +234,6 @@ Matrix<M, N, Fraction> as_fraction(const Matrix<M, N, float> &m) {
 }
 
 void ex_4() {
-    std::cout << "-------ex 4-----" << std::endl;
-
     std::cout << "---question 1---" << std::endl;
     std::vector<Vector2f> p = {{1, 1}, {3, 4}, {5, -1}, {8, 1}};
 
