@@ -27,6 +27,7 @@ jobs:
             cpp_compiler: cl
             toolset: msvc
             arch: x86
+            platform_version: 2022
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
@@ -48,6 +49,7 @@ jobs:
           boost_version: 1.85.0
           toolset: ${{ matrix.toolset }}
           arch: ${{ matrix.arch }}
+          platform_version: ${{ matrix.platform_version }}
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
