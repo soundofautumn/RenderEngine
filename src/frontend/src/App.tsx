@@ -603,6 +603,9 @@ export default function App() {
     const bottom_bounder: number = Math.max(...all_pointers.map(p => p.y));
     console.log('bounder', left_bounder, right_bounder, top_bounder, bottom_bounder);
 
+    const average_x = all_pointers.reduce((sum, p) => sum + p.x, 0) / all_pointers.length;
+    const average_y = all_pointers.reduce((sum, p) => sum + p.y, 0) / all_pointers.length;
+
     if (showingPrimitive.apiEndpoint !== 'Circle' && showingPrimitive.apiEndpoint !== 'Fill' && showingPrimitive.apiEndpoint !== 'Transform') {
       setShadowBounder({
         left_bounder,
@@ -622,8 +625,8 @@ export default function App() {
           type: 'rotate',
         },
         {
-          x: Math.floor((left_bounder + right_bounder) / 2),
-          y: Math.floor((top_bounder + bottom_bounder) / 2),
+          x: average_x,
+          y: average_y,
           type: 'center',
         }
       ])
