@@ -270,6 +270,7 @@ export default function App() {
       setClickingSlidingWindowPoints(false);
       setClickedPoints([]);
       slidingWindowPolygonPointsRef.current = pointers;
+      setSlidingWindowPolygonPoints(pointers);
       handleSlidingWindowChanged();
     }
     loadingRef.current = true;
@@ -788,6 +789,7 @@ export default function App() {
   const [slidingWindowMode, setSlidingWindowMode] = React.useState<'Rectangle' | 'Polygon'>('Rectangle');
   const [slidingWindowAlgorithm, setSlidingWindowAlgorithm] = React.useState<0 | 1>(0);
   const slidingWindowPolygonPointsRef = React.useRef<IPoint[]>([]);
+  const [slidingWindowPolygonPoints, setSlidingWindowPolygonPoints] = React.useState<IPoint[]>([]);
   const [globalOptions, setGlobalOptions] = React.useState<IGlobalOptions>({
     background_color: {
       r: 0,
@@ -860,7 +862,7 @@ export default function App() {
     </div>
     <div id="slidingWindow">
       {
-        ((enableSlidingWindow ? [
+        (((enableSlidingWindow && slidingWindowMode === 'Rectangle') ? [
           {
             name: 'top-left',
             x: slidingWindow.top_left.x,
@@ -881,7 +883,7 @@ export default function App() {
             x: slidingWindow.bottom_right.x,
             y: slidingWindow.bottom_right.y,
           }
-        ] : []) as (IPoint & { name: string })[]).map((point, index) => {
+        ] : (enableSlidingWindow && slidingWindowMode === 'Polygon') ? slidingWindowPolygonPoints : []) as (IPoint & { name: string })[]).map((point, index) => {
           return (
             <div
               key={index}
@@ -897,41 +899,47 @@ export default function App() {
                     e.preventDefault();
                     setSlidingWindowMoving(true);
                     const handleMouseMove = (e: MouseEvent) => {
-                      const currentSlidingWindow = { ...slidingWindowRef.current };
-                      const target = point.name.split('-');
-                      if (target[0] === 'top') {
-                        currentSlidingWindow.top_left.y = e.clientY;
+                      if (slidingWindowMode === 'Rectangle') {
+                        const currentSlidingWindow = { ...slidingWindowRef.current };
+                        const target = point.name.split('-');
+                        if (target[0] === 'top') {
+                          currentSlidingWindow.top_left.y = e.clientY;
+                        } else {
+                          currentSlidingWindow.bottom_right.y = e.clientY;
+                        }
+                        if (target[1] === 'left') {
+                          currentSlidingWindow.top_left.x = e.clientX;
+                        } else {
+                          currentSlidingWindow.bottom_right.x = e.clientX;
+                        }
+                        if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
+                          const temp = currentSlidingWindow.top_left.x;
+                          currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
+                          currentSlidingWindow.bottom_right.x = temp;
+                        }
+                        if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
+                          const temp = currentSlidingWindow.top_left.y;
+                          currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
+                          currentSlidingWindow.bottom_right.y = temp;
+                        }
+                        if (currentSlidingWindow.top_left.x < 0) {
+                          currentSlidingWindow.top_left.x = 0;
+                        }
+                        if (currentSlidingWindow.top_left.y < 0) {
+                          currentSlidingWindow.top_left.y = 0;
+                        }
+                        if (currentSlidingWindow.bottom_right.x > document.body.clientWidth) {
+                          currentSlidingWindow.bottom_right.x = document.body.clientWidth;
+                        }
+                        if (currentSlidingWindow.bottom_right.y > document.body.clientHeight) {
+                          currentSlidingWindow.bottom_right.y = document.body.clientHeight;
+                        }
+                        setSlidingWindow(currentSlidingWindow);
                       } else {
-                        currentSlidingWindow.bottom_right.y = e.clientY;
+                        const currentSlidingWindow = slidingWindowPolygonPointsRef.current;
+                        currentSlidingWindow[index] = { x: e.clientX, y: e.clientY };
+                        setSlidingWindowPolygonPoints(currentSlidingWindow);
                       }
-                      if (target[1] === 'left') {
-                        currentSlidingWindow.top_left.x = e.clientX;
-                      } else {
-                        currentSlidingWindow.bottom_right.x = e.clientX;
-                      }
-                      if (currentSlidingWindow.top_left.x > currentSlidingWindow.bottom_right.x) {
-                        const temp = currentSlidingWindow.top_left.x;
-                        currentSlidingWindow.top_left.x = currentSlidingWindow.bottom_right.x;
-                        currentSlidingWindow.bottom_right.x = temp;
-                      }
-                      if (currentSlidingWindow.top_left.y > currentSlidingWindow.bottom_right.y) {
-                        const temp = currentSlidingWindow.top_left.y;
-                        currentSlidingWindow.top_left.y = currentSlidingWindow.bottom_right.y;
-                        currentSlidingWindow.bottom_right.y = temp;
-                      }
-                      if (currentSlidingWindow.top_left.x < 0) {
-                        currentSlidingWindow.top_left.x = 0;
-                      }
-                      if (currentSlidingWindow.top_left.y < 0) {
-                        currentSlidingWindow.top_left.y = 0;
-                      }
-                      if (currentSlidingWindow.bottom_right.x > document.body.clientWidth) {
-                        currentSlidingWindow.bottom_right.x = document.body.clientWidth;
-                      }
-                      if (currentSlidingWindow.bottom_right.y > document.body.clientHeight) {
-                        currentSlidingWindow.bottom_right.y = document.body.clientHeight;
-                      }
-                      setSlidingWindow(currentSlidingWindow);
                       if (previewSlidingWindowTimeout.current) clearTimeout(previewSlidingWindowTimeout.current);
                       previewSlidingWindowTimeout.current = setTimeout(() => {
                         handleSlidingWindowChanged();
@@ -948,12 +956,6 @@ export default function App() {
                     }
                     document.addEventListener('mousemove', handleMouseMove);
                     document.addEventListener('mouseup', handleMouseUp);
-                  }}
-                  onDoubleClick={() => {
-                    setSlidingWindow({
-                      top_left: { x: 0, y: 0 },
-                      bottom_right: { x: document.body.clientWidth, y: document.body.clientHeight },
-                    })
                   }}
                 />
                 <p className='point-text top'>
@@ -972,7 +974,7 @@ export default function App() {
         top: slidingWindow.top_left.y,
         width: slidingWindow.bottom_right.x - slidingWindow.top_left.x,
         height: slidingWindow.bottom_right.y - slidingWindow.top_left.y,
-        display: enableSlidingWindow ? 'block' : 'none',
+        display: (enableSlidingWindow && slidingWindowMode === 'Rectangle') ? 'block' : 'none',
       }} />
       {
         shadowBounder && (
