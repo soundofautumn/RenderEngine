@@ -90,7 +90,7 @@ void HttpSession::do_read() {
 void HttpSession::do_close() {
     // Send a TCP shutdown
     boost::system::error_code ec;
-    socket_.shutdown(tcp::socket::shutdown_send, ec);
+    (void)socket_.shutdown(tcp::socket::shutdown_send, ec);
 
     // At this point the connection is closed gracefully
 }
