@@ -235,8 +235,7 @@ class RenderCore::RenderEngine {
         pen_options_ = {};
 
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
-        auto it = render_primitives_.begin();
-        while (it != render_primitives_.end()) {
+        for (auto primitive : render_primitives_) {
             std::visit(
                 [this](auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
@@ -246,9 +245,9 @@ class RenderCore::RenderEngine {
                         apply_transform(prim);
                     }
                 },
-                *it);
+                primitive);
             // 裁剪
-            clip(*it);
+            clip(primitive);
             // 绘制图元
             std::visit(
                 [this](const auto &prim) {
@@ -277,8 +276,7 @@ class RenderCore::RenderEngine {
                         transform_matrix_ = Matrix3f::identity();
                     }
                 },
-                *it);
-            ++it;
+                primitive);
         }
         need_render_ = false;
         return true;
