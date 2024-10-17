@@ -18,7 +18,7 @@
 namespace RenderCore {
 
 using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform,
-    BezierCurve, BsplineCurve>;
+    BezierCurve, BsplineCurve, std::monostate>;
 
 }
 

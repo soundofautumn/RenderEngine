@@ -8,11 +8,13 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <type_traits>
 #include <variant>
 #include <vector>
 
 #include "bitmap.hpp"
+#include "line.hpp"
 #include "matrix.hpp"
 #include "options.hpp"
 #include "point.hpp"
@@ -229,9 +231,12 @@ class RenderCore::RenderEngine {
             return true;
         }
         fill_with_background_color();
+        // 重置画笔选项
+        pen_options_ = {};
+
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
-        // 先遍历图元，应用变换矩阵
-        for (auto &primitive : render_primitives_) {
+        auto it = render_primitives_.begin();
+        while (it != render_primitives_.end()) {
             std::visit(
                 [this](auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
@@ -240,19 +245,11 @@ class RenderCore::RenderEngine {
                     } else {
                         apply_transform(prim);
                     }
-                    // 重置变换矩阵
-                    if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
-                        transform_matrix_ = Matrix3f::identity();
-                    }
                 },
-                primitive);
-        }
-        // 裁剪
-        clip();
-        // 重置画笔选项
-        pen_options_ = {};
-        // 遍历绘制图元
-        for (const auto &primitive : render_primitives_) {
+                *it);
+            // 裁剪
+            clip(*it);
+            // 绘制图元
             std::visit(
                 [this](const auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
@@ -270,13 +267,20 @@ class RenderCore::RenderEngine {
                         draw_fill(prim);
                     } else if constexpr (std::is_same_v<T, PenOptions>) {
                         pen_options_ = prim;
+                    } else if constexpr (std::is_same_v<T, Transform>) {
+                        make_transform(prim);
                     } else if constexpr (std::is_same_v<T, BezierCurve>) {
                         draw_bezier_curve(prim);
                     } else if constexpr (std::is_same_v<T, BsplineCurve>) {
                         draw_bspline_curve(prim);
                     };
+                    // 重置变换矩阵
+                    if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
+                        transform_matrix_ = Matrix3f::identity();
+                    }
                 },
-                primitive);
+                *it);
+            ++it;
         }
         need_render_ = false;
         return true;
@@ -305,7 +309,7 @@ class RenderCore::RenderEngine {
     void draw_fill(const Fill &fill);
 
     // 裁剪
-    void clip();
+    void clip(Primitive &primitive);
 
     // 变换
     void make_transform(const Transform &transform);
@@ -339,20 +343,20 @@ class RenderCore::RenderEngine {
     void fill_polygon_seedfill(const Fill &fill);
 
     // 矩形窗口裁剪
-    void rectangle_clip(const Rectangle &window);
+    void rectangle_clip(const Rectangle &window, Primitive &primitive);
 
     // 任意凸多边形裁剪
-    void polygon_clip(const Polygon &window);
+    void polygon_clip(const Polygon &window, Primitive &primitive);
 
     // Cohen-Sutherland 裁剪算法
-    bool clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end);
+    void clip_line_cohen_sutherland(const Rectangle &window, std::optional<Line> &line);
 
     // 中点分割裁剪算法
-    bool clip_line_midpoint(const Rectangle &window, Point &start, Point &end);
+    void clip_line_midpoint(const Rectangle &window, std::optional<Line> &line);
 
     // 裁剪多边形
     // Sutherland-Hodgman
-    bool clip_sutherland_hodgman(const Polygon &window, Polygon &polygon);
+    void clip_sutherland_hodgman(const Polygon &window, std::optional<Polygon> &polygon);
 };
 
 #endif  //RENDERENGINE_ENGINE_HPP

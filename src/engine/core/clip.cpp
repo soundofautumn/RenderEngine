@@ -12,86 +12,63 @@
 
 using namespace RenderCore;
 
-void RenderEngine::clip() {
+void RenderEngine::clip(Primitive &primitive) {
     const auto &clip = global_options_.clip;
     if (!clip.enable) {
         return;
     }
     const auto &clip_window = clip.window;
     if (std::holds_alternative<Rectangle>(clip_window)) {
-        rectangle_clip(std::get<Rectangle>(clip_window));
+        rectangle_clip(std::get<Rectangle>(clip_window), primitive);
     } else if (std::holds_alternative<Polygon>(clip_window)) {
-        polygon_clip(std::get<Polygon>(clip_window));
+        polygon_clip(std::get<Polygon>(clip_window), primitive);
     }
 }
 
-void RenderEngine::rectangle_clip(const Rectangle &window) {
-    auto it = render_primitives_.begin();
-    while (it != render_primitives_.end()) {
-        const auto &primitive = *it;
-        if (std::holds_alternative<Line>(primitive)) {
-            // 裁剪线段
-            auto &line = std::get<Line>(primitive);
-            Line new_line = line;
-            bool should_draw = true;
-            switch (global_options_.clip.algorithm) {
-                default:
+void RenderEngine::rectangle_clip(const Rectangle &window, Primitive &primitive) {
+    if (std::holds_alternative<Line>(primitive)) {
+        // 裁剪线段
+        auto &line = std::get<Line>(primitive);
+        std::optional<Line> new_line = line;
+        switch (global_options_.clip.algorithm) {
+            default:
 #ifdef RENDERENGINE_DEBUG
-                    throw std::runtime_error("Unknown clip algorithm");
+                throw std::runtime_error("Unknown clip algorithm");
 #else
 // 默认使用 Cohen-Sutherland 裁剪算法
 #endif
-                case Clip::Algorithm::CohenSutherland:
-                    // Cohen-Sutherland 裁剪算法
-                    should_draw = clip_line_cohen_sutherland(window, new_line.p1, new_line.p2);
-                    break;
-                case Clip::Algorithm::Midpoint:
-                    // Midpoint 裁剪算法
-                    should_draw = clip_line_midpoint(window, new_line.p1, new_line.p2);
-                    break;
-            }
-            if (should_draw) {
-                *it = new_line;
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
-        } else if (std::holds_alternative<Rectangle>(primitive)) {
-            // 裁剪矩形
-            auto &rectangle = std::get<Rectangle>(primitive);
-            Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
-            bool should_draw = true;
-            // 使用 Sutherland-Hodgman 算法裁剪多边形
-            should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
-            if (should_draw) {
-                *it = new_polygon;
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
-        } else if (std::holds_alternative<Polygon>(primitive)) {
-            // 裁剪多边形
-            auto &polygon = std::get<Polygon>(primitive);
-            Polygon new_polygon = polygon;
-            bool should_draw = true;
-            // 使用 Sutherland-Hodgman 算法裁剪多边形
-            should_draw = clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
-            if (should_draw) {
-                *it = new_polygon;
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
+            case Clip::Algorithm::CohenSutherland:
+                // Cohen-Sutherland 裁剪算法
+                clip_line_cohen_sutherland(window, new_line);
+                break;
+            case Clip::Algorithm::Midpoint:
+                // Midpoint 裁剪算法
+                clip_line_midpoint(window, new_line);
+                break;
         }
-        ++it;
+        new_line.has_value() ? primitive = new_line.value() : primitive = std::monostate{};
+    } else if (std::holds_alternative<Rectangle>(primitive)) {
+        // 裁剪矩形
+        auto &rectangle = std::get<Rectangle>(primitive);
+        std::optional<Polygon> new_polygon = cast_rectangle_to_polygon(rectangle);
+        // 使用 Sutherland-Hodgman 算法裁剪多边形
+        clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
+        new_polygon.has_value() ? primitive = new_polygon.value() : primitive = std::monostate{};
+    } else if (std::holds_alternative<Polygon>(primitive)) {
+        // 裁剪多边形
+        auto &polygon = std::get<Polygon>(primitive);
+        std::optional<Polygon> new_polygon = polygon;
+        // 使用 Sutherland-Hodgman 算法裁剪多边形
+        clip_sutherland_hodgman(cast_rectangle_to_polygon(window), new_polygon);
+        new_polygon.has_value() ? primitive = new_polygon.value() : primitive = std::monostate{};
     }
 }
 
-const uint8_t INSIDE = 0;  // 0000
-const uint8_t LEFT = 1;    // 0001
-const uint8_t RIGHT = 2;   // 0010
-const uint8_t BOTTOM = 4;  // 0100
-const uint8_t TOP = 8;     // 1000
+constexpr uint8_t INSIDE = 0;  // 0000
+constexpr uint8_t LEFT = 1;    // 0001
+constexpr uint8_t RIGHT = 2;   // 0010
+constexpr uint8_t BOTTOM = 4;  // 0100
+constexpr uint8_t TOP = 8;     // 1000
 
 const auto encode_f = [](const Rectangle &window) {
     return [&](float x, float y) -> uint8_t {
@@ -110,8 +87,10 @@ const auto encode_f = [](const Rectangle &window) {
     };
 };
 
-bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &start, Point &end) {
+void RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, std::optional<Line> &line) {
     const auto encode = encode_f(window);
+    auto &start = line->p1;
+    auto &end = line->p2;
 
     float x1 = start.x, y1 = start.y, x2 = end.x, y2 = end.y;
 
@@ -123,12 +102,13 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
         if (start_code == INSIDE && end_code == INSIDE) {
             start = {static_cast<int>(x1), static_cast<int>(y1)};
             end = {static_cast<int>(x2), static_cast<int>(y2)};
-            return true;
+            return;
         }
 
         // 全部在窗口外
         if ((start_code & end_code)) {
-            return false;
+            line.reset();
+            return;
         }
 
         uint8_t code = start_code ? start_code : end_code;
@@ -161,8 +141,10 @@ bool RenderEngine::clip_line_cohen_sutherland(const Rectangle &window, Point &st
     }
 }
 
-bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Point &end) {
+void RenderEngine::clip_line_midpoint(const Rectangle &window, std::optional<Line> &line) {
     const auto encode = encode_f(window);
+    auto &start = line->p1;
+    auto &end = line->p2;
 
     // 计算最近点
     std::function<Point(float, float, float, float)> nearest_point = [&](float x1, float y1,
@@ -186,10 +168,13 @@ bool RenderEngine::clip_line_midpoint(const Rectangle &window, Point &start, Poi
     start = nearest_point(start.x, start.y, end.x, end.y);
     end = nearest_point(end.x, end.y, start.x, start.y);
 
-    return start != end;
+    if (start == end) {
+        line.reset();
+    }
 }
 
-bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polygon) {
+void RenderEngine::clip_sutherland_hodgman(const Polygon &window, std::optional<Polygon> &polygon) {
+    auto &polygon_ref = polygon.value();
     const auto isInside = [&](const Vector2f &point, const Vector2f &edge_start,
                               const Vector2f &edge_end) {
         // 使用叉积判断点是否在边的左侧
@@ -224,9 +209,10 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
     for (size_t i = 0; i < window.size(); i++) {
         window_f[i] = Vector2f{static_cast<float>(window[i].x), static_cast<float>(window[i].y)};
     }
-    std::vector<Vector2f> polygon_f(polygon.size());
-    for (size_t i = 0; i < polygon.size(); i++) {
-        polygon_f[i] = Vector2f{static_cast<float>(polygon[i].x), static_cast<float>(polygon[i].y)};
+    std::vector<Vector2f> polygon_f(polygon_ref.size());
+    for (size_t i = 0; i < polygon_ref.size(); i++) {
+        polygon_f[i] =
+            Vector2f{static_cast<float>(polygon_ref[i].x), static_cast<float>(polygon_ref[i].y)};
     }
 
     // 遍历窗口边界
@@ -259,13 +245,14 @@ bool RenderEngine::clip_sutherland_hodgman(const Polygon &window, Polygon &polyg
     }
 
     // 将浮点数转换为整数
-    polygon.clear();
-    polygon.reserve(polygon_f.size());
+    polygon_ref.clear();
+    polygon_ref.reserve(polygon_f.size());
     for (const auto &point : polygon_f) {
-        polygon.push_back(Point{static_cast<int>(point.x), static_cast<int>(point.y)});
+        polygon_ref.push_back(Point{static_cast<int>(point.x), static_cast<int>(point.y)});
     }
-
-    return !polygon.empty();  // 如果裁剪后多边形非空，返回 true
+    if (polygon_ref.empty()) {
+        polygon.reset();
+    }
 }
 
 enum class Orientation {
@@ -293,49 +280,27 @@ Orientation polygon_orientation(const Polygon &polygon) {
     }
 }
 
-void RenderEngine::polygon_clip(const Polygon &window) {
+void RenderEngine::polygon_clip(const Polygon &window, Primitive &primitive) {
     // 要把裁剪窗口的多边形点的顺序改成顺时针
     Polygon new_window = window;
     if (polygon_orientation(window) == Orientation::CounterClockwise) {
         std::reverse(new_window.begin(), new_window.end());
     }
-    auto it = render_primitives_.begin();
-    while (it != render_primitives_.end()) {
-        const auto &primitive = *it;
-        if (std::holds_alternative<Line>(primitive)) {
-            auto &line = std::get<Line>(primitive);
-            Polygon new_line = {line.p1, line.p2};
-            bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(new_window, new_line);
-            if (should_draw) {
-                *it = Line{new_line[0], new_line[1]};
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
-        } else if (std::holds_alternative<Rectangle>(primitive)) {
-            auto &rectangle = std::get<Rectangle>(primitive);
-            Polygon new_polygon = cast_rectangle_to_polygon(rectangle);
-            bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(new_window, new_polygon);
-            if (should_draw) {
-                *it = new_polygon;
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
-        } else if (std::holds_alternative<Polygon>(primitive)) {
-            auto &polygon = std::get<Polygon>(primitive);
-            Polygon new_polygon = polygon;
-            bool should_draw = true;
-            should_draw = clip_sutherland_hodgman(new_window, new_polygon);
-            if (should_draw) {
-                *it = new_polygon;
-            } else {
-                it = render_primitives_.erase(it);
-                continue;
-            }
-        }
-        ++it;
+    if (std::holds_alternative<Line>(primitive)) {
+        auto &line = std::get<Line>(primitive);
+        std::optional<Polygon> new_polygon = Polygon{line.p1, line.p2};
+        clip_sutherland_hodgman(new_window, new_polygon);
+        new_polygon.has_value() ? primitive = Line{new_polygon.value()[0], new_polygon.value()[1]}
+                                : primitive = std::monostate{};
+    } else if (std::holds_alternative<Rectangle>(primitive)) {
+        auto &rectangle = std::get<Rectangle>(primitive);
+        std::optional<Polygon> new_polygon = cast_rectangle_to_polygon(rectangle);
+        clip_sutherland_hodgman(new_window, new_polygon);
+        new_polygon.has_value() ? primitive = new_polygon.value() : primitive = std::monostate{};
+    } else if (std::holds_alternative<Polygon>(primitive)) {
+        auto &polygon = std::get<Polygon>(primitive);
+        std::optional<Polygon> new_polygon = polygon;
+        clip_sutherland_hodgman(new_window, new_polygon);
+        new_polygon.has_value() ? primitive = new_polygon.value() : primitive = std::monostate{};
     }
 }
