@@ -93,7 +93,7 @@ template <>
 struct TransformMatrixApply<Polygon> : std::true_type {
     //FIXME: 加了constexpr gnu11编译不过
     void operator()(Polygon &polygon, const Matrix3f &transform) const {
-        for (const auto &point : polygon) {
+        for (auto &point : polygon) {
             apply_transform_matrix(point, transform);
         }
     }
@@ -110,7 +110,7 @@ template <>
 struct TransformMatrixApply<BezierCurve> : std::true_type {
     //FIXME:  加了constexpr gnu11编译不过
     void operator()(BezierCurve &curve, const Matrix3f &transform) const {
-        for (const auto &point : curve) {
+        for (auto &point : curve) {
             apply_transform_matrix(point, transform);
         }
     }
