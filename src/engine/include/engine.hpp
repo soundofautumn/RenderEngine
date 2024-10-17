@@ -98,6 +98,7 @@ class RenderCore::RenderEngine {
     void clear() {
         primitives_.clear();
         global_options_ = {};
+        fill_with_background_color();
     }
 
     void set_global_options(const GlobalOptions &options) {
