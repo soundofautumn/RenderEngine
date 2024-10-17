@@ -66,6 +66,8 @@ constexpr bool can_apply_transform_matrix_v = can_apply_transform_matrix<T>::val
 
 template <typename T>
 struct TransformMatrixApply : std::false_type {
+    static_assert(!std::is_const_v<T>, "T must not be const");
+
     constexpr void operator()(T &, const Matrix3f &) const {};
 };
 
