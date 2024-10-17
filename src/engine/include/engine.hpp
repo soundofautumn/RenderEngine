@@ -8,6 +8,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <type_traits>
 #include <variant>
 #include <vector>
 
@@ -229,6 +230,23 @@ class RenderCore::RenderEngine {
         }
         fill_with_background_color();
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
+        // 先遍历图元，应用变换矩阵
+        for (auto &primitive : render_primitives_) {
+            std::visit(
+                [this](auto &prim) {
+                    using T = std::decay_t<decltype(prim)>;
+                    if constexpr (std::is_same_v<T, Transform>) {
+                        make_transform(prim);
+                    } else {
+                        apply_transform(prim);
+                    }
+                    // 重置变换矩阵
+                    if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
+                        transform_matrix_ = Matrix3f::identity();
+                    }
+                },
+                primitive);
+        }
         // 裁剪
         clip();
         // 重置画笔选项
@@ -238,7 +256,6 @@ class RenderCore::RenderEngine {
             std::visit(
                 [this](const auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
-                    apply_transform(prim);
                     if constexpr (std::is_same_v<T, Line>) {
                         draw_line(prim);
                     } else if constexpr (std::is_same_v<T, Circle>) {
@@ -253,16 +270,11 @@ class RenderCore::RenderEngine {
                         draw_fill(prim);
                     } else if constexpr (std::is_same_v<T, PenOptions>) {
                         pen_options_ = prim;
-                    } else if constexpr (std::is_same_v<T, Transform>) {
-                        make_transform(prim);
                     } else if constexpr (std::is_same_v<T, BezierCurve>) {
                         draw_bezier_curve(prim);
                     } else if constexpr (std::is_same_v<T, BsplineCurve>) {
                         draw_bspline_curve(prim);
                     };
-                    if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
-                        transform_matrix_ = Matrix3f::identity();
-                    }
                 },
                 primitive);
         }
