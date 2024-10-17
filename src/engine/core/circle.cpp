@@ -126,7 +126,6 @@ void RenderEngine::draw_circle(const Circle &circle) {
     if (std::holds_alternative<CircleUseCenterRadius>(circle)) {
         auto &center_radius = std::get<CircleUseCenterRadius>(circle);
         draw_circle_midpoint(center_radius.center, center_radius.radius);
-        return;
     } else if (std::holds_alternative<CircleUseThreePoints>(circle)) {
         auto &three_points = std::get<CircleUseThreePoints>(circle);
         // 根据三点求圆心和半径
@@ -141,7 +140,6 @@ void RenderEngine::draw_arc(const Arc &arc) {
         auto &center_radius_angle = std::get<ArcUseCenterRadiusAngle>(arc);
         draw_arc_midpoint(center_radius_angle.center, center_radius_angle.radius,
             center_radius_angle.start_angle, center_radius_angle.end_angle);
-        return;
     } else if (std::holds_alternative<ArcUseThreePoints>(arc)) {
         auto &three_points = std::get<ArcUseThreePoints>(arc);
         // 根据三点求圆心和半径
