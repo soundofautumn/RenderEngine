@@ -296,7 +296,7 @@ drawFuncs.push({
         type: 'func',
         name: 'knots',
         func: (...control_points) => {
-          return Array.from({ length: control_points.length * 2 }, (_, i) => parseFloat(prompt(`第 ${i + 1} 个结点值`) || '0') + 0.01);
+          return Array.from({ length: control_points.length + 4 }, (_, i) => parseFloat(prompt(`第 ${i + 1} 个结点值`) || i.toString()));
         }
       }
     ],
