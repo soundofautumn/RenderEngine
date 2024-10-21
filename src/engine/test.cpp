@@ -13,6 +13,7 @@
 #include "line.hpp"
 #include "matrix.hpp"
 #include "point.hpp"
+#include "polygon.hpp"
 #include "rectangle.hpp"
 #include "transform.hpp"
 #include "vector.hpp"
@@ -129,12 +130,23 @@ void lab_3() {
 }
 
 void lab_4() {
-    engine.set_pen_options({.color = Colors::Yellow});
     // 贝塞尔曲线绘制
-    engine.add_primitive(make_bezier_curve({{100, 100}, {200, 200}, {300, 100}, {400, 200}}));
+    auto bezier_control_points = std::vector<Point>{{100, 100}, {200, 200}, {300, 100}, {400, 200}};
+    engine.set_pen_options({.color = Colors::Red});
+    // 绘制控制多边形
+    engine.add_primitive(make_polygon(bezier_control_points));
+    // 贝塞尔曲线绘制
+    engine.set_pen_options({.color = Colors::Yellow});
+    engine.add_primitive(make_bezier_curve(bezier_control_points));
+    auto bspline_control_points =
+        std::vector<Point>{{100, 400}, {200, 500}, {300, 400}, {400, 500}};
+    auto bspline_knots = std::vector<float>{0, 1, 2, 3, 4, 5, 6, 7};
+    // 绘制控制多边形
+    engine.set_pen_options({.color = Colors::Red});
+    engine.add_primitive(make_polygon(bspline_control_points));
     // b样条曲线绘制
-    engine.add_primitive(make_bspline_curve(
-        {{100, 400}, {200, 500}, {300, 400}, {400, 500}}, {0, 0, 0, 1, 2, 3, 3, 3}));
+    engine.set_pen_options({.color = Colors::Yellow});
+    engine.add_primitive(make_bspline_curve(bspline_control_points, bspline_knots));
 }
 
 void ex_3() {

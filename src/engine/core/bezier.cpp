@@ -35,21 +35,19 @@ void RenderEngine::draw_bezier_curve(const BezierCurve &curve) {
 void RenderEngine::draw_bspline_curve(const BsplineCurve &curve) {
     const auto &control_points = curve.control_points;
     const auto &knots = curve.knots;
-    const auto n = control_points.size();
-    const auto p = knots.size() - n - 1;
-    std::vector<std::vector<Vector2f>> points(p + 1);
-    for (size_t i = 0; i < p + 1; i++) {
-        points[i].resize(n);
-        for (size_t j = 0; j < n; j++) {
-            points[i][j] = Vector2f{
-                static_cast<float>(control_points[j].x), static_cast<float>(control_points[j].y)};
-        }
-    }
+    // 控制点数量
+    auto n = control_points.size();
+    // 节点数量
+    auto m = knots.size();
+    // 阶数
+    auto p = m - n - 1;
+    assert(m - n - 1 >= 0);  // 节点数至少要大于等于控制点数
 
     std::function<Vector2f(size_t, size_t, float)> de_boor = [&](size_t k, size_t i,
                                                                  float u) -> Vector2f {
         if (k == 0) {
-            return points[0][i];  // 基础控制点 (P_i)
+            return {
+                static_cast<float>(control_points[i].x), static_cast<float>(control_points[i].y)};
         }
 
         // 计算alpha系数
@@ -71,16 +69,16 @@ void RenderEngine::draw_bspline_curve(const BsplineCurve &curve) {
     };
 
     // 绘制曲线
-    int num_samples = 1000;                      // 采样点的数量，值越大曲线越平滑
+    constexpr int num_samples = 1000;            // 采样点的数量，值越大曲线越平滑
     float u_start = knots[p];                    // 曲线起始参数
     float u_end = knots[n];                      // 曲线结束参数
     float du = (u_end - u_start) / num_samples;  // 每次步进的参数增量
 
     for (float u = u_start; u <= u_end; u += du) {
-        // 找到 u 对应的节点区间 i
-        size_t i = find_knot_interval(u);
+        // 寻找对应的节点区间 l
+        auto l = find_knot_interval(u);
         // 使用 De Boor 算法计算 u 对应的曲线点
-        Vector2f point = de_boor(p, i, u);
+        Vector2f point = de_boor(p, l, u);
         // 绘制点
         draw_point(point.x, point.y);
     }
