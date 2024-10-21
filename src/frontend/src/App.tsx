@@ -19,18 +19,10 @@ function getHeightUnfold(dom: HTMLElement) {
   return height;
 }
 
-function QueueDo(funcs: Array<() => Promise<void>>): Promise<void> {
-  return new Promise(async (resolve, reject) => {
-    for (const func of funcs) {
-      try {
-        await func();
-      } catch (e) {
-        reject(e);
-        return;
-      }
-    }
-    resolve(void 0);
-  })
+async function QueueDo(funcs: Array<() => Promise<void>>): Promise<void> {
+  for (const func of funcs) {
+    await func();
+  }
 }
 
 function getPointDistance(p1: IPoint, p2: IPoint) {
