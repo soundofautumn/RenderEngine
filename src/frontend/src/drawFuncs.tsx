@@ -296,7 +296,9 @@ drawFuncs.push({
         type: 'func',
         name: 'knots',
         func: (...control_points) => {
-          return Array.from({ length: control_points.length + 4 }, (_, i) => parseFloat(prompt(`第 ${i + 1} 个结点值`) || i.toString()));
+            // knots个数 = control_points个数 + 阶数 + 1
+            // 默认阶数为3，当控制点个数为3时，阶数为2，knots个数为6
+          return Array.from({ length: control_points.length == 3 ? 6 : control_points.length + 4 }, (_, i) => parseFloat(prompt(`第 ${i + 1} 个结点值`) || i.toString()));
         }
       }
     ],
