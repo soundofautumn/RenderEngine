@@ -1,11 +1,14 @@
 //
 // Created by Autumn Sound on 2024/9/5.
 //
+#include <cassert>
 #include <chrono>
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <numbers>
 #include <ostream>
+#include <random>
 #include <vector>
 
 #include "color.hpp"
@@ -22,6 +25,9 @@ using namespace RenderCore;
 
 static RenderEngine engine;
 
+static constexpr int WIDTH = 800;
+static constexpr int HEIGHT = 600;
+
 void lab_1();
 void lab_2();
 void lab_3();
@@ -29,6 +35,8 @@ void lab_4();
 
 void ex_3();
 void ex_4();
+
+void perf_test();
 
 void render_and_save(const std::string &filename) {
     // 计时
@@ -52,7 +60,7 @@ void test(std::function<void()> func, const std::string &filename) {
     std::cout << std::endl;
 
 int main() {
-    engine.init(800, 600);
+    engine.init(WIDTH, HEIGHT);
 
     TEST(lab_1);
     TEST(lab_2);
@@ -61,6 +69,8 @@ int main() {
 
     TEST(ex_3);
     TEST(ex_4);
+
+    TEST(perf_test);
 
     render_and_save("output.bmp");
 #ifdef _WIN32
@@ -291,4 +301,106 @@ void ex_4() {
     };
 
     de_casteljau(p, 0.5);
+}
+
+void perf_test() {
+    constexpr int N = 10000;
+
+    // 随机数生成器
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // 生成随机颜色
+    auto random_color = [&gen]() {
+        std::uniform_int_distribution<int> dis(0, 255);
+        return Color{dis(gen) / 255.0f, dis(gen) / 255.0f, dis(gen) / 255.0f, 1};
+    };
+
+    // 生成随机在画布内的点
+    auto random_point = [&gen]() {
+        std::uniform_int_distribution<int> dis(0, WIDTH - 1);
+        std::uniform_int_distribution<int> dis2(0, HEIGHT - 1);
+        const auto x = dis(gen);
+        const auto y = dis2(gen);
+        assert(x >= 0 && x < WIDTH);
+        assert(y >= 0 && y < HEIGHT);
+        return Point{x, y};
+    };
+
+    // 生成随机直线
+    auto random_line = [&random_point]() { return make_line(random_point(), random_point()); };
+
+    // 生成随机矩形
+    auto random_rectangle = [&random_point]() {
+        return make_rectangle(random_point(), random_point());
+    };
+
+    // 生成随机多边形
+    auto random_polygon = [&gen, &random_point]() {
+        std::uniform_int_distribution<int> dis(3, 5);
+        std::vector<Point> points;
+        for (int i = 0; i < dis(gen); i++) {
+            points.push_back(random_point());
+        }
+        return make_polygon(points);
+    };
+
+    // 生成随机圆
+    auto random_circle = [&gen, &random_point]() {
+        std::uniform_int_distribution<int> dis(0, 200);
+        return make_circle_center_radius(random_point(), dis(gen));
+    };
+
+    // 生成随机变换
+    auto random_transform = [&gen, &random_point]() {
+        // 随机类型
+        std::uniform_int_distribution<int> dis(0, 2);
+        // 随机数
+        std::uniform_real_distribution<float> dis2(0, 1);
+        switch (dis(gen)) {
+            case 0:
+                return Transform{make_translate(dis2(gen) * 100, dis2(gen) * 100)};
+            case 1:
+                return Transform{make_rotate(dis2(gen) * std::numbers::pi, random_point())};
+            case 2:
+                return Transform{make_scale(dis2(gen) * 2, dis2(gen) * 2, random_point())};
+        }
+        return Transform{};
+    };
+
+    // 生成随机贝塞尔曲线
+    auto random_bezier_curve = [&gen, &random_point]() {
+        std::uniform_int_distribution<int> dis(2, 10);
+        std::vector<Point> points;
+        for (int i = 0; i < dis(gen); i++) {
+            points.push_back(random_point());
+        }
+        return make_bezier_curve(points);
+    };
+
+    // 生成随机图元
+    auto random_primitive = [&]() {
+        // 随机类型
+        std::uniform_int_distribution<int> dis(0, 5);
+        switch (dis(gen)) {
+            case 0:
+                return Primitive{random_line()};
+            case 1:
+                return Primitive{random_rectangle()};
+            // case 2:
+                // return Primitive{random_polygon()};
+            case 3:
+                return Primitive{random_circle()};
+            case 4:
+                return Primitive{random_bezier_curve()};
+            case 5:
+                return Primitive{random_transform()};
+        }
+        return Primitive{};
+    };
+
+    for (int i = 0; i < N; i++) {
+        engine.set_pen_options({.color = random_color(), .fill_color = random_color()});
+        engine.add_primitive(random_primitive());
+    }
 }
