@@ -41,7 +41,7 @@ void RenderEngine::draw_bspline_curve(const BsplineCurve &curve) {
     auto m = knots.size();
     // 阶数
     auto p = m - n - 1;
-    assert(m - n - 1 >= 0);  // 节点数至少要大于等于控制点数
+    assert(m - n - 1 > 0);  // 阶数大于1，p是size_t类型，不能 assert(p > 0)
 
     std::function<Vector2f(size_t, size_t, float)> de_boor = [&](size_t k, size_t i,
                                                                  float u) -> Vector2f {
