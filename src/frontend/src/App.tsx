@@ -141,13 +141,21 @@ export default function App() {
       const currentKnot = currentVertexes.find(point => point.type === 'knot' && point.index === movingKnotPoint);
       const currentKnots = currentVertexes.filter(point => point.type === 'knot');
       if (!currentKnot) return;
+      const current_control_points = showingPrimitive?.params.find(param => param.type === 'multi_points')?.value as IPoint[];
+      const control_points_length = current_control_points?.length || 0;
+      const knots_length = currentKnots.length;
+      const order = knots_length - 1 - control_points_length;
       const index = currentKnot.index || 0;
       const minKnot = currentKnots[0].value || 0;
       const maxKnot = currentKnots[currentKnots.length - 1].value || 1;
       const prevKnot = (index === 0 ? 0 : currentKnots[index - 1].value) || 0;
+      const specialPrevKnot = index === control_points_length ? (currentKnots[order].value || 0) + 0.25 : 0;
       const nextKnot = (index < currentKnots.length - 1 ? currentKnots[index + 1].value : 114514) || 114514;
+      const specialNextKnot = index === order ? (currentKnots[control_points_length].value || 0.25) - 0.25 : 114514;
+      const usePrevKnot = Math.max(prevKnot, specialPrevKnot);
+      const useNextKnot = Math.min(nextKnot, specialNextKnot);
       const newKnot = (coordinateRef.current.x - shadowBounder.left_bounder) / (shadowBounder.right_bounder - shadowBounder.left_bounder) * (maxKnot - minKnot) + minKnot;
-      const fixedKnot = Math.min(nextKnot, Math.max(prevKnot, newKnot));
+      const fixedKnot = Math.min(useNextKnot, Math.max(usePrevKnot, newKnot));
       currentKnot.value = fixedKnot;
       setShadowVertex(currentVertexes.map(p => p.type === 'knot' ? ({
         x: shadowBounder.left_bounder + (shadowBounder.right_bounder - shadowBounder.left_bounder) * ((p.value || 0) / (maxKnot - minKnot)),
