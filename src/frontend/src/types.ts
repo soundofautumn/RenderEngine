@@ -11,7 +11,10 @@ export interface IPoint {
         | "view"
         | "bounder"
         | "center"
-        | "rotate";
+        | "rotate"
+        | "knot";
+  value?: number;
+  index?: number;
 }
 
 export interface IDrawFuncParams {
@@ -20,7 +23,12 @@ export interface IDrawFuncParams {
     algorithm?: number;
 }
 
-export type IDrawApiParamType = "point" | "func" | "multi_points" | "knots" | "unknown";
+export type IDrawApiParamType =
+    | "point"
+    | "func"
+    | "multi_points"
+    | "knots"
+    | "unknown";
 
 export interface IDrawApiParam {
     type: IDrawApiParamType;

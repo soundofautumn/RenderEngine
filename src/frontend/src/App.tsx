@@ -136,7 +136,22 @@ export default function App() {
     coordinateRef.current = { x: e.clientX, y: e.clientY };
     setCoordinate(coordinateRef.current);
 
-    if (movingScalePoint && originScalePoint && originShadowBounder) {
+    if (movingKnotPoint && shadowVertex && shadowBounder) {
+      const currentVertexes = [...shadowVertex];
+      const currentKnot = currentVertexes.find(point => point.type === 'knot' && point.index === movingKnotPoint);
+      const currentKnots = currentVertexes.filter(point => point.type === 'knot');
+      if (!currentKnot) return;
+      const index = currentKnot.index || 0;
+      const minKnot = currentKnots[0].value || 0;
+      const maxKnot = currentKnots[currentKnots.length - 1].value || 1;
+      const prevKnot = (index === 0 ? 0 : currentKnots[index - 1].value) || 0;
+      const nextKnot = (index < currentKnots.length - 1 ? currentKnots[index + 1].value : maxKnot) || maxKnot;
+      const newKnot = (coordinateRef.current.y - shadowBounder.top_bounder) / (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (maxKnot - minKnot) + minKnot;
+      const fixedKnot = Math.min(nextKnot, Math.max(prevKnot, newKnot));
+      currentKnot.value = fixedKnot;
+      currentKnot.y = shadowBounder.top_bounder + (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (fixedKnot / (maxKnot - minKnot));
+      setShadowVertex(currentVertexes);
+    } else if (movingScalePoint && originScalePoint && originShadowBounder) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) {
         console.log('Center point not found');
@@ -640,6 +655,22 @@ export default function App() {
         bottom_bounder,
       })
       const offset = BOUNDER_OFFSET;
+
+      let knots_point: IPoint[] = [];
+
+      if (showingPrimitive.params.find(param => param.type === 'knots')) {
+        const knots = showingPrimitive.params.find(param => param.type === 'knots')?.value as number[];
+        knots_point = knots.map((knot, index) => (
+          {
+            x: left_bounder + (right_bounder - left_bounder) * (index / (knots.length - 1)),
+            y: top_bounder + (bottom_bounder - top_bounder) * (knot / (knots[knots.length - 1] - knots[0])),
+            type: 'knot',
+            value: knot,
+            index,
+          }
+        ))
+      }
+
       setShadowVertex([
         { x: left_bounder - offset, y: top_bounder - offset, type: 'bounder' },
         { x: right_bounder + offset, y: top_bounder - offset, type: 'bounder' },
@@ -654,7 +685,8 @@ export default function App() {
           x: average_x,
           y: average_y,
           type: 'center',
-        }
+        },
+        ...knots_point,
       ])
     }
     else {
@@ -779,6 +811,12 @@ export default function App() {
     setMovingCenterPoint(false);
   }
 
+  const [movingKnotPoint, setMovingKnotPoint] = React.useState<false | number>(false);
+  const hanldeKnotPointMouseDown = (index?: number) => {
+    if (index === undefined) return;
+    setMovingKnotPoint(index);
+  }
+
   const [movingRotatePoint, setMovingRotatePoint] = React.useState<boolean>(false);
   const [angle, setAngle] = React.useState(0);
   const [rotateStartPoint, setRotateStartPoint] = React.useState<IPoint | null>(null);
@@ -787,6 +825,28 @@ export default function App() {
     setRotateStartPoint(point);
   }
   const handleRotateMouseUp = () => {
+    if (movingKnotPoint !== false) {
+      const currentKnot = shadowVertex?.find(point => point.type === 'knot' && point.index === movingKnotPoint);
+      if (showingPrimitive && currentKnot && currentKnot.index !== undefined && currentKnot.value !== undefined) {
+        console.log('moved knot point', currentKnot);
+        const newKnots = showingPrimitive?.params.find(param => param.type === 'knots')?.value as number[];
+        newKnots[currentKnot.index] = currentKnot.value;
+        client('/engine/primitive/modify', {
+          data: {
+            Primitive: {
+              [showingPrimitive.apiEndpoint || "unknown"]: {
+                type: showingPrimitive.type,
+                ...Object.fromEntries((showingPrimitive.params || []).map((param) => [param.name || 'unknown', param.value])),
+                knots: newKnots,
+                algorithm: 0,
+              }
+            },
+            Index: showingPrimitive.index,
+          }
+        })
+      }
+      setMovingKnotPoint(false);
+    }
     if (movingRotatePoint && rotateStartPoint) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) return;
@@ -1369,7 +1429,15 @@ export default function App() {
                           <div key={index}>
                             {`(${point.x}, ${point.y})`}
                           </div>
-                        )) : param.type === 'knots' ? param.value.join(', ') :
+                        )) : param.type === 'knots' ? ((arr: number[], size: number): number[][] => {
+                          const result: number[][] = [];
+                          for (let i = 0; i < arr.length; i += size) {
+                            result.push(arr.slice(i, i + size));
+                          }
+                          return result;
+                        })(param.value, 2).map(a => <div className='value'>
+                          {(a.map((v: number) => v.toFixed(2)).join(', '))}
+                        </div>) :
                           (typeof param.value === 'object') ? Object.entries(param.value).map(([key, value]) => (typeof value === 'object' && value !== null) ? (
                             <div className='param' key={key}>
                               <div className='name'>{key}</div>
@@ -1491,22 +1559,22 @@ export default function App() {
             <div className='point-item'>
               <div className={`point-circle ${getBounderPointType(point)}`}
                 style={{
-                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : point.type === 'drag' ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
+                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : (point.type === 'drag' || point.type === 'knot') ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
                 }}
-                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : point.type === 'bounder' ? () => handleScalePointMouseDown(point) : () => { }}
+                onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : point.type === 'bounder' ? () => handleScalePointMouseDown(point) : point.type === 'knot' ? () => hanldeKnotPointMouseDown(point.index) : () => { }}
                 onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : point.type === 'center' ? handleCenterMouseUp : point.type === 'rotate' ? handleRotateMouseUp : point.type === 'bounder' ? handleScalePointMouseUp : handleRotateMouseUp}
                 onMouseMove={handleMouseMove}
               />
               <p className='point-text top'>
                 {
-                  (point.type === 'view' || point.type === 'dragable' || point.type === 'bounder' || point.type === "center" || point.type === "rotate") ? '' : clickingSlidingWindowPoints ? slidingWindowMode === 'Rectangle' ? (index === 0 ? 'top-left' : 'bottom-right') : (index + 1) :
+                  (point.type === 'view' || point.type === 'dragable' || point.type === 'bounder' || point.type === "center" || point.type === "rotate" || point.type === "knot") ? '' : clickingSlidingWindowPoints ? slidingWindowMode === 'Rectangle' ? (index === 0 ? 'top-left' : 'bottom-right') : (index + 1) :
                     point.type === 'ending' ? '结束' : (!currentDrawFunc.current.multiplePoints && (index + 1) === currentDrawFunc.current.requiredPointers) ? '结束' : (index + 1)
                 }
               </p>
               <p className='point-text'>
                 {
                   (point.type === 'view') ? movingRotatePoint ? `${(angle * (-180 / Math.PI)).toFixed(2)}°` : '' :
-                    (point.type === 'bounder' || point.type === 'center' || point.type === 'rotate')
+                    (point.type === 'bounder' || point.type === 'center' || point.type === 'rotate' || point.type === 'knot')
                       ? '' : `(${point.x}, ${point.y})`
                 }
               </p>
