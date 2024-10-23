@@ -149,13 +149,13 @@ export default function App() {
       const newKnot = (coordinateRef.current.y - shadowBounder.top_bounder) / (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (maxKnot - minKnot) + minKnot;
       const fixedKnot = Math.min(nextKnot, Math.max(prevKnot, newKnot));
       currentKnot.value = fixedKnot;
-      setShadowVertex(currentVertexes.map(p => ({
+      setShadowVertex(currentVertexes.map(p => p.type === 'knot' ? ({
         x: p.x,
         y: shadowBounder.top_bounder + (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * ((p.value || 0) / (maxKnot - minKnot)),
         type: p.type,
         index: p.index,
         value: p.value,
-      })));
+      }) : p));
     } else if (movingScalePoint && originScalePoint && originShadowBounder) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) {
