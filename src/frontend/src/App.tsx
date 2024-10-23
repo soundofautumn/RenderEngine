@@ -145,12 +145,17 @@ export default function App() {
       const minKnot = currentKnots[0].value || 0;
       const maxKnot = currentKnots[currentKnots.length - 1].value || 1;
       const prevKnot = (index === 0 ? 0 : currentKnots[index - 1].value) || 0;
-      const nextKnot = (index < currentKnots.length - 1 ? currentKnots[index + 1].value : maxKnot) || maxKnot;
+      const nextKnot = (index < currentKnots.length - 1 ? currentKnots[index + 1].value : 114514) || 114514;
       const newKnot = (coordinateRef.current.y - shadowBounder.top_bounder) / (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (maxKnot - minKnot) + minKnot;
       const fixedKnot = Math.min(nextKnot, Math.max(prevKnot, newKnot));
       currentKnot.value = fixedKnot;
-      currentKnot.y = shadowBounder.top_bounder + (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (fixedKnot / (maxKnot - minKnot));
-      setShadowVertex(currentVertexes);
+      setShadowVertex(currentVertexes.map(p => ({
+        x: p.x,
+        y: shadowBounder.top_bounder + (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * ((p.value || 0) / (maxKnot - minKnot)),
+        type: p.type,
+        index: p.index,
+        value: p.value,
+      })));
     } else if (movingScalePoint && originScalePoint && originShadowBounder) {
       const center_point = shadowVertex?.find(point => point.type === 'center');
       if (!center_point) {
