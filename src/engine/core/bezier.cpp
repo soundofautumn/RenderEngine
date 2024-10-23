@@ -1,10 +1,12 @@
 //
 // Created by Autumn Sound on 2024/9/30.
 //
+#include <cassert>
 #include <functional>
 #include <vector>
 
 #include "engine.hpp"
+#include "utils.hpp"
 #include "vector.hpp"
 
 using namespace RenderCore;
@@ -51,7 +53,7 @@ void RenderEngine::draw_bspline_curve(const BsplineCurve &curve) {
         }
 
         // 计算alpha系数
-        float alpha = (knots[i + p + 1 - k] - knots[i] != 0.0f)
+        float alpha = (!near_equal(knots[i + p + 1 - k], knots[i]))
                           ? (u - knots[i]) / (knots[i + p + 1 - k] - knots[i])
                           : 0.0f;
 
@@ -73,6 +75,8 @@ void RenderEngine::draw_bspline_curve(const BsplineCurve &curve) {
     float u_start = knots[p];                    // 曲线起始参数
     float u_end = knots[n];                      // 曲线结束参数
     float du = (u_end - u_start) / num_samples;  // 每次步进的参数增量
+
+    assert(!near_equal(u_start, u_end));
 
     for (float u = u_start; u <= u_end; u += du) {
         // 寻找对应的节点区间 l
