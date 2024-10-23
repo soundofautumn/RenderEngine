@@ -146,12 +146,12 @@ export default function App() {
       const maxKnot = currentKnots[currentKnots.length - 1].value || 1;
       const prevKnot = (index === 0 ? 0 : currentKnots[index - 1].value) || 0;
       const nextKnot = (index < currentKnots.length - 1 ? currentKnots[index + 1].value : 114514) || 114514;
-      const newKnot = (coordinateRef.current.y - shadowBounder.top_bounder) / (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * (maxKnot - minKnot) + minKnot;
+      const newKnot = (coordinateRef.current.x - shadowBounder.left_bounder) / (shadowBounder.right_bounder - shadowBounder.left_bounder) * (maxKnot - minKnot) + minKnot;
       const fixedKnot = Math.min(nextKnot, Math.max(prevKnot, newKnot));
       currentKnot.value = fixedKnot;
       setShadowVertex(currentVertexes.map(p => p.type === 'knot' ? ({
-        x: p.x,
-        y: shadowBounder.top_bounder + (shadowBounder.bottom_bounder - shadowBounder.top_bounder) * ((p.value || 0) / (maxKnot - minKnot)),
+        x: shadowBounder.left_bounder + (shadowBounder.right_bounder - shadowBounder.left_bounder) * ((p.value || 0) / (maxKnot - minKnot)),
+        y: p.y,
         type: p.type,
         index: p.index,
         value: p.value,
@@ -667,8 +667,8 @@ export default function App() {
         const knots = showingPrimitive.params.find(param => param.type === 'knots')?.value as number[];
         knots_point = knots.map((knot, index) => (
           {
-            x: left_bounder + (right_bounder - left_bounder) * (index / (knots.length - 1)),
-            y: top_bounder + (bottom_bounder - top_bounder) * (knot / (knots[knots.length - 1] - knots[0])),
+            x: left_bounder + (right_bounder - left_bounder) * (knot / (knots[knots.length - 1] - knots[0])),
+            y: top_bounder - 3 * offset,
             type: 'knot',
             value: knot,
             index,
@@ -1564,7 +1564,11 @@ export default function App() {
             <div className='point-item'>
               <div className={`point-circle ${getBounderPointType(point)}`}
                 style={{
-                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : (point.type === 'drag' || point.type === 'knot') ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : 'red'
+                  backgroundColor: point.type === 'view' ? 'green' : (point.type === 'sliding' || point.type === 'ending' || point.type === 'bounder' || point.type === 'center') ? 'transparent' : (point.type === 'drag') ? 'yellow' : point.type === 'current' ? 'blue' : point.type === "rotate" ? 'yellow' : point.type === 'knot' ? (
+                    point.index === showingPrimitive?.params.find(param => param.type === 'multi_points')?.value?.length ? '#2ecc71' :
+                      point.index === showingPrimitive?.params.find(param => param.type === 'knots')?.value?.length - 1 - showingPrimitive?.params.find(param => param.type === 'multi_points')?.value?.length ? '#2ecc71' :
+                        '#d35400'
+                  ) : 'red'
                 }}
                 onMouseDown={point.type === 'dragable' ? () => handleEditPointMouseDown(point) : point.type === 'center' ? handleCenterMouseDown : point.type === 'rotate' ? () => handleRotateMouseDown(point) : point.type === 'bounder' ? () => handleScalePointMouseDown(point) : point.type === 'knot' ? () => hanldeKnotPointMouseDown(point.index) : () => { }}
                 onMouseUp={point.type === 'dragable' ? handleEditPointMouseUp : point.type === 'center' ? handleCenterMouseUp : point.type === 'rotate' ? handleRotateMouseUp : point.type === 'bounder' ? handleScalePointMouseUp : handleRotateMouseUp}

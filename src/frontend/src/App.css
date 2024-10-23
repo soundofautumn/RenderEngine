@@ -62,9 +62,13 @@ canvas {
 .point.bounder .point-item .point-circle,
 .point.dragable .point-item .point-circle,
 .point.rotate .point-item .point-circle,
-.point.center .point-item .point-circle,
-.point.knot .point-item .point-circle {
+.point.center .point-item .point-circle {
     cursor: all-scroll;
+    pointer-events: all;
+}
+
+.point.knot .point-item .point-circle {
+    cursor: col-resize;
     pointer-events: all;
 }
 

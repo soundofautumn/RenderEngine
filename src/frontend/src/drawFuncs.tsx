@@ -51,7 +51,13 @@ class DrawFunc {
                 return [param.name || `knots`, ((...control_points) => {
                   // knots个数 = control_points个数 + 阶数 + 1
                   // 默认阶数为3，当控制点个数为3时，阶数为2，knots个数为6
-                  return Array.from({ length: control_points.length == 3 ? 6 : control_points.length + 4 }, (_, i) => i);
+                  return Array.from({
+                    length: (control_points => {
+                      const default_order = control_points.length <= 3 ? control_points.length - 1 : 3;
+                      const asked_order = parseInt(prompt("生成的阶数？", default_order.toString()) || default_order.toString());
+                      return asked_order > control_points.length - 1 ? control_points.length - 1 : asked_order;
+                    })(control_points) + control_points.length + 1
+                  }, (_, i) => i);
                 })(...pointers)];
               else return [param.name || `u${index + 1}`, null];
             })),
