@@ -20,7 +20,7 @@ export interface IDrawFuncParams {
     algorithm?: number;
 }
 
-export type IDrawApiParamType = "point" | "func" | "multi_points" | "unknown";
+export type IDrawApiParamType = "point" | "func" | "multi_points" | "knots" | "unknown";
 
 export interface IDrawApiParam {
     type: IDrawApiParamType;

@@ -47,6 +47,12 @@ class DrawFunc {
                 return [param.name || `f${index + 1}`, param.func(...pointers)];
               else if (param.type === 'multi_points')
                 return [param.name || `mp${index + 1}`, pointers];
+              else if (param.type === 'knots')
+                return [param.name || `knots`, ((...control_points) => {
+                  // knots个数 = control_points个数 + 阶数 + 1
+                  // 默认阶数为3，当控制点个数为3时，阶数为2，knots个数为6
+                  return Array.from({ length: control_points.length == 3 ? 6 : control_points.length + 4 }, (_, i) => i);
+                })(...pointers)];
               else return [param.name || `u${index + 1}`, null];
             })),
             algorithm: this.algorithm,
@@ -293,13 +299,7 @@ drawFuncs.push({
         name: 'control_points',
       },
       {
-        type: 'func',
-        name: 'knots',
-        func: (...control_points) => {
-            // knots个数 = control_points个数 + 阶数 + 1
-            // 默认阶数为3，当控制点个数为3时，阶数为2，knots个数为6
-          return Array.from({ length: control_points.length == 3 ? 6 : control_points.length + 4 }, (_, i) => parseFloat(prompt(`第 ${i + 1} 个结点值`) || i.toString()));
-        }
+        type: 'knots',
       }
     ],
     requiredPointers: 3,

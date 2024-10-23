@@ -495,6 +495,8 @@ export default function App() {
               return param.name || `f${index + 1}`;
             else if (param.type === 'multi_points')
               return param.name || `mp${index + 1}`;
+            else if (param.type === 'knots')
+              return param.name || `knots`;
             else return param.name || `u${index + 1}`;
           }),
           algorithm: df.drawFunc.algorithm,
@@ -516,6 +518,8 @@ export default function App() {
                 return param.name || `f${index + 1}`;
               else if (param.type === 'multi_points')
                 return param.name || `mp${index + 1}`;
+              else if (param.type === 'knots')
+                return param.name || `knots`;
               else return param.name || `u${index + 1}`;
             })();
             return {
@@ -1365,7 +1369,7 @@ export default function App() {
                           <div key={index}>
                             {`(${point.x}, ${point.y})`}
                           </div>
-                        )) :
+                        )) : param.type === 'knots' ? param.value.join(', ') :
                           (typeof param.value === 'object') ? Object.entries(param.value).map(([key, value]) => (typeof value === 'object' && value !== null) ? (
                             <div className='param' key={key}>
                               <div className='name'>{key}</div>
