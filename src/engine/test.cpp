@@ -335,16 +335,6 @@ void perf_test() {
         return make_rectangle(random_point(), random_point());
     };
 
-    // 生成随机多边形
-    auto random_polygon = [&gen, &random_point]() {
-        std::uniform_int_distribution<int> dis(3, 5);
-        std::vector<Point> points;
-        for (int i = 0; i < dis(gen); i++) {
-            points.push_back(random_point());
-        }
-        return make_polygon(points);
-    };
-
     // 生成随机圆
     auto random_circle = [&gen, &random_point]() {
         std::uniform_int_distribution<int> dis(0, 200);
@@ -381,19 +371,17 @@ void perf_test() {
     // 生成随机图元
     auto random_primitive = [&]() {
         // 随机类型
-        std::uniform_int_distribution<int> dis(0, 5);
+        std::uniform_int_distribution<int> dis(0, 4);
         switch (dis(gen)) {
             case 0:
                 return Primitive{random_line()};
             case 1:
                 return Primitive{random_rectangle()};
-            // case 2:
-                // return Primitive{random_polygon()};
-            case 3:
+            case 2:
                 return Primitive{random_circle()};
-            case 4:
+            case 3:
                 return Primitive{random_bezier_curve()};
-            case 5:
+            case 4:
                 return Primitive{random_transform()};
         }
         return Primitive{};
