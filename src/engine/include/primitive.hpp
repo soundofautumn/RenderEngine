@@ -17,6 +17,9 @@
 #include "transform.hpp"
 namespace RenderCore {
 
+// 图元
+// 可以是线段、圆、圆弧、矩形、多边形、填充、画笔选项、变换等
+// 也可以是空的 monostate
 using Primitive = std::variant<Line, Circle, Arc, Rectangle, Polygon, Fill, PenOptions, Transform,
     BezierCurve, BsplineCurve, std::monostate>;
 

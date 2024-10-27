@@ -23,6 +23,20 @@
     └── server # C++ 服务器
 ```
 
+## 渲染引擎代码结构
+
+核心逻辑在 `src/engine/include/engine.hpp` 中，包含了图元存储、帧缓冲、图元转换等
+
+具体逻辑可以看代码中的注释
+
+`src/engine/include/bitmaps.hpp` 是存储渲染结果的类，可以保存为 bmp 图片
+
+`src/engine/include/primitives.hpp` 是图元的定义，包括点、线、三角形、矩形等
+
+所有算法实现在 `src/engine/core/` 中，根据处理的图元不同，分为不同的文件
+
+`src/engine/test.cpp` 是测试文件，可以用来测试引擎的功能，我们针对每个实验都测试了一些基本绘制功能，并能够生成对应的 bmp 图片
+
 ## 构建
 
 1. 克隆仓库

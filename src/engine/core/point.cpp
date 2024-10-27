@@ -8,11 +8,11 @@
 using namespace RenderCore;
 
 // 虚线
-const uint16_t DASH_PATTERN = 0b1100'1100'1100'1100;
+constexpr uint16_t DASH_PATTERN = 0b1100'1100'1100'1100;
 // 点线
-const uint16_t DOT_PATTERN = 0b1000'1000'1000'1000;
+constexpr uint16_t DOT_PATTERN = 0b1000'1000'1000'1000;
 // 点划线
-const uint16_t DASH_DOT_PATTERN = 0b1111'1010'1111'1010;
+constexpr uint16_t DASH_DOT_PATTERN = 0b1111'1010'1111'1010;
 
 void RenderEngine::draw_point(int x, int y, int index) {
     const auto &options = pen_options_;
@@ -20,6 +20,8 @@ void RenderEngine::draw_point(int x, int y, int index) {
         draw_pixel(x, y, options.color);
         return;
     }
+    // DEBUG模式下，如果不支持的线型，抛出异常
+    // RELEASE模式下，如果不支持的线型，则退化为画点
     if (options.type != PenOptions::LineType::SOLID && index == -1) {
 #ifdef RENDERENGINE_DEBUG
         throw std::runtime_error("Unsupported line type");

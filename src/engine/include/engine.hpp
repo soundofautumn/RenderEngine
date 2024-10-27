@@ -52,7 +52,7 @@ class RenderCore::RenderEngine {
 
     // 画笔选项
     // 在渲染过程自动更新
-    // 方便在渲染过程中获取画笔选项
+    // 设置成成员变量方便在渲染过程中获取画笔选项
     PenOptions pen_options_;
 
     // 全局选项
@@ -234,8 +234,12 @@ class RenderCore::RenderEngine {
         // 重置画笔选项
         pen_options_ = {};
 
+        // 复制图元
         render_primitives_ = std::list<Primitive>(primitives_.begin(), primitives_.end());
         for (auto primitive : render_primitives_) {
+            // 应用变换矩阵
+            // 对于能在栅格化前应用变换矩阵的图元，直接对原始图元应用变换矩阵
+            // 对于不能在栅格化前应用变换矩阵的图元，先保存变换矩阵，在栅格化时通过draw_pixel应用变换矩阵
             std::visit(
                 [this](auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
@@ -247,8 +251,15 @@ class RenderCore::RenderEngine {
                 },
                 primitive);
             // 裁剪
+            // 对于需要裁剪的图元，进行裁剪
+            // 裁剪后的图元会替换原始图元
+            // 裁剪后的图元可能是空的 monostate
             clip(primitive);
-            // 绘制图元
+            // 开始进行栅格化
+            // 对于不同的图元，使用不同的栅格化算法
+            // 栅格化后的图元会根据画笔选项进行绘制
+            // 如果是画笔选项，只更新画笔选项
+            // 画笔选项会影响接下来的图元直到下一个画笔选项
             std::visit(
                 [this](const auto &prim) {
                     using T = std::decay_t<decltype(prim)>;
@@ -272,6 +283,7 @@ class RenderCore::RenderEngine {
                         draw_bspline_curve(prim);
                     };
                     // 重置变换矩阵
+                    // 变换矩阵只对下一个图元有效
                     if constexpr (!std::is_same_v<T, Transform> && !std::is_same_v<T, PenOptions>) {
                         transform_matrix_ = Matrix3f::identity();
                     }
@@ -284,6 +296,8 @@ class RenderCore::RenderEngine {
 
    private:
     // 绘制点
+    // 线型线宽的控制也在这里实现
+    // index 用于控制虚线、点线、点划线等
     void draw_point(int x, int y, int index = -1);
 
     // 绘制线段

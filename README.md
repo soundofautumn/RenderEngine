@@ -25,6 +25,20 @@ The frontend is written in React, using TypeScript, and built using vite.
     └── server # C++ server
 ```
 
+## Render Engine Code Structure
+
+The core logic is located in `src/engine/include/engine.hpp`, which includes primitive storage, frame buffer, and primitive transformation.
+
+Detailed logic can be found in the comments within the code.
+
+`src/engine/include/bitmaps.hpp` contains the class that stores rendered results and can save them as BMP images.
+
+`src/engine/include/primitives.hpp` defines the primitives, including points, lines, triangles, rectangles, etc.
+
+All algorithms are implemented in `src/engine/core/`, divided into different files based on the type of primitive being processed.
+
+`src/engine/test.cpp` is the test file, used to test the engine’s functionality. For each experiment, we tested some basic rendering functions and were able to generate corresponding BMP images.
+
 ## Build
 
 1. Clone the repository
