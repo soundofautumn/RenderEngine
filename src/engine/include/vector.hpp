@@ -86,10 +86,6 @@ struct Vector {
     }
 };
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
-#pragma GCC diagnostic ignored "-Wnested-anon-types"
-
 // 特化二维矢量
 template <typename T>
 struct Vector<2, T> {
@@ -307,8 +303,6 @@ struct Vector<4, T> {
 
     constexpr inline Vector<4, T> xyzw() const { return Vector<4, T>(x, y, z, w); }
 };
-
-#pragma GCC diagnostic pop
 
 //---------------------------------------------------------------------
 // 数学库：矢量运算
