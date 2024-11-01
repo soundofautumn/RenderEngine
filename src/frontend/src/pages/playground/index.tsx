@@ -2,7 +2,7 @@ import * as React from 'react';
 import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } from '../../utils/client';
 import drawFuncs from '../../utils/drawFuncs';
 
-import './index.css';
+import './playground.css';
 import { BOUNDER_OFFSET, IDrawApiParam, IGlobalOptions, IPoint, IPrimitive, IShadowBounder } from '../../utils/types';
 import { randomEngineName } from '../../utils';
 
@@ -29,7 +29,7 @@ function getPointDistance(p1: IPoint, p2: IPoint) {
   return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
 }
 
-export default function App() {
+export default function PlayGround() {
   const coordinateRef = React.useRef({ x: 0, y: 0 });
   const [coordinate, setCoordinate] = React.useState({ x: 0, y: 0 });
   const canvasRef = React.useRef<HTMLCanvasElement>(null);

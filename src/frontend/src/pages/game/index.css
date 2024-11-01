@@ -1,0 +1,136 @@
+#game {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #2c3e50;
+}
+#game {
+    #title {
+        color: white;
+        font-size: 3em;
+        margin-bottom: 20px;
+        /* 字体间距加宽，加描边和发光效果 */
+        letter-spacing: 0.2em;
+        text-shadow: 0 0 5px #7f8c8d, 0 0 10px #7f8c8d, 0 0 15px #7f8c8d,
+            0 0 20px #34495e, 0 0 30px #34495e, 0 0 40px #34495e,
+            0 0 55px #34495e, 0 0 75px #34495e;
+    }
+
+    canvas {
+        outline: white 1px solid;
+        background: black;
+    }
+
+    #hide {
+        width: 800px;
+        height: 0px;
+        position: relative;
+        .chess {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            z-index: 10;
+            opacity: 100%;
+            --color: white;
+            background-color: var(--color);
+            &.-\31 {
+                --color: rgba(0, 0, 0, 0.3);
+            }
+            &.\30 {
+                --color: #2ecc71;
+            }
+            &.\31 {
+                --color: #3498db;
+            }
+            &.\32 {
+                --color: #e74c3c;
+            }
+            &.\33 {
+                --color: #f1c40f;
+            }
+            &.router {
+                &::before {
+                    content: "🛜";
+                    font-size: 50px;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+            }
+            &.current {
+                outline: 3px dashed var(--color);
+                background-color: transparent;
+            }
+        }
+    }
+
+    #pressed-key-list {
+        color: white;
+        font-size: 1.5em;
+        margin-top: 20px;
+        height: fit-content;
+        width: 800px;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 22px;
+        flex-wrap: nowrap;
+    }
+
+    #pressed-key-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .key-icon {
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        border: #2c3e50 1px solid;
+        flex: 0 0 auto;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+    }
+
+    .key-icon + .key-icon {
+        margin-left: 10px;
+    }
+
+    .key-icon.ArrowUp {
+        border: #2ecc71 1px solid;
+        background-color: #2ecc7166;
+        &::before {
+            content: "↑";
+        }
+    }
+    .key-icon.ArrowDown {
+        border: #e67e22 1px solid;
+        background-color: #e67e2266;
+        &::before {
+            content: "↓";
+        }
+    }
+    .key-icon.ArrowLeft {
+        border: #f1c40f 1px solid;
+        background-color: #f1c40f66;
+        &::before {
+            content: "←";
+        }
+    }
+    .key-icon.ArrowRight {
+        border: #3498db 1px solid;
+        background-color: #3498db66;
+        &::before {
+            content: "→";
+        }
+    }
+    .key-icon.Space {
+        border: #9b59b6 1px solid;
+        background-color: #9b59b666;
+    }
+}

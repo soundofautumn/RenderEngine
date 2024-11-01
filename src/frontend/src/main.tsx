@@ -2,17 +2,24 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   RouterProvider,
-  createBrowserRouter
+  createBrowserRouter,
+  redirect
 } from 'react-router-dom'
 
-import App from "./pages/index";
+import PlayGround from "./pages/playground";
 import Game from "./pages/game";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const ROUTERS = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    loader: () => {
+      return redirect("/playground");
+    }
+  },
+  {
+    path: "/playground",
+    element: <PlayGround />,
   },
   {
     path: "/game",
