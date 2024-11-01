@@ -1,5 +1,5 @@
 import axios from "axios";
-import { randomEngineName } from "./utils";
+import { randomEngineName } from ".";
 
 export const backend_endpoint =
     import.meta.env.VITE_RENDER_ENGINE_ENDPOINT || "localhost:3000";

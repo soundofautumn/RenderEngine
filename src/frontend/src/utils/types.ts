@@ -39,6 +39,7 @@ export interface IDrawApiParam {
 export interface IPrimitive {
     apiEndpoint: string;
     params: (IDrawApiParam & {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         value: any;
     })[];
     index: number;

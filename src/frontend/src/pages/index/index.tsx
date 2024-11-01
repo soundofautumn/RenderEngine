@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } from './client';
-import drawFuncs from './drawFuncs';
+import { backend_endpoint, engine_name, engine_fps, client, retry_max_times } from '../../utils/client';
+import drawFuncs from '../../utils/drawFuncs';
 
-import './App.css';
-import { BOUNDER_OFFSET, IDrawApiParam, IGlobalOptions, IPoint, IPrimitive, IShadowBounder } from './types';
-import { randomEngineName } from './utils';
+import './index.css';
+import { BOUNDER_OFFSET, IDrawApiParam, IGlobalOptions, IPoint, IPrimitive, IShadowBounder } from '../../utils/types';
+import { randomEngineName } from '../../utils';
 
 function getHeightUnfold(dom: HTMLElement) {
   const fakeNode = dom.cloneNode(true) as HTMLElement;
