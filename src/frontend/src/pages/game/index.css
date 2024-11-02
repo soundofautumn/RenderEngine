@@ -24,9 +24,11 @@
     }
 
     #hide {
+        display: none;
         width: 800px;
         height: 0px;
         position: relative;
+        opacity: 0.1;
         .chess {
             position: absolute;
             width: 100px;
@@ -42,13 +44,13 @@
                 --color: #2ecc71;
             }
             &.\31 {
-                --color: #3498db;
+                --color: #e67e22;
             }
             &.\32 {
                 --color: #e74c3c;
             }
             &.\33 {
-                --color: #f1c40f;
+                --color: #3498db;
             }
             &.router {
                 &::before {

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { backend_endpoint, game_engine_name as engine_name, game_engine_fps as engine_fps, client, retry_max_times } from '../../utils/client';
-import { IDrawApiParam, IPrimitive } from '../../utils/types';
-import drawFuncs from '../../utils/drawFuncs';
+import { backend_endpoint, engine_name, game_engine_fps as engine_fps, client, retry_max_times } from '../../utils/client';
+import { drawFunctions } from '../../utils/drawFuncs';
 
 import './index.css'
 
@@ -12,6 +11,116 @@ type Direction = 'up' | 'down' | 'left' | 'right' | undefined;
 interface IChess {
   type: 'empty' | 'wire' | 'router';
   owner?: number;
+  primitive?: number[];
+}
+
+const OwnerColors = [
+  '#2ecc71',
+  '#e67e22',
+  '#e74c3c',
+  '#3498db',
+  '#f1c40f',
+  '#9b59b6',
+];
+
+function DeletePrimitive(index: number) {
+  return client("/engine/primitive/modify", {
+    data: {
+      Primitive: {
+        Line: {
+          p1: {
+            x: 0,
+            y: 0,
+          },
+          p2: {
+            x: 0,
+            y: 0,
+          },
+          algorithm: 0,
+        }
+      },
+      Index: index,
+    }
+  })
+}
+
+function ChangeColor(color: string): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    client('/engine/primitive/push_back', {
+      data: {
+        PenOptions: {
+          color: {
+            r: parseInt(color.slice(1, 3), 16),
+            g: parseInt(color.slice(3, 5), 16),
+            b: parseInt(color.slice(5, 7), 16),
+            a: 255,
+          },
+          width: 1,
+          type: 0,
+          dash: 1,
+          fill_color: { r: 0, g: 0, b: 0, a: 0 },
+        },
+      }
+    }).then(r => {
+      resolve(parseInt(r.data.message))
+    }).catch(reject);
+  })
+}
+
+async function DrawSelectBox(x: number, y: number, owner: number): Promise<number[]> {
+  const color = OwnerColors[owner] || '#ffffff';
+  const primitives: number[] = [
+    await ChangeColor(color),
+    await drawFunctions.Rectangle.draw({
+      pointers: [
+        { x, y },
+        { x: x + 100, y: y + 100 }
+      ]
+    }),
+  ];
+  return primitives;
+}
+
+async function DrawRouter(x: number, y: number, owner: number): Promise<number[]> {
+  const color = OwnerColors[owner] || '#ffffff';
+  const primitives: number[] = [
+    await ChangeColor(color),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 10 }
+      ]
+    }),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 20 }
+      ]
+    }),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 25 }
+      ]
+    })
+  ];
+  console.log(`(${x}, ${y}) ${owner}`, 'Router Drawn:', primitives);
+  return primitives;
+}
+
+async function PutWire(from: { x: number, y: number }, to: { x: number, y: number }, owner: number) {
+  const color = OwnerColors[owner] || '#ffffff';
+  const primitives: number[] = [
+    await ChangeColor(color),
+    await drawFunctions.Line.draw({
+      pointers: [
+        { x: from.x * 100 + 50, y: from.y * 100 + 50 },
+        { x: to.x * 100 + 50, y: to.y * 100 + 50 }
+      ]
+    }),
+  ];
+  console.log(`(${from.x}, ${from.y}) -> (${to.x}, ${to.y}) ${owner}`, 'Wire Drawn:', primitives);
+  return primitives;
 }
 
 function GenerateChessboard(): IChess[][] {
@@ -73,75 +182,10 @@ export default function Game() {
   const loadingRef = React.useRef(true);
   const fpsRef = React.useRef(0);
   const [fps, setFps] = React.useState(0);
-  const first = React.useRef(false);
+  const first = React.useRef(true);
   const [start, setStart] = React.useState(true);
   const startTimeoutRef = React.useRef<number | null>(null);
   const [errorMessage, setErrorMessage] = React.useState('等待后端响应...');
-  const [, setPrimitives] = React.useState<IPrimitive[]>([]);
-  const [showingPrimitive, setShowingPrimitive] = React.useState<IPrimitive | null>(null);
-  const fetchPrimitives = (update_index?: number) => {
-    client("/engine/primitive/get_all").then(r => {
-      const raw_primitives = r.data as { [apiEndpoint: string]: { [param: string]: object } }[];
-      console.log(raw_primitives);
-      const primitives = raw_primitives.map((raw_primitive, index) => {
-        const apiEndpoint = Object.keys(raw_primitive)[0];
-        const matchedDrawFuncs = drawFuncs.filter(df => df.drawFunc.apiEndpoint === apiEndpoint).map(df => ({
-          params: df.drawFunc.params,
-          type: df.drawFunc.type,
-          names: df.drawFunc.params.map((param, index) => {
-            if (param.type === 'point')
-              return param.name || `p${index + 1}`;
-            else if (param.type === 'func' && param.func)
-              return param.name || `f${index + 1}`;
-            else if (param.type === 'multi_points')
-              return param.name || `mp${index + 1}`;
-            else if (param.type === 'knots')
-              return param.name || `knots`;
-            else return param.name || `u${index + 1}`;
-          }),
-          algorithm: df.drawFunc.algorithm,
-        })).sort((a, b) => {
-          const matchTimes = (df: {
-            params: IDrawApiParam[];
-            names: string[];
-          }) => df.names.filter(name => Object.keys(raw_primitive[apiEndpoint]).includes(name)).length;
-          return matchTimes(b) - matchTimes(a);
-        });
-        const matchedDrawFunc = matchedDrawFuncs.length > 0 ? matchedDrawFuncs[0] : null;
-        const params:
-          (IDrawApiParam & { value: object })[]
-          = matchedDrawFunc?.params.map((param, index) => {
-            const name = (() => {
-              if (param.type === 'point')
-                return param.name || `p${index + 1}`;
-              else if (param.type === 'func' && param.func)
-                return param.name || `f${index + 1}`;
-              else if (param.type === 'multi_points')
-                return param.name || `mp${index + 1}`;
-              else if (param.type === 'knots')
-                return param.name || `knots`;
-              else return param.name || `u${index + 1}`;
-            })();
-            return {
-              type: param.type,
-              name,
-              value: raw_primitive[apiEndpoint][name],
-            }
-          }) || Object.keys(raw_primitive[apiEndpoint]).map((name) => ({
-            type: 'unknown',
-            name,
-            value: raw_primitive[apiEndpoint][name],
-          }))
-        return { apiEndpoint, params, index, type: matchedDrawFunc?.type || 'unknown', editable: matchedDrawFunc ? true : false, algorithm: matchedDrawFunc?.algorithm || 0 };
-      });
-      console.log(primitives);
-      setPrimitives(primitives);
-      if (showingPrimitive && update_index) {
-        const newShowingPrimitive = primitives.find(p => p.index === update_index);
-        if (newShowingPrimitive) setShowingPrimitive(newShowingPrimitive);
-      }
-    })
-  }
   React.useEffect(() => {
     if (!first.current) return;
     first.current = false;
@@ -170,7 +214,7 @@ export default function Game() {
             window.location.reload();
           }
         }, 500);
-        fetchPrimitives();
+        Init();
         resolve(1);
       }).catch(e => {
         console.error(e);
@@ -220,16 +264,12 @@ export default function Game() {
   }, [])
 
   /* 游戏逻辑 */
-  const [chessboard, setChessboard] = React.useState<IChess[][]>(GenerateChessboard());
-  React.useEffect(() => {
-    console.log('chessboard', chessboard);
-  }, [chessboard])
-  const [currentPosition, setCurrentPosition] = React.useState({ x: 0, y: 0 });
-  React.useEffect(() => {
-    console.log('position', currentPosition);
-  }, [currentPosition])
+  const [chessboard, setChessboard] = React.useState<IChess[][]>([]);
+  const [currentPosition, setCurrentPosition] = React.useState({ x: -1, y: -1 });
+  const currentWiresPrimitive = React.useRef<number[]>([]);
+  const allWiresPrimtives = React.useRef<{ [owner: number]: number[] }>({});
   const handleMove = (direction: Direction) => {
-    const putWire = (x: number, y: number) => {
+    const putWire = async (x: number, y: number) => {
       if (currentOwner < 0) {
         setCurrentPosition({ x, y });
         return;
@@ -237,6 +277,7 @@ export default function Game() {
         if (chessboard[y][x].type === 'empty') {
           // 空的地方放线
           chessboard[y][x] = { type: 'wire', owner: currentOwner };
+          currentWiresPrimitive.current.push(...await PutWire(currentPosition, { x, y }, currentOwner));
           setCurrentPosition({ x, y });
         }
         else if (chessboard[y][x].type === 'wire') {
@@ -248,6 +289,9 @@ export default function Game() {
             return;
           else {
             // 成功连线
+            currentWiresPrimitive.current.push(...await PutWire(currentPosition, { x, y }, currentOwner));
+            allWiresPrimtives.current[currentOwner] = currentWiresPrimitive.current;
+            currentWiresPrimitive.current = [];
             setCurrentPosition({ x, y });
             setCurrentOwner(-1);
             setCurrentStartChess(null);
@@ -270,24 +314,54 @@ export default function Game() {
     }
   }
   const [currentOwner, setCurrentOwner] = React.useState(-1);
+
+  const curPosPrimitives = React.useRef<number[]>([]);
+  React.useEffect(() => {
+    console.log('position', currentPosition, curPosPrimitives.current);
+    curPosPrimitives.current.forEach(primitive => {
+      DeletePrimitive(primitive);
+    })
+    DrawSelectBox(currentPosition.x * 100, currentPosition.y * 100, currentOwner).then(r => {
+      curPosPrimitives.current = r;
+    })
+  }, [currentPosition, currentOwner])
   const [currentStartChess, setCurrentStartChess] = React.useState<{ x: number, y: number } | null>(null);
   const handleSelect = () => {
     const currentChess = chessboard[currentPosition.y][currentPosition.x];
     console.log('handleSelect', currentChess);
     if (currentChess.type === 'router') {
       const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
-      if (owner === currentOwner)
+      if (owner === currentOwner) {
+        // 取消连线
         setCurrentOwner(-1);
+      }
       else {
+        // 开始连线
+        if (allWiresPrimtives.current[owner]) {
+          allWiresPrimtives.current[owner].forEach(primitive => {
+            DeletePrimitive(primitive);
+          })
+          allWiresPrimtives.current[owner] = [];
+        }
         setCurrentOwner(owner);
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
         setCurrentStartChess({ x: currentPosition.x, y: currentPosition.y });
       }
     } else if (currentChess.type === 'wire') {
       if (currentOwner === -1) {
+        // 删除已经连过的线
         const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
+        allWiresPrimtives.current[owner].forEach(primitive => {
+          DeletePrimitive(primitive);
+        })
+        allWiresPrimtives.current[owner] = [];
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
       } else {
+        // 取消当前连线
+        currentWiresPrimitive.current.forEach(primitive => {
+          DeletePrimitive(primitive);
+        })
+        currentWiresPrimitive.current = [];
         setCurrentOwner(-1);
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === currentOwner ? { type: 'empty' } : chess)));
         setCurrentStartChess(null);
@@ -307,9 +381,26 @@ export default function Game() {
       alert('You Win!');
     }
   }
+  const Init = async () => {
+    await ChangeColor('#ffffff');
+    const newChessboard = GenerateChessboard();
+    setChessboard(newChessboard)
+    for (const row of newChessboard) {
+      for (const chess of row) {
+        if (chess.type === 'router') {
+          await DrawRouter(row.indexOf(chess) * 100 + 50, newChessboard.indexOf(row) * 100 + 50, chess.owner === undefined ? -1 : chess.owner);
+        }
+      }
+    }
+    setCurrentPosition({ x: 0, y: 0 });
+  }
 
 
-  return <div id="game">
+  return <div
+    id="game"
+    onKeyDown={handleKeyPressed}
+    tabIndex={0}
+  >
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
       <div>{errorMessage}</div>
     </div>
@@ -322,11 +413,7 @@ export default function Game() {
       <span style={{ color: "#74b9ff" }}>重</span>
       <span style={{ color: "#e74c3c" }}>连</span>
     </p>
-    <div
-      id='hide'
-      onKeyDown={handleKeyPressed}
-      tabIndex={0}
-    >
+    <div id='hide'>
       {
         chessboard.map((row, y) => row.map((chess, x) => {
           return <div key={`${x}-${y}`} className={`chess ${chess.type} ${chess.owner === undefined ? -2 : chess.owner}`} style={{ top: y * 100, left: x * 100 }} />

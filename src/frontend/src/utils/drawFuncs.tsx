@@ -30,7 +30,7 @@ class DrawFunc {
       throw new Error("Multiple points drawing method requires multi_points");
   }
 
-  public draw(props: IDrawFuncParams): Promise<void> {
+  public draw(props: IDrawFuncParams): Promise<number> {
     const { pointers } = props;
     return new Promise((resolve, reject) => {
       if (pointers.length < this.requiredPointers) {
@@ -64,8 +64,10 @@ class DrawFunc {
             algorithm: this.algorithm,
           }
         }
-      }).then(() => {
-        resolve();
+      }).then((r) => {
+        const index = parseInt(r.data.message);
+        // console.log('Added Primitive Index:', index);
+        resolve(index);
       }).catch(e => {
         console.error(e);
         reject("Failed to draw");
@@ -78,6 +80,75 @@ interface IDrawFunc {
   name: string;
   drawFunc: DrawFunc;
 }
+
+
+export const drawFunctions = {
+  Line: new DrawFunc(
+    {
+      params: [
+        {
+          type: 'point',
+        },
+        {
+          type: 'point',
+        },
+      ],
+      requiredPointers: 2,
+      apiEndpoint: 'Line',
+      drawingMethod: 'click',
+      algorithm: 0,
+    }
+  ),
+  Circle: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+        name: 'point_on_circle',
+      },
+      {
+        type: 'point',
+        name: 'center'
+      },
+      {
+        type: 'func',
+        name: 'radius',
+        func: (point_on_circle, center) => Math.floor(Math.sqrt((point_on_circle.x - center.x) ** 2 + (point_on_circle.y - center.y) ** 2)),
+      }
+    ],
+    requiredPointers: 2,
+    apiEndpoint: 'Circle',
+    drawingMethod: 'click',
+    type: 'center_radius',
+  }),
+  Rectangle: new DrawFunc({
+    params: [
+      {
+        type: 'func',
+        name: 'top_left',
+        func: (a: IPoint, b: IPoint) => {
+          return {
+            x: Math.min(a.x, b.x),
+            y: Math.min(a.y, b.y)
+          }
+        }
+      },
+      {
+        type: 'func',
+        name: 'bottom_right',
+        func: (a: IPoint, b: IPoint) => {
+          return {
+            x: Math.max(a.x, b.x),
+            y: Math.max(a.y, b.y)
+          }
+        }
+      },
+    ],
+    requiredPointers: 2,
+    apiEndpoint: 'Rectangle',
+    drawingMethod: 'click',
+  }),
+}
+
 
 const drawFuncs: IDrawFunc[] = []
 
