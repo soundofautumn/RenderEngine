@@ -86,14 +86,16 @@ void handle_engine_draw(const request &req, response &res) {
     if (!engine_mutex) {
         return;
     }
-    int length = -1;
+
     try {
         auto primitive = deserialize_primitive(j.as_object());
         logger::trace("Add primitive: {}", boost::json::serialize(j));
+        int index;
         {
             std::lock_guard<std::mutex> lock(engine_mutex->mutex);
-            length = engine_mutex->engine.add_primitive(primitive);
+            index = engine_mutex->engine.add_primitive(primitive);
         }
+        success_response(res, "Primitive added.", {{"index", index}});
     } catch (const std::exception &e) {
 #ifdef NDEBUG
         auto msg = "Invalid primitive.";
@@ -102,7 +104,6 @@ void handle_engine_draw(const request &req, response &res) {
 #endif
         error_response(res, http::status::bad_request, msg);
     }
-    success_response(res, std::to_string(length));
 }
 
 void handle_engine_get_primitives(const request &req, response &res) {

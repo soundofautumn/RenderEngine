@@ -65,7 +65,7 @@ class DrawFunc {
           }
         }
       }).then((r) => {
-        const index = parseInt(r.data.message);
+        const index = r.data.data.index;
         // console.log('Added Primitive Index:', index);
         resolve(index);
       }).catch(e => {

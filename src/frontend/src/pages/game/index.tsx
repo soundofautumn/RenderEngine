@@ -62,7 +62,7 @@ function ChangeColor(color: string): Promise<number> {
         },
       }
     }).then(r => {
-      resolve(parseInt(r.data.message))
+      resolve(r.data.data.index);
     }).catch(reject);
   })
 }

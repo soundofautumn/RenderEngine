@@ -16,6 +16,17 @@ inline void success_response(response &res, const std::string &msg) {
     res.body() = boost::json::serialize(j);
 }
 
+inline void success_response(response &res, const std::string &msg, const boost::json::value &data) {
+    res.result(http::status::ok);
+    res.set(http::field::content_type, "application/json");
+    boost::json::object j{
+        {"status", "success"},
+        {"message", msg},
+        {"data", data},
+    };
+    res.body() = boost::json::serialize(j);
+}
+
 inline void error_response(response &res, http::status status, const std::string &msg) {
     res.result(status);
     res.set(http::field::content_type, "application/json");
