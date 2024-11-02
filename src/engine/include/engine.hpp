@@ -167,7 +167,7 @@ class RenderCore::RenderEngine {
         }
         need_render_ = true;
         primitives_.push_back(primitive);
-        return primitives_.size() - 2;
+        return primitives_.size() - 1;
     }
 
     // 插入图元
