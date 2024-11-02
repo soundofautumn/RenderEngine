@@ -161,12 +161,13 @@ class RenderCore::RenderEngine {
     }
 
     // 绘制图元
-    void add_primitive(const Primitive &primitive) {
+    int add_primitive(const Primitive &primitive) {
         if (!frame_buffer_) {
-            return;
+            return -1;
         }
         need_render_ = true;
         primitives_.push_back(primitive);
+        return primitives_.size() - 2;
     }
 
     // 插入图元
