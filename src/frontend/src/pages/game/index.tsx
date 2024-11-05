@@ -109,7 +109,7 @@ async function DrawSelectBox(x: number, y: number, owner: number): Promise<numbe
 async function DrawRouter(x: number, y: number, owner: number, alpha = 80): Promise<number[]> {
   const color = OwnerColors[owner] || '#ffffff';
   const primitives: number[] = [
-    await ChangeColor('#bdc3c7', '#bdc3c7', 255, 255),
+    await ChangeColor('#7f8c8d', '#7f8c8d', 255, 255),
     await drawFunctions.Circle.draw({
       pointers: [
         { x, y },
@@ -156,7 +156,7 @@ async function DrawRouter(x: number, y: number, owner: number, alpha = 80): Prom
       ]
     }),
 
-    await ChangeColor('#bdc3c7', '#000000', 0, 255),
+    await ChangeColor('#7f8c8d', '#000000', 0, 255),
     ...await Promise.all([
       drawFunctions.Rectangle.draw({
         pointers: [
@@ -189,7 +189,7 @@ async function DrawRouter(x: number, y: number, owner: number, alpha = 80): Prom
     ]),
 
 
-    await ChangeColor('#bdc3c7', '#000000', 255, 255),
+    await ChangeColor('#7f8c8d', '#000000', 255, 255),
     await drawFunctions.Circle.draw({
       pointers: [
         { x, y },
@@ -362,8 +362,35 @@ async function DrawRouter(x: number, y: number, owner: number, alpha = 80): Prom
       }),
     ])
   ];
-  console.log(`(${x}, ${y}) ${owner}`, 'Router Drawn:', primitives);
   return primitives;
+}
+
+function randomColor() {
+  return '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+}
+
+// 随机生成不同颜色的从屏幕下方开始的贝塞尔曲线来模拟烟花
+async function DrawWin() {
+  for (let i = 0; i < 100; i++) {
+    const primitives: number[] = [];
+    primitives.push(await ChangeColor(randomColor(), randomColor(), 255, 255))
+    primitives.push(await drawFunctions.Bezier.draw({
+      pointers: [
+        { x: Math.floor(Math.random() * 800), y: Math.floor(Math.random() * 800) },
+        { x: Math.floor(Math.random() * 800), y: Math.floor(Math.random() * 800) },
+        { x: Math.floor(Math.random() * 800), y: Math.floor(Math.random() * 800) },
+        { x: Math.floor(Math.random() * 800), y: Math.floor(Math.random() * 800) },
+      ]
+    }))
+    if (i % 5 == 0)
+      await new Promise(r => setTimeout(r, 100));
+    setTimeout(() => {
+      primitives.forEach(primitive => {
+        DeletePrimitive(primitive);
+      })
+    }, 100)
+  }
+  return;
 }
 
 async function PutWire(from: { x: number, y: number }, to: { x: number, y: number }, owner: number) {
@@ -377,9 +404,10 @@ async function PutWire(from: { x: number, y: number }, to: { x: number, y: numbe
       ]
     }),
   ];
-  console.log(`(${from.x}, ${from.y}) -> (${to.x}, ${to.y}) ${owner}`, 'Wire Drawn:', primitives);
   return primitives;
 }
+
+
 
 function GenerateChessboard(): IChess[][] {
   const emptyBoard: IChess[][] = Array.from({ length: 6 }, () => Array.from({ length: 8 }, () => ({ type: 'empty' })));
@@ -423,6 +451,7 @@ export default function Game() {
     }
   }
   const handleGameKey = (key: ControlKey) => {
+    if (gameEnd.current) return;
     const directionMap: { [key in ControlKey]: Direction } = {
       'ArrowUp': 'up',
       'ArrowDown': 'down',
@@ -559,7 +588,7 @@ export default function Game() {
                     DeletePrimitive(primitive);
                   })
                   chess.primitive = await DrawRouter(cx * 100 + 50, cy * 100 + 50, currentOwner, 120);
-                  
+
                 }
               }
             }
@@ -589,7 +618,6 @@ export default function Game() {
 
   const curPosPrimitives = React.useRef<number[]>([]);
   React.useEffect(() => {
-    console.log('position', currentPosition, curPosPrimitives.current);
     curPosPrimitives.current.forEach(primitive => {
       DeletePrimitive(primitive);
     })
@@ -600,7 +628,6 @@ export default function Game() {
   const [currentStartChess, setCurrentStartChess] = React.useState<{ x: number, y: number } | null>(null);
   const handleSelect = () => {
     const currentChess = chessboard[currentPosition.y][currentPosition.x];
-    console.log('handleSelect', currentChess);
     if (currentChess.type === 'router') {
       const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
       if (owner === currentOwner) {
@@ -640,7 +667,8 @@ export default function Game() {
       }
     }
   }
-  const checkWin = () => {
+  const gameEnd = React.useRef(false);
+  const checkWin = async () => {
     const owners = new Set<number>();
     chessboard.forEach(row => row.forEach(chess => {
       if (chess.type === 'router') owners.add(chess.owner || -1);
@@ -650,6 +678,8 @@ export default function Game() {
       if (chess.type === 'wire') connectedOwners.add(chess.owner || -1);
     }));
     if (owners.size === connectedOwners.size) {
+      gameEnd.current = true;
+      await DrawWin();
       alert('You Win!');
     }
   }

@@ -158,6 +158,18 @@ export const drawFunctions = {
     apiEndpoint: 'Fill',
     drawingMethod: 'click',
   }),
+  Bezier: new DrawFunc({
+    params: [
+      {
+        type: 'multi_points',
+        name: 'control_points',
+      }
+    ],
+    requiredPointers: 3,
+    apiEndpoint: 'BezierCurve',
+    drawingMethod: 'click',
+    multiplePoints: true,
+  }),
 }
 
 
