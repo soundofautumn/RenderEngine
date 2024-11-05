@@ -732,11 +732,46 @@ export default function Game() {
       }
       <div className={`chess current ${currentOwner}`} style={{ top: currentPosition.y * 100, left: currentPosition.x * 100 }} />
     </div>
-    <canvas
-      width={800}
-      height={600}
-      ref={canvasRef}
-    />
+    <div id="main">
+      <div className='slider left'>
+        <p>游戏背景</p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在遥远的未来，世界依赖一个庞大的智能能源系统来维持城市的运转。然而，这个系统的中心——被称为“能量之心”的能源枢纽——因一场未知的风暴而失去了平衡，导致许多节点断开连接。玩家将化身为一位被誉为“电之修复者”的天才电气修理工，手握特殊的能量导线工具，进入到错综复杂的电箱内。在这座小小的空间里，玩家不仅要面对狭窄的路径和有限的资源，还要小心翼翼地处理每一条线路，确保它们不相互干扰，重建能量流动，恢复整个系统的秩序。每一关的挑战不仅仅是对手艺的考验，更是一场智慧的较量，直面隐藏在电路中的神秘力量。
+      </div>
+      <canvas
+        width={800}
+        height={600}
+        ref={canvasRef}
+      />
+      <div className='slider right'>
+        <p>玩法介绍</p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在每一关的电路空间内，会有一个棋盘格，格子上散布着成对的电路节点，它们被赋予了不同的颜色，彼此呼应。你的任务是将同颜色的节点用横竖排列的线条连接，绘制出一条完整无缺的通路，既不能让线路碰撞，也不能相互交叠。你需要谨慎思考，用心操作，因为每一次成功的连接都意味着能量的复苏和城市的重生。
+        <br /><br />
+        <div id="key-help">
+          <div className='key-item'>
+            <div className={`key-icon ArrowUp`} />
+            <div className="key-intro">向上移动</div>
+          </div>
+          <div className='key-item'>
+            <div className={`key-icon ArrowDown`} />
+            <div className="key-intro">向下移动</div>
+          </div>
+          <div className='key-item'>
+            <div className={`key-icon ArrowLeft`} />
+            <div className="key-intro">向左移动</div>
+          </div>
+          <div className='key-item'>
+            <div className={`key-icon ArrowRight`} />
+            <div className="key-intro">向右移动</div>
+          </div>
+          <div className='key-item'>
+            <div className={`key-icon Space`} />
+            <div className="key-intro">安装拆除</div>
+          </div>
+        </div>
+        <br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;你需要通过方向键来操作选择框，使用空格键来选中或取消选中节点，连接线路。你也可以通过选中导线来取消已经连接的节点。当所有的节点都被成功连接时，你就赢得了这一关的胜利。祝你好运！
+      </div>
+    </div>
     <div id='pressed-key-list'>
       {
         pressedKeys.map((key, index) => <div key={index} className={`key-icon ${key}`} />)
