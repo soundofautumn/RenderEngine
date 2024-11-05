@@ -21,7 +21,13 @@ const OwnerColors = [
   '#3498db',
   '#f1c40f',
   '#9b59b6',
-];
+  '#6c5ce7',
+  '#e84393',
+  '#2d3436',
+  '#fdcb6e',
+  '#0984e3',
+  '#e17055',
+].sort(() => Math.random() - 0.5);
 
 function DeletePrimitive(index: number) {
   return client("/engine/primitive/modify", {
@@ -407,18 +413,17 @@ async function PutWire(from: { x: number, y: number }, to: { x: number, y: numbe
   return primitives;
 }
 
-
-
 function GenerateChessboard(): IChess[][] {
   const emptyBoard: IChess[][] = Array.from({ length: 6 }, () => Array.from({ length: 8 }, () => ({ type: 'empty' })));
-  emptyBoard[0][3] = { type: 'router', owner: 0 };
-  emptyBoard[0][4] = { type: 'router', owner: 3 };
-  emptyBoard[0][7] = { type: 'router', owner: 1 };
-  emptyBoard[1][2] = { type: 'router', owner: 2 };
-  emptyBoard[1][3] = { type: 'router', owner: 3 };
-  emptyBoard[2][2] = { type: 'router', owner: 1 };
-  emptyBoard[3][0] = { type: 'router', owner: 0 };
-  emptyBoard[3][5] = { type: 'router', owner: 2 };
+  for (let i = 0; i < Math.floor(3 + Math.random() * 4); i++)
+    for (let j = 0; j < 2; j++) {
+      let x, y;
+      do {
+        x = Math.floor(Math.random() * 8);
+        y = Math.floor(Math.random() * 6);
+      } while (emptyBoard[y][x].type !== 'empty');
+      emptyBoard[y][x] = { type: 'router', owner: i };
+    }
   return emptyBoard;
 }
 
@@ -680,7 +685,8 @@ export default function Game() {
     if (owners.size === connectedOwners.size) {
       gameEnd.current = true;
       await DrawWin();
-      alert('You Win!');
+      // alert('You Win!');
+      location.reload()
     }
   }
   const Init = async () => {
@@ -695,6 +701,7 @@ export default function Game() {
       }
     }
     setCurrentPosition({ x: 0, y: 0 });
+    document.getElementById('game')?.focus();
   }
 
 
