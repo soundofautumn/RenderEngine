@@ -415,13 +415,15 @@ async function PutWire(from: { x: number, y: number }, to: { x: number, y: numbe
 
 function GenerateChessboard(): IChess[][] {
   const emptyBoard: IChess[][] = Array.from({ length: 6 }, () => Array.from({ length: 8 }, () => ({ type: 'empty' })));
-  for (let i = 0; i < Math.floor(3 + Math.random() * 4); i++)
+  let borderRouterCount = 0;
+  for (let i = 0; i < Math.floor(3 + Math.random() * 2); i++)
     for (let j = 0; j < 2; j++) {
       let x, y;
       do {
         x = Math.floor(Math.random() * 8);
         y = Math.floor(Math.random() * 6);
-      } while (emptyBoard[y][x].type !== 'empty');
+      } while (emptyBoard[y][x].type !== 'empty' || (x === 0 || y === 0 || x === 7 || y === 5) && borderRouterCount >= 2);
+      if (x === 0 || y === 0 || x === 7 || y === 5) borderRouterCount++;
       emptyBoard[y][x] = { type: 'router', owner: i };
     }
   return emptyBoard;
