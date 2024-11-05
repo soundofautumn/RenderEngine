@@ -147,6 +147,17 @@ export const drawFunctions = {
     apiEndpoint: 'Rectangle',
     drawingMethod: 'click',
   }),
+  Seed: new DrawFunc({
+    params: [
+      {
+        type: 'point',
+        name: 'seed',
+      }
+    ],
+    requiredPointers: 1,
+    apiEndpoint: 'Fill',
+    drawingMethod: 'click',
+  }),
 }
 
 

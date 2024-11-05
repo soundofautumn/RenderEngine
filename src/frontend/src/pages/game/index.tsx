@@ -44,7 +44,7 @@ function DeletePrimitive(index: number) {
   })
 }
 
-function ChangeColor(color: string): Promise<number> {
+function ChangeColor(color: string, back_color = '#000000', fore_alpha = 255, back_alpha = 0): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     client('/engine/primitive/push_back', {
       data: {
@@ -53,12 +53,17 @@ function ChangeColor(color: string): Promise<number> {
             r: parseInt(color.slice(1, 3), 16),
             g: parseInt(color.slice(3, 5), 16),
             b: parseInt(color.slice(5, 7), 16),
-            a: 255,
+            a: fore_alpha,
           },
           width: 1,
           type: 0,
           dash: 1,
-          fill_color: { r: 0, g: 0, b: 0, a: 0 },
+          fill_color: {
+            r: parseInt(back_color.slice(1, 3), 16),
+            g: parseInt(back_color.slice(3, 5), 16),
+            b: parseInt(back_color.slice(5, 7), 16),
+            a: back_alpha,
+          },
         },
       }
     }).then(r => {
@@ -70,39 +75,292 @@ function ChangeColor(color: string): Promise<number> {
 async function DrawSelectBox(x: number, y: number, owner: number): Promise<number[]> {
   const color = OwnerColors[owner] || '#ffffff';
   const primitives: number[] = [
-    await ChangeColor(color),
-    await drawFunctions.Rectangle.draw({
-      pointers: [
-        { x, y },
-        { x: x + 100, y: y + 100 }
-      ]
-    }),
+    await ChangeColor(color, '#000000', 200),
+    ...await Promise.all([
+      drawFunctions.Circle.draw({
+        pointers: [
+          { x, y },
+          { x, y: y + 46 }
+        ]
+      }),
+      drawFunctions.Circle.draw({
+        pointers: [
+          { x, y },
+          { x, y: y + 47 }
+        ]
+      }),
+      drawFunctions.Circle.draw({
+        pointers: [
+          { x, y },
+          { x, y: y + 48 }
+        ]
+      }),
+      drawFunctions.Circle.draw({
+        pointers: [
+          { x, y },
+          { x, y: y + 49 }
+        ]
+      }),
+    ]),
   ];
   return primitives;
 }
 
-async function DrawRouter(x: number, y: number, owner: number): Promise<number[]> {
+async function DrawRouter(x: number, y: number, owner: number, alpha = 80): Promise<number[]> {
   const color = OwnerColors[owner] || '#ffffff';
   const primitives: number[] = [
-    await ChangeColor(color),
+    await ChangeColor('#bdc3c7', '#bdc3c7', 255, 255),
     await drawFunctions.Circle.draw({
       pointers: [
         { x, y },
-        { x, y: y + 10 }
+        { x, y: y + 45 }
       ]
     }),
-    await drawFunctions.Circle.draw({
+    await drawFunctions.Seed.draw({
       pointers: [
         { x, y },
-        { x, y: y + 20 }
       ]
     }),
+
+    await ChangeColor(color, color, 255, 40),
     await drawFunctions.Circle.draw({
       pointers: [
         { x, y },
-        { x, y: y + 25 }
+        { x, y: y + 42 }
       ]
-    })
+    }),
+    await drawFunctions.Seed.draw({
+      pointers: [
+        { x, y },
+      ]
+    }),
+
+    await ChangeColor('#000000', color, 255, alpha),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 32 }
+      ]
+    }),
+    await drawFunctions.Seed.draw({
+      pointers: [
+        { x, y },
+      ]
+    }),
+
+    await ChangeColor(color, '#000000', 40),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 32 }
+      ]
+    }),
+
+    await ChangeColor('#bdc3c7', '#000000', 0, 255),
+    ...await Promise.all([
+      drawFunctions.Rectangle.draw({
+        pointers: [
+          { x: x - 5, y: y - 35 },
+          { x: x + 5, y: y + 35 }
+        ]
+      }),
+      drawFunctions.Rectangle.draw({
+        pointers: [
+          { x: x - 35, y: y - 5 },
+          { x: x + 35, y: y + 5 }
+        ]
+      }),
+    ]),
+
+    await ChangeColor(color, color, 0, 40),
+    ...await Promise.all([
+      drawFunctions.Rectangle.draw({
+        pointers: [
+          { x: x - 5, y: y - 35 },
+          { x: x + 5, y: y + 35 }
+        ]
+      }),
+      drawFunctions.Rectangle.draw({
+        pointers: [
+          { x: x - 35, y: y - 5 },
+          { x: x + 35, y: y + 5 }
+        ]
+      }),
+    ]),
+
+
+    await ChangeColor('#bdc3c7', '#000000', 255, 255),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 12 }
+      ]
+    }),
+    await drawFunctions.Seed.draw({
+      pointers: [
+        { x, y },
+      ]
+    }),
+
+    await ChangeColor(color, color, 255, 40),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 12 }
+      ]
+    }),
+    await drawFunctions.Seed.draw({
+      pointers: [
+        { x, y },
+      ]
+    }),
+
+    await ChangeColor('#000000', color, 255, 40),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 12 }
+      ]
+    }),
+    await ChangeColor(color, color, 40, 40),
+    await drawFunctions.Circle.draw({
+      pointers: [
+        { x, y },
+        { x, y: y + 12 }
+      ]
+    }),
+
+    await ChangeColor(color, color, 255, 0),
+    ...await Promise.all([
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 3, y: y - 3 },
+          { x: x - 3, y: y - 3 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x, y: y - 3 },
+          { x, y: y - 3 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 3, y: y - 3 },
+          { x: x + 3, y: y - 3 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 3, y },
+          { x: x - 3, y },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x, y },
+          { x, y },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 3, y },
+          { x: x + 3, y },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 3, y: y + 3 },
+          { x: x - 3, y: y + 3 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x, y: y + 3 },
+          { x, y: y + 3 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 3, y: y + 3 },
+          { x: x + 3, y: y + 3 },
+        ]
+      }),
+
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x, y: y + 10 },
+          { x: x, y: y + 34 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x, y: y - 10 },
+          { x: x, y: y - 34 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 10, y: y },
+          { x: x - 34, y: y },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 10, y: y },
+          { x: x + 34, y: y },
+        ]
+      }),
+
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 2, y: y + 10 },
+          { x: x + 2, y: y + 10 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 2, y: y + 34 },
+          { x: x + 2, y: y + 34 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 2, y: y - 10 },
+          { x: x + 2, y: y - 10 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 2, y: y - 34 },
+          { x: x + 2, y: y - 34 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 10, y: y - 2 },
+          { x: x + 10, y: y + 2 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x + 34, y: y - 2 },
+          { x: x + 34, y: y + 2 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 10, y: y - 2 },
+          { x: x - 10, y: y + 2 },
+        ]
+      }),
+      drawFunctions.Line.draw({
+        pointers: [
+          { x: x - 34, y: y - 2 },
+          { x: x - 34, y: y + 2 },
+        ]
+      }),
+    ])
   ];
   console.log(`(${x}, ${y}) ${owner}`, 'Router Drawn:', primitives);
   return primitives;
@@ -292,6 +550,20 @@ export default function Game() {
             currentWiresPrimitive.current.push(...await PutWire(currentPosition, { x, y }, currentOwner));
             allWiresPrimtives.current[currentOwner] = currentWiresPrimitive.current;
             currentWiresPrimitive.current = [];
+
+            for (let cy = 0; cy < chessboard.length; cy++) {
+              for (let cx = 0; cx < chessboard[cy].length; cx++) {
+                const chess = chessboard[cy][cx];
+                if (chess.type === 'router' && chess.owner === currentOwner) {
+                  chess.primitive?.forEach(primitive => {
+                    DeletePrimitive(primitive);
+                  })
+                  chess.primitive = await DrawRouter(cx * 100 + 50, cy * 100 + 50, currentOwner, 120);
+                  
+                }
+              }
+            }
+
             setCurrentPosition({ x, y });
             setCurrentOwner(-1);
             setCurrentStartChess(null);
@@ -321,7 +593,7 @@ export default function Game() {
     curPosPrimitives.current.forEach(primitive => {
       DeletePrimitive(primitive);
     })
-    DrawSelectBox(currentPosition.x * 100, currentPosition.y * 100, currentOwner).then(r => {
+    DrawSelectBox(currentPosition.x * 100 + 50, currentPosition.y * 100 + 50, currentOwner).then(r => {
       curPosPrimitives.current = r;
     })
   }, [currentPosition, currentOwner])
