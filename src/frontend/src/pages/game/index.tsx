@@ -675,6 +675,8 @@ export default function Game() {
     }
   }
   const gameEnd = React.useRef(false);
+  const [gameEndState, setGameEnd] = React.useState(false);
+  const [finishedGameTimes,] = React.useState(localStorage.getItem('finish-game-times') || '0');
   const checkWin = async () => {
     const owners = new Set<number>();
     chessboard.forEach(row => row.forEach(chess => {
@@ -686,6 +688,8 @@ export default function Game() {
     }));
     if (owners.size === connectedOwners.size) {
       gameEnd.current = true;
+      localStorage.setItem('finish-game-times', (parseInt(localStorage.getItem('finish-game-times') || '0') + 1).toString());
+      setGameEnd(true);
       await DrawWin();
       // alert('You Win!');
       location.reload()
@@ -736,6 +740,19 @@ export default function Game() {
       <div className='slider left'>
         <p>游戏背景</p>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在遥远的未来，世界依赖一个庞大的智能能源系统来维持城市的运转。然而，这个系统的中心——被称为“能量之心”的能源枢纽——因一场未知的风暴而失去了平衡，导致许多节点断开连接。玩家将化身为一位被誉为“电之修复者”的天才电气修理工，手握特殊的能量导线工具，进入到错综复杂的电箱内。在这座小小的空间里，玩家不仅要面对狭窄的路径和有限的资源，还要小心翼翼地处理每一条线路，确保它们不相互干扰，重建能量流动，恢复整个系统的秩序。每一关的挑战不仅仅是对手艺的考验，更是一场智慧的较量，直面隐藏在电路中的神秘力量。
+        {
+          gameEndState ?
+            <>
+              <br /><br />
+              {
+                "恭喜你，你已经成功修复了能量之心，城市的能源系统恢复了正常运转！".split('').map((char, index) => <span key={index} style={{ color: randomColor() }}>{char}</span>)
+              }
+            </>
+            : <>
+              <br /><br />
+              加油，天才电气修理工，你已经成功修复了 {finishedGameTimes} 个“能量之心”！
+            </>
+        }
       </div>
       <canvas
         width={800}
