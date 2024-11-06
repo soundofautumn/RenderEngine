@@ -457,8 +457,10 @@ export default function Game() {
       handleGameKey(extendKeyMap[e.key]);
     }
   }
-  const handleGameKey = (key: ControlKey) => {
-    if (gameEnd.current) return;
+  const handleGameKey = async (key: ControlKey) => {
+    if (gameEnd.current || drawing.current) return;
+    drawing.current = true;
+    setDrawing(true)
     const directionMap: { [key in ControlKey]: Direction } = {
       'ArrowUp': 'up',
       'ArrowDown': 'down',
@@ -467,8 +469,10 @@ export default function Game() {
       'Space': undefined,
     };
     setPressedKeys([...pressedKeys, key]);
-    if (key === 'Space') handleSelect();
-    else handleMove(directionMap[key]);
+    if (key === 'Space') await handleSelect();
+    else await handleMove(directionMap[key]);
+    drawing.current = false;
+    setDrawing(false)
   }
 
   /* 连接后端 */
@@ -562,7 +566,7 @@ export default function Game() {
   const [currentPosition, setCurrentPosition] = React.useState({ x: -1, y: -1 });
   const currentWiresPrimitive = React.useRef<number[]>([]);
   const allWiresPrimitives = React.useRef<{ [owner: number]: number[] }>({});
-  const handleMove = (direction: Direction) => {
+  const handleMove = async (direction: Direction) => {
     const putWire = async (x: number, y: number) => {
       if (currentOwner < 0) {
         setCurrentPosition({ x, y });
@@ -609,16 +613,16 @@ export default function Game() {
       }
     }
     if (direction === 'up') {
-      if (currentPosition.y > 0) putWire(currentPosition.x, currentPosition.y - 1);
+      if (currentPosition.y > 0) await putWire(currentPosition.x, currentPosition.y - 1);
     }
     if (direction === 'down') {
-      if (currentPosition.y < 5) putWire(currentPosition.x, currentPosition.y + 1);
+      if (currentPosition.y < 5) await putWire(currentPosition.x, currentPosition.y + 1);
     }
     if (direction === 'left') {
-      if (currentPosition.x > 0) putWire(currentPosition.x - 1, currentPosition.y);
+      if (currentPosition.x > 0) await putWire(currentPosition.x - 1, currentPosition.y);
     }
     if (direction === 'right') {
-      if (currentPosition.x < 7) putWire(currentPosition.x + 1, currentPosition.y);
+      if (currentPosition.x < 7) await putWire(currentPosition.x + 1, currentPosition.y);
     }
   }
   const [currentOwner, setCurrentOwner] = React.useState(-1);
@@ -633,7 +637,7 @@ export default function Game() {
     })
   }, [currentPosition, currentOwner])
   const [currentStartChess, setCurrentStartChess] = React.useState<{ x: number, y: number } | null>(null);
-  const handleSelect = () => {
+  const handleSelect = async () => {
     const currentChess = chessboard[currentPosition.y][currentPosition.x];
     if (currentChess.type === 'router') {
       const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
@@ -644,9 +648,9 @@ export default function Game() {
       else {
         // 开始连线
         if (allWiresPrimitives.current[owner]) {
-          allWiresPrimitives.current[owner].forEach(primitive => {
-            DeletePrimitive(primitive);
-          })
+          await Promise.all(allWiresPrimitives.current[owner].map(primitive =>
+            DeletePrimitive(primitive)
+          ))
           allWiresPrimitives.current[owner] = [];
         }
         setCurrentOwner(owner);
@@ -657,16 +661,15 @@ export default function Game() {
       if (currentOwner === -1) {
         // 删除已经连过的线
         const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
-        allWiresPrimitives.current[owner].forEach(primitive => {
-          DeletePrimitive(primitive);
-        })
+        await Promise.all(allWiresPrimitives.current[owner].map(primitive =>
+          DeletePrimitive(primitive)))
         allWiresPrimitives.current[owner] = [];
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
       } else {
         // 取消当前连线
-        currentWiresPrimitive.current.forEach(primitive => {
-          DeletePrimitive(primitive);
-        })
+        await Promise.all(currentWiresPrimitive.current.map(primitive =>
+          DeletePrimitive(primitive)
+        ))
         currentWiresPrimitive.current = [];
         setCurrentOwner(-1);
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === currentOwner ? { type: 'empty' } : chess)));
@@ -675,6 +678,8 @@ export default function Game() {
     }
   }
   const gameEnd = React.useRef(false);
+  const drawing = React.useRef(false);
+  const [drawingState, setDrawing] = React.useState(false);
   const [gameEndState, setGameEnd] = React.useState(false);
   const [finishedGameTimes,] = React.useState(localStorage.getItem('finish-game-times') || '0');
   const checkWin = async () => {
@@ -721,7 +726,9 @@ export default function Game() {
     </div>
     <div id="mousePosition">
       Engine: {engine_name};
-      FPS: {fps}.</div>
+      FPS: {fps}.
+      {drawingState ? ' Drawing..' : ''}
+    </div>
     <p id='title'>
       <span style={{ color: "#2ecc71" }}>断</span>
       <span style={{ color: "#f1c40f" }}>线</span>
