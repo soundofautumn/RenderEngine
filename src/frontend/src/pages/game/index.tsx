@@ -561,7 +561,7 @@ export default function Game() {
   const [chessboard, setChessboard] = React.useState<IChess[][]>([]);
   const [currentPosition, setCurrentPosition] = React.useState({ x: -1, y: -1 });
   const currentWiresPrimitive = React.useRef<number[]>([]);
-  const allWiresPrimtives = React.useRef<{ [owner: number]: number[] }>({});
+  const allWiresPrimitives = React.useRef<{ [owner: number]: number[] }>({});
   const handleMove = (direction: Direction) => {
     const putWire = async (x: number, y: number) => {
       if (currentOwner < 0) {
@@ -584,7 +584,7 @@ export default function Game() {
           else {
             // 成功连线
             currentWiresPrimitive.current.push(...await PutWire(currentPosition, { x, y }, currentOwner));
-            allWiresPrimtives.current[currentOwner] = currentWiresPrimitive.current;
+            allWiresPrimitives.current[currentOwner] = currentWiresPrimitive.current;
             currentWiresPrimitive.current = [];
 
             for (let cy = 0; cy < chessboard.length; cy++) {
@@ -643,11 +643,11 @@ export default function Game() {
       }
       else {
         // 开始连线
-        if (allWiresPrimtives.current[owner]) {
-          allWiresPrimtives.current[owner].forEach(primitive => {
+        if (allWiresPrimitives.current[owner]) {
+          allWiresPrimitives.current[owner].forEach(primitive => {
             DeletePrimitive(primitive);
           })
-          allWiresPrimtives.current[owner] = [];
+          allWiresPrimitives.current[owner] = [];
         }
         setCurrentOwner(owner);
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
@@ -657,10 +657,10 @@ export default function Game() {
       if (currentOwner === -1) {
         // 删除已经连过的线
         const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
-        allWiresPrimtives.current[owner].forEach(primitive => {
+        allWiresPrimitives.current[owner].forEach(primitive => {
           DeletePrimitive(primitive);
         })
-        allWiresPrimtives.current[owner] = [];
+        allWiresPrimitives.current[owner] = [];
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
       } else {
         // 取消当前连线
