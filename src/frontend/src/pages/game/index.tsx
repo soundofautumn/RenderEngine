@@ -455,9 +455,9 @@ export default function Game() {
     if (Object.keys(extendKeyMap).includes(key)) {
         key = extendKeyMap[key];
     }
-    if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
+    if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Space') {
       e.preventDefault();
-      handleGameKey(key as ControlKey)
+      handleGameKey(key as ControlKey);
     }
   }
   const handleKeyUp = () => {
