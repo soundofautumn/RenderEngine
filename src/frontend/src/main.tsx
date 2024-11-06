@@ -14,7 +14,7 @@ export const ROUTERS = createBrowserRouter([
   {
     path: "/",
     loader: () => {
-      return redirect("/playground");
+      return redirect("/game");
     }
   },
   {
