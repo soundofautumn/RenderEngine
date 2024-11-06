@@ -431,6 +431,7 @@ function GenerateChessboard(): IChess[][] {
 
 export default function Game() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const isKeyDown = React.useRef(false);
 
   /* 处理键盘事件 */
   const [pressedKeys, setPressedKeys] = React.useState<ControlKey[]>([]);
@@ -441,6 +442,8 @@ export default function Game() {
     });
   }, [pressedKeys])
   const handleKeyPressed = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (isKeyDown.current) return;
+    isKeyDown.current = true;
     const extendKeyMap: { [key: string]: ControlKey } = {
       w: 'ArrowUp',
       a: 'ArrowLeft',
@@ -448,14 +451,17 @@ export default function Game() {
       d: 'ArrowRight',
       ' ': 'Space',
     }
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      e.preventDefault();
-      handleGameKey(e.key as ControlKey);
+    let key = e.key;
+    if (Object.keys(extendKeyMap).includes(key)) {
+        key = extendKeyMap[key];
     }
-    if (Object.keys(extendKeyMap).includes(e.key)) {
+    if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
       e.preventDefault();
-      handleGameKey(extendKeyMap[e.key]);
+      handleGameKey(key as ControlKey)
     }
+  }
+  const handleKeyUp = () => {
+    isKeyDown.current = false;
   }
   const handleGameKey = async (key: ControlKey) => {
     if (gameEnd.current || drawing.current) return;
@@ -608,7 +614,7 @@ export default function Game() {
             setCurrentPosition({ x, y });
             setCurrentOwner(-1);
             setCurrentStartChess(null);
-            checkWin();
+            await checkWin();
           }
         }
       }
@@ -630,8 +636,8 @@ export default function Game() {
 
   const curPosPrimitives = React.useRef<number[]>([]);
   React.useEffect(() => {
-    curPosPrimitives.current.forEach(primitive => {
-      DeletePrimitive(primitive);
+    curPosPrimitives.current.forEach(async primitive => {
+      await DeletePrimitive(primitive);
     })
     DrawSelectBox(currentPosition.x * 100 + 50, currentPosition.y * 100 + 50, currentOwner).then(r => {
       curPosPrimitives.current = r;
@@ -777,6 +783,7 @@ export default function Game() {
   return <div
     id="game"
     onKeyDown={handleKeyPressed}
+    onKeyUp={handleKeyUp}
     tabIndex={0}
   >
     <div id="hover" style={{ opacity: start ? 0 : 1 }}>
