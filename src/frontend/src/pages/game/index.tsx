@@ -589,6 +589,7 @@ export default function Game() {
             // 成功连线
             currentWiresPrimitive.current.push(...await PutWire(currentPosition, { x, y }, currentOwner));
             allWiresPrimitives.current[currentOwner] = currentWiresPrimitive.current;
+            connectedRouters.current.push(currentOwner)
             currentWiresPrimitive.current = [];
 
             for (let cy = 0; cy < chessboard.length; cy++) {
@@ -653,6 +654,48 @@ export default function Game() {
           ))
           allWiresPrimitives.current[owner] = [];
         }
+        if (connectedRouters.current.includes(owner)) {
+          connectedRouters.current = connectedRouters.current.filter(t => t !== owner)
+          for (let y = 0; y < chessboard.length; y++)
+            for (let x = 0; x < chessboard[y].length; x++) {
+              const chess = chessboard[y][x];
+              if (chess.type === 'router' && chess.owner === owner) {
+                if (chess.primitive)
+                  await Promise.all(chess.primitive.map(p =>
+                    DeletePrimitive(p)
+                  ))
+                chess.primitive = await DrawRouter(x * 100 + 50, y * 100 + 50, owner, 80)
+              }
+            }
+        }
+        if (connectedRouters.current.includes(owner)) {
+          connectedRouters.current = connectedRouters.current.filter(t => t !== owner)
+          for (let y = 0; y < chessboard.length; y++)
+            for (let x = 0; x < chessboard[y].length; x++) {
+              const chess = chessboard[y][x];
+              if (chess.type === 'router' && chess.owner === owner) {
+                if (chess.primitive)
+                  await Promise.all(chess.primitive.map(p =>
+                    DeletePrimitive(p)
+                  ))
+                chess.primitive = await DrawRouter(x * 100 + 50, y * 100 + 50, owner, 80)
+              }
+            }
+        }
+        if (connectedRouters.current.includes(owner)) {
+          connectedRouters.current = connectedRouters.current.filter(t => t !== owner)
+          for (let y = 0; y < chessboard.length; y++)
+            for (let x = 0; x < chessboard[y].length; x++) {
+              const chess = chessboard[y][x];
+              if (chess.type === 'router' && chess.owner === owner) {
+                if (chess.primitive)
+                  await Promise.all(chess.primitive.map(p =>
+                    DeletePrimitive(p)
+                  ))
+                chess.primitive = await DrawRouter(x * 100 + 50, y * 100 + 50, owner, 80)
+              }
+            }
+        }
         setCurrentOwner(owner);
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
         setCurrentStartChess({ x: currentPosition.x, y: currentPosition.y });
@@ -663,6 +706,20 @@ export default function Game() {
         const owner = currentChess.owner === undefined ? -1 : currentChess.owner;
         await Promise.all(allWiresPrimitives.current[owner].map(primitive =>
           DeletePrimitive(primitive)))
+        if (connectedRouters.current.includes(owner)) {
+          connectedRouters.current = connectedRouters.current.filter(t => t !== owner)
+          for (let y = 0; y < chessboard.length; y++)
+            for (let x = 0; x < chessboard[y].length; x++) {
+              const chess = chessboard[y][x];
+              if (chess.type === 'router' && chess.owner === owner) {
+                if (chess.primitive)
+                  await Promise.all(chess.primitive.map(p =>
+                    DeletePrimitive(p)
+                  ))
+                chess.primitive = await DrawRouter(x * 100 + 50, y * 100 + 50, owner, 80)
+              }
+            }
+        }
         allWiresPrimitives.current[owner] = [];
         setChessboard(chessboard.map(row => row.map(chess => chess.type === 'wire' && chess.owner === owner ? { type: 'empty' } : chess)));
       } else {
@@ -682,16 +739,17 @@ export default function Game() {
   const [drawingState, setDrawing] = React.useState(false);
   const [gameEndState, setGameEnd] = React.useState(false);
   const [finishedGameTimes,] = React.useState(localStorage.getItem('finish-game-times') || '0');
+  const connectedRouters = React.useRef<number[]>([]);
   const checkWin = async () => {
     const owners = new Set<number>();
     chessboard.forEach(row => row.forEach(chess => {
       if (chess.type === 'router') owners.add(chess.owner || -1);
     }));
-    const connectedOwners = new Set<number>();
-    chessboard.forEach(row => row.forEach(chess => {
-      if (chess.type === 'wire') connectedOwners.add(chess.owner || -1);
-    }));
-    if (owners.size === connectedOwners.size) {
+    // const connectedOwners = new Set<number>();
+    // chessboard.forEach(row => row.forEach(chess => {
+    //   if (chess.type === 'wire') connectedOwners.add(chess.owner || -1);
+    // }));
+    if (owners.size === connectedRouters.current.length) {
       gameEnd.current = true;
       localStorage.setItem('finish-game-times', (parseInt(localStorage.getItem('finish-game-times') || '0') + 1).toString());
       setGameEnd(true);
